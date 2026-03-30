@@ -1,3 +1,4 @@
+paciente.png
 import streamlit as st
 from pathlib import Path
 from datetime import date
@@ -25,7 +26,7 @@ seccion = st.session_state.seccion
 st.markdown("""
 <style>
 .block-container {
-    padding-top: 1.5rem;
+    padding-top: 1.2rem;
     padding-bottom: 2rem;
 }
 .boton-inferior-derecha {
@@ -62,6 +63,18 @@ div.stButton > button {
     padding: 1rem 1.2rem;
     border-radius: 12px;
     border: 1px solid #e5e5e5;
+}
+.bloque-seccion {
+    background-color: #fafafa;
+    padding: 1rem 1rem 0.6rem 1rem;
+    border-radius: 14px;
+    border: 1px solid #e8e8e8;
+    margin-bottom: 1rem;
+}
+.titulo-bloque {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -153,7 +166,7 @@ elif seccion == "A Practicar":
 # PREPARACIÓN DE PACIENTE
 # -------------------------
 elif seccion == "Preparación de paciente":
-    col_btn1, col_btn2 = st.columns([1, 5])
+    col_btn1, col_btn2 = st.columns([1, 6])
     with col_btn1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
@@ -161,27 +174,39 @@ elif seccion == "Preparación de paciente":
 
     st.header("Preparación de paciente")
 
-    col_form, col_img = st.columns([2.2, 1])
+    # Layout más compacto
+    col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.70])
 
-    with col_form:
-        st.subheader("Datos del paciente")
+    # ---------------------------------
+    # COLUMNA IZQUIERDA: DATOS PACIENTE
+    # ---------------------------------
+    with col_izq:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Datos del paciente</div>', unsafe_allow_html=True)
 
         nombres = st.text_input("Nombres")
         apellidos = st.text_input("Apellidos")
-        fecha_nac = st.date_input("Fecha de nacimiento", value=date(2000, 1, 1))
 
-        hoy = date.today()
-        edad = hoy.year - fecha_nac.year - ((hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day))
-        st.write(f"**Edad:** {edad} años")
+        c1, c2 = st.columns([1.2, 0.8])
+        with c1:
+            fecha_nac = st.date_input("Fecha de nacimiento", value=date(2000, 1, 1))
+        with c2:
+            hoy = date.today()
+            edad = hoy.year - fecha_nac.year - ((hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day))
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.metric("Edad", f"{edad} años")
 
         examen = st.text_input("Examen")
-        peso = st.number_input("Peso (kg)", min_value=0.0, value=70.0, step=0.1)
 
-        embarazo = st.selectbox(
-            "Embarazo",
-            ["Seleccionar", "SI", "NO", "NO APLICA"],
-            index=0
-        )
+        c3, c4 = st.columns(2)
+        with c3:
+            peso = st.number_input("Peso (kg)", min_value=0.0, value=70.0, step=0.1)
+        with c4:
+            embarazo = st.selectbox(
+                "Embarazo",
+                ["Seleccionar", "SI", "NO", "NO APLICA"],
+                index=0
+            )
 
         creatinina = st.selectbox(
             "Creatinina",
@@ -189,7 +214,14 @@ elif seccion == "Preparación de paciente":
             index=0
         )
 
-        st.subheader("Preparación para contraste")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # ---------------------------------
+    # COLUMNA CENTRO: CONTRASTE Y POSICIÓN
+    # ---------------------------------
+    with col_centro:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Preparación para contraste</div>', unsafe_allow_html=True)
 
         medio_contraste_ev = st.selectbox(
             "Medio de contraste EV",
@@ -197,47 +229,63 @@ elif seccion == "Preparación de paciente":
             index=0
         )
 
-        via_venosa = st.selectbox(
-            "Vía venosa",
-            ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
-            index=0
-        )
+        # Si es NO, ocultar el resto de opciones de contraste
+        if medio_contraste_ev != "NO":
+            c5, c6 = st.columns(2)
+            with c5:
+                via_venosa = st.selectbox(
+                    "Vía venosa",
+                    ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
+                    index=0
+                )
+            with c6:
+                cantidad_contraste = st.selectbox(
+                    "Cantidad contraste",
+                    [
+                        "Seleccionar", "10 cc", "20 cc", "30 cc", "40 cc", "50 cc", "60 cc", "70 cc", "80 cc",
+                        "90 cc", "100 cc", "110 cc", "120 cc", "130 cc", "140 cc", "150 cc",
+                        "160 cc", "170 cc", "180 cc", "190 cc", "200 cc"
+                    ],
+                    index=0
+                )
 
-        cantidad_contraste = st.selectbox(
-            "Cantidad de contraste (ml)",
-            [
-                "Seleccionar", "10 cc", "20 cc", "30 cc", "40 cc", "50 cc", "60 cc", "70 cc", "80 cc",
-                "90 cc", "100 cc", "110 cc", "120 cc", "130 cc", "140 cc", "150 cc",
-                "160 cc", "170 cc", "180 cc", "190 cc", "200 cc"
-            ],
-            index=0
-        )
+            c7, c8 = st.columns(2)
+            with c7:
+                metodo_inyeccion = st.selectbox(
+                    "Método de inyección",
+                    ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
+                    index=0
+                )
+            with c8:
+                medio_contraste_oral = st.selectbox(
+                    "Contraste oral",
+                    ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
+                    index=0
+                )
+        else:
+            via_venosa = ""
+            cantidad_contraste = ""
+            metodo_inyeccion = ""
+            medio_contraste_oral = ""
 
-        metodo_inyeccion = st.selectbox(
-            "Método de inyección",
-            ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
-            index=0
-        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        medio_contraste_oral = st.selectbox(
-            "Medio de contraste oral",
-            ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
-            index=0
-        )
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
 
-        st.subheader("Posicionamiento del paciente")
-
-        entrada_paciente = st.selectbox(
-            "Entrada paciente",
-            ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
-            index=0
-        )
-
-        posicionamiento = st.selectbox(
-            "Posicionamiento",
-            ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
-            index=0
-        )
+        c9, c10 = st.columns(2)
+        with c9:
+            entrada_paciente = st.selectbox(
+                "Entrada paciente",
+                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                index=0
+            )
+        with c10:
+            posicionamiento = st.selectbox(
+                "Posicionamiento",
+                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                index=0
+            )
 
         posicion_brazos = st.selectbox(
             "Posición de brazos / extremidades",
@@ -253,14 +301,25 @@ elif seccion == "Preparación de paciente":
             index=0
         )
 
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # ---------------------------------
+    # COLUMNA DERECHA: IMAGEN
+    # ---------------------------------
     with col_img:
-        st.subheader("Imagen")
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
 
         if PACIENTE_IMG.exists():
             st.image(str(PACIENTE_IMG), use_container_width=True)
         else:
-            st.info("Si quieres mostrar una imagen aquí, guarda un archivo llamado 'paciente.png' en la misma carpeta del app.py.")
+            st.info("Guarda la imagen como 'paciente.png' en la misma carpeta del app.py.")
 
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # ---------------------------------
+    # RESUMEN
+    # ---------------------------------
     st.divider()
     st.subheader("Resumen")
 
@@ -272,10 +331,13 @@ elif seccion == "Preparación de paciente":
     st.write(f"**Embarazo:** {embarazo}")
     st.write(f"**Creatinina:** {creatinina}")
     st.write(f"**Medio de contraste EV:** {medio_contraste_ev}")
-    st.write(f"**Vía venosa:** {via_venosa}")
-    st.write(f"**Cantidad de contraste:** {cantidad_contraste}")
-    st.write(f"**Método de inyección:** {metodo_inyeccion}")
-    st.write(f"**Medio de contraste oral:** {medio_contraste_oral}")
+
+    if medio_contraste_ev != "NO":
+        st.write(f"**Vía venosa:** {via_venosa}")
+        st.write(f"**Cantidad de contraste:** {cantidad_contraste}")
+        st.write(f"**Método de inyección:** {metodo_inyeccion}")
+        st.write(f"**Medio de contraste oral:** {medio_contraste_oral}")
+
     st.write(f"**Entrada del paciente:** {entrada_paciente}")
     st.write(f"**Posicionamiento:** {posicionamiento}")
     st.write(f"**Posición de brazos / extremidades:** {posicion_brazos}")
