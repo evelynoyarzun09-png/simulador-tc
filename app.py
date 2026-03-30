@@ -394,8 +394,8 @@ elif seccion == "Preparación de paciente":
         examen = st.text_input("Examen")
 
         c3, c4 = st.columns(2)
-        with c3:
-            peso = st.number_input("Peso (kg)", min_value=0.0, value=70.0, step=0.1)
+        with c3:with c3:
+    peso = st.selectbox("Peso (kg)", list(range(1, 201)), index=69)
         with c4:
             embarazo = st.selectbox("Embarazo", ["Seleccionar", "SI", "NO", "NO APLICA"], index=0)
 
