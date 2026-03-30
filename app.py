@@ -285,6 +285,9 @@ def ir_a_practicar():
 def volver_menu():
     st.session_state.seccion = "A Practicar"
 
+def ir_a_topograma():
+    st.session_state.seccion = "Topograma"
+
 # -------------------------
 # PORTADA
 # -------------------------
@@ -375,7 +378,7 @@ elif seccion == "Preparación de paciente":
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.65])
+    col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.75])
 
     with col_izq:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
@@ -493,7 +496,7 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
 
         if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
-            st.image(str(PACIENTE_IMG), width=2000)
+            st.image(str(PACIENTE_IMG), width=260)
         else:
             st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
 
@@ -521,6 +524,14 @@ elif seccion == "Preparación de paciente":
     st.write(f"**Posicionamiento:** {posicionamiento}")
     st.write(f"**Posición de brazos / extremidades:** {posicion_brazos}")
     st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
+
+    with col_sig2:
+        if st.button("Siguiente", use_container_width=True):
+            ir_a_topograma()
+            st.rerun()
 
 # -------------------------
 # JERINGA INYECTORA
