@@ -1,29 +1,120 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Simulador TC", layout="wide")
+st.set_page_config(page_title="Tomografía Computada Aplicada", layout="wide")
 
 # -------------------------
 # ESTADO INICIAL
 # -------------------------
 if "seccion" not in st.session_state:
-    st.session_state.seccion = "A Practicar"
+    st.session_state.seccion = "Portada"
 
 seccion = st.session_state.seccion
 
-st.title("Simulador de Tomografía Computada")
+# -------------------------
+# ESTILOS GENERALES
+# -------------------------
+st.markdown("""
+<style>
+html, body, [data-testid="stAppViewContainer"], .stApp {
+    background-color: black;
+    color: #40E0D0;
+}
+
+[data-testid="stHeader"] {
+    background: rgba(0,0,0,0);
+}
+
+[data-testid="stToolbar"] {
+    right: 1rem;
+}
+
+h1, h2, h3, h4, h5, h6, p, label, div, span {
+    color: #40E0D0 !important;
+}
+
+.stButton > button {
+    background-color: #40E0D0;
+    color: black;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.stButton > button:hover {
+    background-color: #2ec4b6;
+    color: black;
+}
+
+.portada-container {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.portada-titulo {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #40E0D0;
+    margin-bottom: 1rem;
+}
+
+.portada-subtitulo {
+    font-size: 1.3rem;
+    color: #40E0D0;
+    opacity: 0.9;
+}
+
+.boton-esquina {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # -------------------------
-# FUNCIÓN PARA VOLVER AL MENÚ
+# FUNCIONES
 # -------------------------
+def ir_a_practicar():
+    st.session_state.seccion = "A Practicar"
+
 def volver_menu():
     st.session_state.seccion = "A Practicar"
 
 
 # -------------------------
+# PORTADA
+# -------------------------
+if seccion == "Portada":
+    st.markdown("""
+    <div class="portada-container">
+        <div class="portada-titulo">Tomografía Computada Aplicada</div>
+        <div class="portada-subtitulo">
+            Simulador interactivo para práctica de adquisición, reconstrucción,
+            reformación y cálculos en tomografía computada
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="boton-esquina">', unsafe_allow_html=True)
+    if st.button("Ir a practicar", use_container_width=False):
+        ir_a_practicar()
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+# -------------------------
 # PANTALLA PRINCIPAL
 # -------------------------
-if seccion == "A Practicar":
+elif seccion == "A Practicar":
+    st.title("Tomografía Computada Aplicada")
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
@@ -340,4 +431,3 @@ elif seccion == "Cálculos":
     if usar_ssde == "Sí":
         ssde = ctdi_vol * factor_ssde
         st.metric("SSDE (mGy)", f"{ssde:.2f}")
-        
