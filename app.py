@@ -1,29 +1,106 @@
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
+
+# -------------------------
+# RUTA DE IMAGEN
+# -------------------------
+BASE_DIR = Path(__file__).parent
+PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
 
 # -------------------------
 # ESTADO INICIAL
 # -------------------------
 if "seccion" not in st.session_state:
-    st.session_state.seccion = "A Practicar"
+    st.session_state.seccion = "Portada"
 
 seccion = st.session_state.seccion
 
-st.title("Simulador de Tomografía Computada")
+# -------------------------
+# ESTILOS
+# -------------------------
+st.markdown("""
+<style>
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+}
+.boton-inferior-derecha {
+    position: fixed;
+    right: 2rem;
+    bottom: 1.5rem;
+    z-index: 999;
+}
+.portada-titulo {
+    text-align: center;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #20cfcf;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.portada-subtitulo {
+    text-align: center;
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+.portada-fondo {
+    background-color: black;
+    padding: 1.2rem 1.2rem 5rem 1.2rem;
+    border-radius: 18px;
+}
+div.stButton > button {
+    border-radius: 12px;
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -------------------------
-# FUNCIÓN PARA VOLVER AL MENÚ
+# FUNCIONES
 # -------------------------
+def ir_a_practicar():
+    st.session_state.seccion = "A Practicar"
+
 def volver_menu():
     st.session_state.seccion = "A Practicar"
 
 
 # -------------------------
+# PORTADA
+# -------------------------
+if seccion == "Portada":
+    st.markdown('<div class="portada-fondo">', unsafe_allow_html=True)
+    st.markdown('<div class="portada-titulo">Tomografía Computada Aplicada</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="portada-subtitulo">Simulador interactivo para práctica de preparación, adquisición, reconstrucción y cálculos.</div>',
+        unsafe_allow_html=True
+    )
+
+    if PORTADA_IMG.exists():
+        col1, col2, col3 = st.columns([1, 3, 1])
+        with col2:
+            st.image(str(PORTADA_IMG), use_container_width=True)
+    else:
+        st.warning("No se encontró la imagen de portada 'tomografo_portada.png'.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="boton-inferior-derecha">', unsafe_allow_html=True)
+    if st.button("Ir a A Practicar"):
+        ir_a_practicar()
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+# -------------------------
 # PANTALLA PRINCIPAL
 # -------------------------
-if seccion == "A Practicar":
+elif seccion == "A Practicar":
+    st.title("Simulador de Tomografía Computada")
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
@@ -340,4 +417,3 @@ elif seccion == "Cálculos":
     if usar_ssde == "Sí":
         ssde = ctdi_vol * factor_ssde
         st.metric("SSDE (mGy)", f"{ssde:.2f}")
-        
