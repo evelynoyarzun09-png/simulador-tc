@@ -3,29 +3,81 @@ import pandas as pd
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
 
+# -------------------------
+# ESTADO INICIAL
+# -------------------------
+if "seccion" not in st.session_state:
+    st.session_state.seccion = "A Practicar"
+
+seccion = st.session_state.seccion
+
 st.title("Simulador de Tomografía Computada")
 
-seccion = st.sidebar.selectbox(
-    "Selecciona etapa",
-    [
-        "A Practicar",
-        "Preparación de paciente",
-        "Jeringa inyectora",
-        "Topograma",
-        "Adquisición",
-        "Reconstrucción",
-        "Reformación",
-        "Medida paciente",
-        "Cálculos"
-    ]
-)
+# -------------------------
+# FUNCIÓN PARA VOLVER AL MENÚ
+# -------------------------
+def volver_menu():
+    st.session_state.seccion = "A Practicar"
 
+
+# -------------------------
+# PANTALLA PRINCIPAL
+# -------------------------
 if seccion == "A Practicar":
     st.header("A Practicar")
-    st.write("Bienvenida al simulador de Tomografía Computada.")
-    st.info("Selecciona una etapa desde el menú lateral para comenzar.")
+    st.write("Selecciona una etapa del simulador:")
 
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("Preparación de paciente", use_container_width=True):
+            st.session_state.seccion = "Preparación de paciente"
+            st.rerun()
+
+        if st.button("Jeringa inyectora", use_container_width=True):
+            st.session_state.seccion = "Jeringa inyectora"
+            st.rerun()
+
+        if st.button("Topograma", use_container_width=True):
+            st.session_state.seccion = "Topograma"
+            st.rerun()
+
+    with col2:
+        if st.button("Adquisición", use_container_width=True):
+            st.session_state.seccion = "Adquisición"
+            st.rerun()
+
+        if st.button("Reconstrucción", use_container_width=True):
+            st.session_state.seccion = "Reconstrucción"
+            st.rerun()
+
+        if st.button("Reformación", use_container_width=True):
+            st.session_state.seccion = "Reformación"
+            st.rerun()
+
+    with col3:
+        if st.button("Medida paciente", use_container_width=True):
+            st.session_state.seccion = "Medida paciente"
+            st.rerun()
+
+        if st.button("Cálculos", use_container_width=True):
+            st.session_state.seccion = "Cálculos"
+            st.rerun()
+
+    st.divider()
+    st.info("Haz clic en una etapa para continuar.")
+
+
+# -------------------------
+# PREPARACIÓN DE PACIENTE
+# -------------------------
 elif seccion == "Preparación de paciente":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Preparación de paciente")
 
     col1, col2 = st.columns(2)
@@ -48,7 +100,17 @@ elif seccion == "Preparación de paciente":
     st.write(f"Talla: {talla} cm")
     st.write(f"Vía venosa permeable: {via_venosa}")
 
+
+# -------------------------
+# JERINGA INYECTORA
+# -------------------------
 elif seccion == "Jeringa inyectora":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Jeringa inyectora")
 
     col1, col2 = st.columns(2)
@@ -71,7 +133,17 @@ elif seccion == "Jeringa inyectora":
     st.write(f"Delay: {tiempo_delay} s")
     st.write(f"Sitio de punción: {sitio_puncion}")
 
+
+# -------------------------
+# TOPOGRAMA
+# -------------------------
 elif seccion == "Topograma":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Topograma")
 
     col1, col2 = st.columns(2)
@@ -95,7 +167,17 @@ elif seccion == "Topograma":
     st.write(f"Término: {termino}")
     st.write(f"Observaciones: {observaciones_topo}")
 
+
+# -------------------------
+# ADQUISICIÓN
+# -------------------------
 elif seccion == "Adquisición":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Adquisición")
 
     col1, col2 = st.columns(2)
@@ -122,7 +204,17 @@ elif seccion == "Adquisición":
     st.write(f"Longitud: {longitud} cm")
     st.write(f"Modo: {modo}")
 
+
+# -------------------------
+# RECONSTRUCCIÓN
+# -------------------------
 elif seccion == "Reconstrucción":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Reconstrucción")
 
     col1, col2 = st.columns(2)
@@ -152,7 +244,17 @@ elif seccion == "Reconstrucción":
     st.write(f"Algoritmo: {algoritmo}")
     st.write(f"Ventana: {ventana}")
 
+
+# -------------------------
+# REFORMACIÓN
+# -------------------------
 elif seccion == "Reformación":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Reformación")
 
     col1, col2 = st.columns(2)
@@ -175,7 +277,17 @@ elif seccion == "Reformación":
     st.write(f"Orientación: {orientacion}")
     st.write(f"Observaciones: {observaciones_reform}")
 
+
+# -------------------------
+# MEDIDA PACIENTE
+# -------------------------
 elif seccion == "Medida paciente":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Medida paciente")
 
     col1, col2 = st.columns(2)
@@ -199,7 +311,17 @@ elif seccion == "Medida paciente":
     st.write(f"Edad: {edad}")
     st.write(f"Sexo: {sexo}")
 
+
+# -------------------------
+# CÁLCULOS
+# -------------------------
 elif seccion == "Cálculos":
+    col_btn1, col_btn2 = st.columns([1, 5])
+    with col_btn1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_menu()
+            st.rerun()
+
     st.header("Cálculos")
 
     col1, col2 = st.columns(2)
