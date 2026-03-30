@@ -70,13 +70,14 @@ html, body, [class*="css"] {
     border-radius: 18px;
 }
 
-/* Botones generales */
+/* Botones */
 div.stButton > button {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
     border: 1px solid #9ca3ad !important;
     font-weight: 600 !important;
+    min-height: 46px !important;
 }
 
 /* Bloques */
@@ -100,26 +101,50 @@ div.stButton > button {
     color: white;
 }
 
-/* Reducir tamaño del valor de edad del metric */
+/* Edad más pequeña */
 [data-testid="stMetricValue"] {
     font-size: 1.35rem !important;
 }
 
-/* Fondo de selectbox */
+/* Selectbox cerrado */
 div[data-baseweb="select"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
 }
 
-/* Fondo input */
+/* Texto dentro del select cerrado */
+div[data-baseweb="select"] span {
+    color: #1f1f1f !important;
+}
+
+/* Menú desplegable abierto */
+div[role="listbox"] {
+    background-color: #c7ccd4 !important;
+    color: #1f1f1f !important;
+    border: 1px solid #9ca3ad !important;
+}
+
+/* Cada opción del desplegable */
+div[role="option"] {
+    background-color: #c7ccd4 !important;
+    color: #1f1f1f !important;
+}
+
+/* Hover sobre opción */
+div[role="option"]:hover {
+    background-color: #b2b8c1 !important;
+    color: #1f1f1f !important;
+}
+
+/* Inputs */
 div[data-baseweb="input"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
 }
 
-/* Fondo textarea */
+/* Textarea */
 div[data-baseweb="textarea"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
@@ -141,6 +166,12 @@ label, .stMarkdown, p, span, div {
 [data-testid="stInfo"] {
     background-color: #5a6478 !important;
     color: white !important;
+}
+
+/* Separación del botón volver */
+.boton-volver {
+    margin-top: 0.4rem;
+    margin-bottom: 1rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -232,13 +263,15 @@ elif seccion == "A Practicar":
 # PREPARACIÓN DE PACIENTE
 # -------------------------
 elif seccion == "Preparación de paciente":
-    col_btn1, col_btn2 = st.columns([1, 6])
-    with col_btn1:
+    st.header("Preparación de paciente")
+
+    st.markdown('<div class="boton-volver">', unsafe_allow_html=True)
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Preparación de paciente")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.65])
 
@@ -399,13 +432,13 @@ elif seccion == "Preparación de paciente":
 # JERINGA INYECTORA
 # -------------------------
 elif seccion == "Jeringa inyectora":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Jeringa inyectora")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Jeringa inyectora")
 
     col1, col2 = st.columns(2)
 
@@ -435,13 +468,13 @@ elif seccion == "Jeringa inyectora":
 # TOPOGRAMA
 # -------------------------
 elif seccion == "Topograma":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Topograma")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Topograma")
 
     col1, col2 = st.columns(2)
 
@@ -473,13 +506,13 @@ elif seccion == "Topograma":
 # ADQUISICIÓN
 # -------------------------
 elif seccion == "Adquisición":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Adquisición")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Adquisición")
 
     col1, col2 = st.columns(2)
 
@@ -513,13 +546,13 @@ elif seccion == "Adquisición":
 # RECONSTRUCCIÓN
 # -------------------------
 elif seccion == "Reconstrucción":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Reconstrucción")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Reconstrucción")
 
     col1, col2 = st.columns(2)
 
@@ -561,13 +594,13 @@ elif seccion == "Reconstrucción":
 # REFORMACIÓN
 # -------------------------
 elif seccion == "Reformación":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Reformación")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Reformación")
 
     col1, col2 = st.columns(2)
 
@@ -597,13 +630,13 @@ elif seccion == "Reformación":
 # MEDIDA PACIENTE
 # -------------------------
 elif seccion == "Medida paciente":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Medida paciente")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Medida paciente")
 
     col1, col2 = st.columns(2)
 
@@ -634,13 +667,13 @@ elif seccion == "Medida paciente":
 # CÁLCULOS
 # -------------------------
 elif seccion == "Cálculos":
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
+    st.header("Cálculos")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
         if st.button("⬅ Volver", use_container_width=True):
             volver_menu()
             st.rerun()
-
-    st.header("Cálculos")
 
     col1, col2 = st.columns(2)
 
@@ -662,3 +695,4 @@ elif seccion == "Cálculos":
     if usar_ssde == "Sí":
         ssde = ctdi_vol * factor_ssde
         st.metric("SSDE (mGy)", f"{ssde:.2f}")
+        
