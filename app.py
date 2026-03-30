@@ -303,8 +303,10 @@ if seccion == "Portada":
     else:
         st.warning("No se encontró la imagen de portada 'tomografo_portada.png'.")
 
-    col_btn1, col_btn2, col_btn3 = st.columns([5, 2, 1])
-    with col_btn3:
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+
+    col_btn1, col_btn2, col_btn3 = st.columns([1.5, 2, 1.5])
+    with col_btn2:
         if st.button("Ir a A Practicar", use_container_width=True):
             ir_a_practicar()
             st.rerun()
