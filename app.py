@@ -1,6 +1,7 @@
 import streamlit as st
 from pathlib import Path
 from datetime import date
+import hmac
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
 
@@ -21,10 +22,102 @@ else:
     PACIENTE_IMG = None
 
 # -------------------------
-# ESTADO INICIAL
+# CONTROL DE ACCESO
 # -------------------------
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
+
 if "seccion" not in st.session_state:
     st.session_state.seccion = "Portada"
+
+
+def verificar_clave():
+    clave_ingresada = st.session_state.get("clave_ingresada", "")
+    clave_correcta = st.secrets.get("app_password", "")
+
+    if hmac.compare_digest(clave_ingresada, clave_correcta):
+        st.session_state.autenticado = True
+        st.session_state.error_clave = False
+    else:
+        st.session_state.autenticado = False
+        st.session_state.error_clave = True
+
+
+if not st.session_state.autenticado:
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #111111;
+    }
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 820px;
+    }
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
+        color: white !important;
+    }
+    .login-box {
+        background-color: #000000;
+        padding: 2rem;
+        border-radius: 18px;
+        border: 1px solid #2d2d2d;
+    }
+    .login-titulo {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #20cfcf;
+        margin-bottom: 0.8rem;
+    }
+    .login-subtitulo {
+        text-align: center;
+        color: white;
+        font-size: 1.05rem;
+        margin-bottom: 1.2rem;
+    }
+    div[data-baseweb="input"] > div {
+        background-color: #d0d5dd !important;
+        color: #111111 !important;
+        border-radius: 12px !important;
+    }
+    input {
+        color: #111111 !important;
+        -webkit-text-fill-color: #111111 !important;
+    }
+    div.stButton > button {
+        background-color: #b8bec7 !important;
+        color: #1f1f1f !important;
+        border-radius: 12px !important;
+        border: 1px solid #9ca3ad !important;
+        font-weight: 600 !important;
+        min-height: 46px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    st.markdown('<div class="login-titulo">Tomografía Computada Aplicada</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="login-subtitulo">Ingrese la clave para acceder al simulador.</div>',
+        unsafe_allow_html=True
+    )
+
+    if PORTADA_IMG.exists():
+        st.image(str(PORTADA_IMG), width="stretch")
+
+    st.text_input(
+        "Clave de acceso",
+        type="password",
+        key="clave_ingresada",
+        on_change=verificar_clave
+    )
+
+    if st.session_state.get("error_clave", False):
+        st.error("Clave incorrecta. Inténtalo nuevamente.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
 
 seccion = st.session_state.seccion
 
@@ -206,7 +299,7 @@ if seccion == "Portada":
     if PORTADA_IMG.exists():
         col1, col2, col3 = st.columns([1, 3, 1])
         with col2:
-            st.image(str(PORTADA_IMG), use_container_width=True)
+            st.image(str(PORTADA_IMG), width="stretch")
     else:
         st.warning("No se encontró la imagen de portada 'tomografo_portada.png'.")
 
