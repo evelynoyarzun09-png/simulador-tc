@@ -1,6 +1,7 @@
-if seccion == "A Practicar":
-    st.header("Simulador de Tomografía Computada")
+if "seccion" not in st.session_state:
+    st.session_state.seccion = "A Practicar"
 
+seccion = st.session_state.seccion
     st.write("Selecciona una etapa:")
 
     col1, col2, col3 = st.columns(3)
