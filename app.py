@@ -490,8 +490,8 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
 
-        if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
-    st.image(str(PACIENTE_IMG), width=280)
+     if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
+    st.image(str(PACIENTE_IMG), width=260)
         else:
             st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
 
