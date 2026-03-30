@@ -394,8 +394,8 @@ elif seccion == "Preparación de paciente":
         examen = st.text_input("Examen")
 
         c3, c4 = st.columns(2)
-        with c3:with c3:
-    peso = st.selectbox("Peso (kg)", list(range(1, 201)), index=69)
+        with c3:
+            peso = st.number_input("Peso (kg)", min_value=0.0, value=70.0, step=0.1)
         with c4:
             embarazo = st.selectbox("Embarazo", ["Seleccionar", "SI", "NO", "NO APLICA"], index=0)
 
@@ -491,7 +491,7 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
 
         if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
-            st.image(str(PACIENTE_IMG), width=380)
+            st.image(str(PACIENTE_IMG), width=210)
         else:
             st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
 
