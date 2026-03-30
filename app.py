@@ -340,3 +340,4 @@ elif seccion == "Cálculos":
     if usar_ssde == "Sí":
         ssde = ctdi_vol * factor_ssde
         st.metric("SSDE (mGy)", f"{ssde:.2f}")
+        
