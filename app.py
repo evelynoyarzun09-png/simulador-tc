@@ -9,7 +9,16 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
 # -------------------------
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
-PACIENTE_IMG = BASE_DIR / "paciente.png"
+
+PACIENTE_IMG_PNG = BASE_DIR / "paciente.png"
+PACIENTE_IMG_JPG = BASE_DIR / "paciente.jpg"
+
+if PACIENTE_IMG_PNG.exists():
+    PACIENTE_IMG = PACIENTE_IMG_PNG
+elif PACIENTE_IMG_JPG.exists():
+    PACIENTE_IMG = PACIENTE_IMG_JPG
+else:
+    PACIENTE_IMG = None
 
 # -------------------------
 # ESTADO INICIAL
@@ -24,16 +33,23 @@ seccion = st.session_state.seccion
 # -------------------------
 st.markdown("""
 <style>
+/* Fondo general */
+.stApp {
+    background-color: #505050;
+}
+
+/* Contenedor principal */
 .block-container {
     padding-top: 1.2rem;
     padding-bottom: 2rem;
 }
-.boton-inferior-derecha {
-    position: fixed;
-    right: 2rem;
-    bottom: 1.5rem;
-    z-index: 999;
+
+/* Texto general */
+html, body, [class*="css"] {
+    color: white;
 }
+
+/* Portada */
 .portada-titulo {
     text-align: center;
     font-size: 2.6rem;
@@ -50,30 +66,81 @@ st.markdown("""
 }
 .portada-fondo {
     background-color: black;
-    padding: 1.2rem 1.2rem 5rem 1.2rem;
+    padding: 1.2rem 1.2rem 2rem 1.2rem;
     border-radius: 18px;
 }
+
+/* Botones generales */
 div.stButton > button {
-    border-radius: 12px;
-    font-weight: 600;
+    background-color: #b8bec7 !important;
+    color: #1f1f1f !important;
+    border-radius: 12px !important;
+    border: 1px solid #9ca3ad !important;
+    font-weight: 600 !important;
 }
+
+/* Bloques */
 .bloque-resumen {
-    background-color: #f7f7f7;
+    background-color: #616161;
     padding: 1rem 1.2rem;
     border-radius: 12px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid #7a7a7a;
 }
 .bloque-seccion {
-    background-color: #fafafa;
+    background-color: #616161;
     padding: 1rem 1rem 0.6rem 1rem;
     border-radius: 14px;
-    border: 1px solid #e8e8e8;
+    border: 1px solid #7a7a7a;
     margin-bottom: 1rem;
 }
 .titulo-bloque {
     font-size: 1.05rem;
     font-weight: 700;
     margin-bottom: 0.6rem;
+    color: white;
+}
+
+/* Reducir tamaño del valor de edad del metric */
+[data-testid="stMetricValue"] {
+    font-size: 1.35rem !important;
+}
+
+/* Fondo de selectbox */
+div[data-baseweb="select"] > div {
+    background-color: #b8bec7 !important;
+    color: #1f1f1f !important;
+    border-radius: 12px !important;
+}
+
+/* Fondo input */
+div[data-baseweb="input"] > div {
+    background-color: #b8bec7 !important;
+    color: #1f1f1f !important;
+    border-radius: 12px !important;
+}
+
+/* Fondo textarea */
+div[data-baseweb="textarea"] > div {
+    background-color: #b8bec7 !important;
+    color: #1f1f1f !important;
+    border-radius: 12px !important;
+}
+
+/* Texto dentro de inputs */
+input, textarea {
+    color: #1f1f1f !important;
+    -webkit-text-fill-color: #1f1f1f !important;
+}
+
+/* Etiquetas */
+label, .stMarkdown, p, span, div {
+    color: white;
+}
+
+/* Caja info */
+[data-testid="stInfo"] {
+    background-color: #5a6478 !important;
+    color: white !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -105,12 +172,12 @@ if seccion == "Portada":
     else:
         st.warning("No se encontró la imagen de portada 'tomografo_portada.png'.")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    col_btn1, col_btn2, col_btn3 = st.columns([5, 2, 1])
+    with col_btn3:
+        if st.button("Ir a A Practicar", use_container_width=True):
+            ir_a_practicar()
+            st.rerun()
 
-    st.markdown('<div class="boton-inferior-derecha">', unsafe_allow_html=True)
-    if st.button("Ir a A Practicar"):
-        ir_a_practicar()
-        st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
@@ -173,12 +240,8 @@ elif seccion == "Preparación de paciente":
 
     st.header("Preparación de paciente")
 
-    # Layout más compacto
-    col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.70])
+    col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.65])
 
-    # ---------------------------------
-    # COLUMNA IZQUIERDA: DATOS PACIENTE
-    # ---------------------------------
     with col_izq:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Datos del paciente</div>', unsafe_allow_html=True)
@@ -215,9 +278,6 @@ elif seccion == "Preparación de paciente":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ---------------------------------
-    # COLUMNA CENTRO: CONTRASTE Y POSICIÓN
-    # ---------------------------------
     with col_centro:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Preparación para contraste</div>', unsafe_allow_html=True)
@@ -228,7 +288,6 @@ elif seccion == "Preparación de paciente":
             index=0
         )
 
-        # Si es NO, ocultar el resto de opciones de contraste
         if medio_contraste_ev != "NO":
             c5, c6 = st.columns(2)
             with c5:
@@ -302,23 +361,17 @@ elif seccion == "Preparación de paciente":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ---------------------------------
-    # COLUMNA DERECHA: IMAGEN
-    # ---------------------------------
     with col_img:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
 
-        if PACIENTE_IMG.exists():
-            st.image(str(PACIENTE_IMG), use_container_width=True)
+        if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
+            st.image(str(PACIENTE_IMG), width=210)
         else:
-            st.info("Guarda la imagen como 'paciente.png' en la misma carpeta del app.py.")
+            st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # ---------------------------------
-    # RESUMEN
-    # ---------------------------------
     st.divider()
     st.subheader("Resumen")
 
