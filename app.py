@@ -218,6 +218,8 @@ elif seccion == "Preparación de paciente":
             ["NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"]
         )
 
+        st.subheader("Posicionamiento del paciente")
+
         entrada_paciente = st.selectbox(
             "Entrada paciente",
             ["CABEZA PRIMERO", "PIES PRIMERO"]
