@@ -179,67 +179,78 @@ elif seccion == "Preparación de paciente":
 
         embarazo = st.selectbox(
             "Embarazo",
-            ["SI", "NO", "NO APLICA"]
+            ["Seleccionar", "SI", "NO", "NO APLICA"],
+            index=0
         )
 
         creatinina = st.selectbox(
             "Creatinina",
-            ["SI", "NO"]
+            ["Seleccionar", "SI", "NO"],
+            index=0
         )
 
         st.subheader("Preparación para contraste")
 
         medio_contraste_ev = st.selectbox(
             "Medio de contraste EV",
-            ["SI", "NO", "NO APLICA"]
+            ["Seleccionar", "SI", "NO", "NO APLICA"],
+            index=0
         )
 
         via_venosa = st.selectbox(
             "Vía venosa",
-            ["24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"]
+            ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
+            index=0
         )
 
         cantidad_contraste = st.selectbox(
             "Cantidad de contraste (ml)",
             [
-                "10 cc", "20 cc", "30 cc", "40 cc", "50 cc", "60 cc", "70 cc", "80 cc",
+                "Seleccionar", "10 cc", "20 cc", "30 cc", "40 cc", "50 cc", "60 cc", "70 cc", "80 cc",
                 "90 cc", "100 cc", "110 cc", "120 cc", "130 cc", "140 cc", "150 cc",
                 "160 cc", "170 cc", "180 cc", "190 cc", "200 cc"
-            ]
+            ],
+            index=0
         )
 
         metodo_inyeccion = st.selectbox(
             "Método de inyección",
-            ["JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"]
+            ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
+            index=0
         )
 
         medio_contraste_oral = st.selectbox(
             "Medio de contraste oral",
-            ["NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"]
+            ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
+            index=0
         )
 
         st.subheader("Posicionamiento del paciente")
 
         entrada_paciente = st.selectbox(
             "Entrada paciente",
-            ["CABEZA PRIMERO", "PIES PRIMERO"]
+            ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+            index=0
         )
 
         posicionamiento = st.selectbox(
             "Posicionamiento",
-            ["SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"]
+            ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+            index=0
         )
 
         posicion_brazos = st.selectbox(
             "Posición de brazos / extremidades",
             [
+                "Seleccionar",
                 "BRAZOS ARRIBA",
                 "BRAZOS ABAJO",
                 "ELEVA BRAZO DERECHO",
                 "ELEVA BRAZO IZQUIERDO",
                 "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
                 "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
-            ]
+            ],
+            index=0
         )
 
     with col_img:
@@ -292,7 +303,11 @@ elif seccion == "Jeringa inyectora":
     with col2:
         flush = st.number_input("Volumen de flush / suero (mL)", min_value=0.0, value=30.0)
         tiempo_delay = st.number_input("Delay / retardo (s)", min_value=0.0, value=25.0)
-        sitio_puncion = st.selectbox("Sitio de punción", ["Brazo derecho", "Brazo izquierdo", "Otro"])
+        sitio_puncion = st.selectbox(
+            "Sitio de punción",
+            ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"],
+            index=0
+        )
 
     st.subheader("Resumen")
     st.write(f"Tipo de contraste: {tipo_contraste}")
@@ -319,9 +334,14 @@ elif seccion == "Topograma":
     with col1:
         region = st.selectbox(
             "Región anatómica",
-            ["Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"]
+            ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
+            index=0
         )
-        proyeccion = st.selectbox("Proyección", ["AP", "Lateral", "AP y lateral"])
+        proyeccion = st.selectbox(
+            "Proyección",
+            ["Seleccionar", "AP", "Lateral", "AP y lateral"],
+            index=0
+        )
 
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde")
@@ -350,7 +370,7 @@ elif seccion == "Adquisición":
     col1, col2 = st.columns(2)
 
     with col1:
-        kvp = st.selectbox("kVp", [80, 100, 120, 140])
+        kvp = st.selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], index=0)
         mas = st.number_input("mAs", min_value=1, value=100)
         pitch = st.number_input("Pitch", min_value=0.1, value=1.0, step=0.1)
         rotacion = st.number_input("Tiempo de rotación (s)", min_value=0.1, value=0.5, step=0.1)
@@ -359,7 +379,11 @@ elif seccion == "Adquisición":
         colimacion = st.text_input("Colimación", value="64 x 0.625 mm")
         espesor_corte = st.number_input("Espesor de corte (mm)", min_value=0.1, value=1.0, step=0.1)
         longitud = st.number_input("Longitud de barrido (cm)", min_value=1.0, value=30.0)
-        modo = st.selectbox("Modo de adquisición", ["Helicoidal", "Secuencial"])
+        modo = st.selectbox(
+            "Modo de adquisición",
+            ["Seleccionar", "Helicoidal", "Secuencial"],
+            index=0
+        )
 
     st.subheader("Resumen")
     st.write(f"kVp: {kvp}")
@@ -388,7 +412,8 @@ elif seccion == "Reconstrucción":
     with col1:
         kernel = st.selectbox(
             "Kernel / filtro",
-            ["Blando", "Estándar", "Óseo", "Pulmonar", "Otro"]
+            ["Seleccionar", "Blando", "Estándar", "Óseo", "Pulmonar", "Otro"],
+            index=0
         )
         grosor_recon = st.number_input("Grosor de reconstrucción (mm)", min_value=0.1, value=1.0, step=0.1)
         intervalo_recon = st.number_input("Intervalo de reconstrucción (mm)", min_value=0.1, value=0.5, step=0.1)
@@ -397,10 +422,18 @@ elif seccion == "Reconstrucción":
         plano_recon = st.multiselect(
             "Planos reconstruidos",
             ["Axial", "Coronal", "Sagital", "Oblicuo"],
-            default=["Axial"]
+            default=[]
         )
-        algoritmo = st.selectbox("Algoritmo", ["FBP", "Iterativa", "Otro"])
-        ventana = st.selectbox("Ventana principal", ["Partes blandas", "Pulmón", "Ósea", "Otra"])
+        algoritmo = st.selectbox(
+            "Algoritmo",
+            ["Seleccionar", "FBP", "Iterativa", "Otro"],
+            index=0
+        )
+        ventana = st.selectbox(
+            "Ventana principal",
+            ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"],
+            index=0
+        )
 
     st.subheader("Resumen")
     st.write(f"Kernel: {kernel}")
@@ -428,12 +461,16 @@ elif seccion == "Reformación":
         tipo_reformacion = st.multiselect(
             "Tipo de reformación",
             ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"],
-            default=["MPR coronal", "MPR sagital"]
+            default=[]
         )
         grosor_mip = st.number_input("Grosor MIP / slab (mm)", min_value=0.1, value=10.0, step=0.1)
 
     with col2:
-        orientacion = st.selectbox("Orientación principal", ["Coronal", "Sagital", "Oblicua"])
+        orientacion = st.selectbox(
+            "Orientación principal",
+            ["Seleccionar", "Coronal", "Sagital", "Oblicua"],
+            index=0
+        )
         observaciones_reform = st.text_area("Observaciones de reformación")
 
     st.subheader("Resumen")
@@ -461,8 +498,12 @@ elif seccion == "Medida paciente":
         diametro_lat = st.number_input("Diámetro lateral (cm)", min_value=0.0, value=35.0)
 
     with col2:
-        edad = st.number_input("Edad", min_value=0, value=30)
-        sexo = st.selectbox("Sexo", ["Femenino", "Masculino", "Otro"])
+        edad_medida = st.number_input("Edad", min_value=0, value=30)
+        sexo = st.selectbox(
+            "Sexo",
+            ["Seleccionar", "Femenino", "Masculino", "Otro"],
+            index=0
+        )
 
     if diametro_ap > 0 and diametro_lat > 0:
         diametro_efectivo = (diametro_ap * diametro_lat) ** 0.5
@@ -472,7 +513,7 @@ elif seccion == "Medida paciente":
     st.metric("Diámetro efectivo (cm)", f"{diametro_efectivo:.2f}")
 
     st.subheader("Resumen")
-    st.write(f"Edad: {edad}")
+    st.write(f"Edad: {edad_medida}")
     st.write(f"Sexo: {sexo}")
 
 # -------------------------
@@ -495,7 +536,11 @@ elif seccion == "Cálculos":
 
     with col2:
         factor_ssde = st.number_input("Factor SSDE", min_value=0.1, value=1.0, step=0.1)
-        usar_ssde = st.selectbox("¿Calcular SSDE?", ["Sí", "No"])
+        usar_ssde = st.selectbox(
+            "¿Calcular SSDE?",
+            ["Seleccionar", "Sí", "No"],
+            index=0
+        )
 
     dlp = ctdi_vol * longitud_scan
     st.metric("DLP (mGy·cm)", f"{dlp:.2f}")
