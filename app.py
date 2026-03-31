@@ -598,8 +598,8 @@ elif seccion == "Topograma":
     col1, col2 = st.columns(2)
 
     with col1:
-        region = st.selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "EESS", "Columna", "cuerpo", "EEII", "Angio"], index=0)
-        plano = st.selectbox("Proyección", ["Seleccionar", "AP", "Lateral", "AP y lateral"], index=0)
+        region = st.selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], index=0)
+        proyeccion = st.selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], index=0)
 
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde")
@@ -608,7 +608,7 @@ elif seccion == "Topograma":
 
     st.subheader("Resumen")
     st.write(f"Región: {region}")
-    st.write(f"Proyección: {proyeccion}")
+    st.write(f"Plano: {proyeccion}")
     st.write(f"Inicio: {inicio}")
     st.write(f"Término: {termino}")
     st.write(f"Observaciones: {observaciones_topo}")
