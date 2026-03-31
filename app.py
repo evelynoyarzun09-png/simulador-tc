@@ -338,16 +338,20 @@ elif seccion == "A Practicar":
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
-    col_izq, col_centro, col_der = st.columns([1, 1.6, 1])
+    col_img, col_menu = st.columns([1.15, 1], vertical_alignment="center")
 
-    with col_centro:
+    with col_img:
         st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
 
         if A_PRACTICAR_IMG.exists():
             st.image(str(A_PRACTICAR_IMG), width="stretch")
-            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         else:
             st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col_menu:
+        st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
 
         if st.button("Preparación del paciente", use_container_width=True):
             st.session_state.seccion = "Preparación de paciente"
