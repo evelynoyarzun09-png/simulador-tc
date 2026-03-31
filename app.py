@@ -581,30 +581,25 @@ elif seccion == "Topograma":
             "Entrada paciente",
             ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
             index=0,
-            key="entrada_paciente"
-        )
+            key="entrada_paciente")
     with cpos2:
         posicionamiento = st.selectbox(
             "Posicionamiento",
             ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
             index=0,
-            key="posicionamiento_paciente"
-        )
+            key="posicionamiento_paciente")
 
     posicion_brazos = st.selectbox(
         "Posición de brazos / extremidades",
-        [
-            "Seleccionar",
+        [ "Seleccionar",
             "BRAZOS ARRIBA",
             "BRAZOS ABAJO",
             "ELEVA BRAZO DERECHO",
             "ELEVA BRAZO IZQUIERDO",
             "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
-            "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
-        ],
+            "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
         index=0,
-        key="posicion_brazos_paciente"
-    )
+        key="posicion_brazos_paciente")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -617,22 +612,19 @@ elif seccion == "Topograma":
             "Región anatómica",
             ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
             index=0,
-            key="region_topograma"
-        )
+            key="region_topograma")
 
         plano = st.selectbox(
             "Plano",
             ["Seleccionar", "AP", "Lateral", "AP y lateral"],
             index=0,
-            key="plano_topograma"
-        )
+            key="plano_topograma")
 
         posicion_tubo = st.selectbox(
             "Posición del tubo",
             ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
             index=0,
-            key="posicion_tubo"
-        )
+            key="posicion_tubo")
 
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
@@ -653,7 +645,6 @@ elif seccion == "Topograma":
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
     st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # ADQUISICIÓN
 # -------------------------
