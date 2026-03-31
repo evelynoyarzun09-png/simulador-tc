@@ -567,7 +567,7 @@ elif seccion == "Topograma":
     if TOPOGRAMA_IMG.exists():
         col_img1, col_img2, col_img3 = st.columns([1, 2.8, 1])
         with col_img2:
-            st.image(str(TOPOGRAMA_IMG), width="stretch")
+            st.image(str(TOPOGRAMA_IMG), width="500")
     else:
         st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
 
