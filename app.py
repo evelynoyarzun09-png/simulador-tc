@@ -476,42 +476,6 @@ elif seccion == "Preparación de paciente":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
-
-        c9, c10 = st.columns(2)
-        with c9:
-            entrada_paciente = st.selectbox(
-                "Entrada paciente",
-                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
-                index=0,
-                key="entrada_paciente"
-            )
-        with c10:
-            posicionamiento = st.selectbox(
-                "Posicionamiento",
-                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
-                index=0,
-                key="posicionamiento_paciente"
-            )
-
-        posicion_brazos = st.selectbox(
-            "Posición de brazos / extremidades",
-            [
-                "Seleccionar",
-                "BRAZOS ARRIBA",
-                "BRAZOS ABAJO",
-                "ELEVA BRAZO DERECHO",
-                "ELEVA BRAZO IZQUIERDO",
-                "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
-                "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
-            ],
-            index=0,
-            key="posicion_brazos_paciente"
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
     with col_img:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
@@ -541,9 +505,6 @@ elif seccion == "Preparación de paciente":
         st.write(f"**Método de inyección:** {metodo_inyeccion}")
         st.write(f"**Medio de contraste oral:** {medio_contraste_oral}")
 
-    st.write(f"**Entrada del paciente:** {entrada_paciente}")
-    st.write(f"**Posicionamiento:** {posicionamiento}")
-    st.write(f"**Posición de brazos / extremidades:** {posicion_brazos}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -598,9 +559,41 @@ elif seccion == "Topograma":
             volver_menu()
             st.rerun()
 
-    entrada_paciente = st.session_state.get("entrada_paciente", "Seleccionar")
-    posicionamiento = st.session_state.get("posicionamiento_paciente", "Seleccionar")
-    posicion_brazos = st.session_state.get("posicion_brazos_paciente", "Seleccionar")
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
+
+    cpos1, cpos2 = st.columns(2)
+    with cpos1:
+        entrada_paciente = st.selectbox(
+            "Entrada paciente",
+            ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+            index=0,
+            key="entrada_paciente"
+        )
+    with cpos2:
+        posicionamiento = st.selectbox(
+            "Posicionamiento",
+            ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+            index=0,
+            key="posicionamiento_paciente"
+        )
+
+    posicion_brazos = st.selectbox(
+        "Posición de brazos / extremidades",
+        [
+            "Seleccionar",
+            "BRAZOS ARRIBA",
+            "BRAZOS ABAJO",
+            "ELEVA BRAZO DERECHO",
+            "ELEVA BRAZO IZQUIERDO",
+            "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
+            "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
+        ],
+        index=0,
+        key="posicion_brazos_paciente"
+    )
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -622,20 +615,18 @@ elif seccion == "Topograma":
         observaciones_topo = st.text_area("Observaciones")
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-    st.subheader("Datos de posicionamiento traspasados")
+    st.subheader("Resumen")
 
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Entrada del paciente:** {entrada_paciente}")
     st.write(f"**Posicionamiento:** {posicionamiento}")
     st.write(f"**Posición de brazos / extremidades:** {posicion_brazos}")
+    st.write(f"**Región:** {region}")
+    st.write(f"**Plano:** {proyeccion}")
+    st.write(f"**Inicio:** {inicio}")
+    st.write(f"**Término:** {termino}")
+    st.write(f"**Observaciones:** {observaciones_topo}")
     st.markdown('</div>', unsafe_allow_html=True)
-
-    st.subheader("Resumen")
-    st.write(f"Región: {region}")
-    st.write(f"Plano: {proyeccion}")
-    st.write(f"Inicio: {inicio}")
-    st.write(f"Término: {termino}")
-    st.write(f"Observaciones: {observaciones_topo}")
 
 # -------------------------
 # ADQUISICIÓN
