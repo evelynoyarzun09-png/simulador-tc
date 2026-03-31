@@ -547,7 +547,6 @@ elif seccion == "Jeringa inyectora":
     st.write(f"Flush: {flush} mL")
     st.write(f"Delay: {tiempo_delay} s")
     st.write(f"Sitio de punción: {sitio_puncion}")
-
 # -------------------------
 # TOPOGRAMA
 # -------------------------
@@ -560,87 +559,75 @@ elif seccion == "Topograma":
             volver_menu()
             st.rerun()
 
-    # Imagen superior
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
+    # Dos columnas: opciones a la izquierda, imagen a la derecha
+    col_izq, col_der = st.columns([1.25, 0.9], vertical_alignment="top")
 
-    if TOPOGRAMA_IMG.exists():
-        col_img1, col_img2, col_img3 = st.columns([1, 2.8, 1])
-        with col_img2:
-            st.image(str(TOPOGRAMA_IMG), width=500)
-    else:
-        st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
+    with col_izq:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        cpos1, cpos2 = st.columns(2)
+        with cpos1:
+            entrada_paciente = st.selectbox(
+                "Entrada paciente",
+                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                index=0,
+                key="entrada_paciente")
+        with cpos2:
+            posicionamiento = st.selectbox(
+                "Posicionamiento",
+                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                index=0,
+                key="posicionamiento_paciente")
 
-    # Opciones debajo de la imagen
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
-
-    cpos1, cpos2 = st.columns(2)
-    with cpos1:
-        entrada_paciente = st.selectbox(
-            "Entrada paciente",
-            ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+        posicion_brazos = st.selectbox(
+            "Posición de brazos / extremidades",
+            ["Seleccionar",
+                "BRAZOS ARRIBA",
+                "BRAZOS ABAJO",
+                "ELEVA BRAZO DERECHO",
+                "ELEVA BRAZO IZQUIERDO",
+                "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
+                "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
             index=0,
-            key="entrada_paciente"
-        )
-    with cpos2:
-        posicionamiento = st.selectbox(
-            "Posicionamiento",
-            ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
-            index=0,
-            key="posicionamiento_paciente"
-        )
+            key="posicion_brazos_paciente")
 
-    posicion_brazos = st.selectbox(
-        "Posición de brazos / extremidades",
-        [
-            "Seleccionar",
-            "BRAZOS ARRIBA",
-            "BRAZOS ABAJO",
-            "ELEVA BRAZO DERECHO",
-            "ELEVA BRAZO IZQUIERDO",
-            "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
-            "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
-        ],
-        index=0,
-        key="posicion_brazos_paciente"
-    )
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
         region = st.selectbox(
             "Región anatómica",
             ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
             index=0,
-            key="region_topograma"
-        )
+            key="region_topograma")
 
         plano = st.selectbox(
             "Plano",
             ["Seleccionar", "AP", "Lateral", "AP y lateral"],
             index=0,
-            key="plano_topograma"
-        )
+            key="plano_topograma")
 
         posicion_tubo = st.selectbox(
             "Posición del tubo",
             ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
             index=0,
-            key="posicion_tubo"
-        )
+            key="posicion_tubo")
 
-    with col2:
-        inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
-        termino = st.text_input("Término topograma", value="Hasta", key="termino_topograma")
+        ctop1, ctop2 = st.columns(2)
+        with ctop1:
+            inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
+        with ctop2:
+            termino = st.text_input("Término topograma", value="Hasta", key="termino_topograma")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col_der:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
+
+        if TOPOGRAMA_IMG.exists():
+            st.image(str(TOPOGRAMA_IMG), width="stretch")
+        else:
+            st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     st.subheader("Resumen")
@@ -655,7 +642,6 @@ elif seccion == "Topograma":
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
     st.markdown('</div>', unsafe_allow_html=True)
-
 # -------------------------
 # ADQUISICIÓN
 # -------------------------
