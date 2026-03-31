@@ -324,22 +324,27 @@ elif seccion == "A Practicar":
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
-    col1, col2 = st.columns(2)
+    A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
 
-    with col1:
-        if st.button("Preparación de paciente", use_container_width=True):
+    col_izq, col_centro, col_der = st.columns([1, 1.6, 1])
+
+    with col_centro:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+
+        if A_PRACTICAR_IMG.exists():
+            st.image(str(A_PRACTICAR_IMG), width="stretch")
+            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        else:
+            st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
+
+        if st.button("Preparación del paciente", use_container_width=True):
             st.session_state.seccion = "Preparación de paciente"
-            st.rerun()
-
-        if st.button("Jeringa inyectora", use_container_width=True):
-            st.session_state.seccion = "Jeringa inyectora"
             st.rerun()
 
         if st.button("Topograma", use_container_width=True):
             st.session_state.seccion = "Topograma"
             st.rerun()
 
-    with col2:
         if st.button("Adquisición", use_container_width=True):
             st.session_state.seccion = "Adquisición"
             st.rerun()
@@ -351,6 +356,12 @@ elif seccion == "A Practicar":
         if st.button("Reformación", use_container_width=True):
             st.session_state.seccion = "Reformación"
             st.rerun()
+
+        if st.button("Jeringa inyectora", use_container_width=True):
+            st.session_state.seccion = "Jeringa inyectora"
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
@@ -681,65 +692,3 @@ elif seccion == "Reformación":
     st.write(f"Grosor slab: {grosor_mip} mm")
     st.write(f"Orientación: {orientacion}")
     st.write(f"Observaciones: {observaciones_reform}")
-
-# -------------------------
-# MEDIDA PACIENTE
-# -------------------------
-elif seccion == "Medida paciente":
-    st.header("Medida paciente")
-
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
-            st.rerun()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        diametro_ap = st.number_input("Diámetro AP (cm)", min_value=0.0, value=25.0)
-        diametro_lat = st.number_input("Diámetro lateral (cm)", min_value=0.0, value=35.0)
-
-    with col2:
-        edad_medida = st.number_input("Edad", min_value=0, value=30)
-        sexo = st.selectbox("Sexo", ["Seleccionar", "Femenino", "Masculino", "Otro"], index=0)
-
-    if diametro_ap > 0 and diametro_lat > 0:
-        diametro_efectivo = (diametro_ap * diametro_lat) ** 0.5
-    else:
-        diametro_efectivo = 0.0
-
-    st.metric("Diámetro efectivo (cm)", f"{diametro_efectivo:.2f}")
-
-    st.subheader("Resumen")
-    st.write(f"Edad: {edad_medida}")
-    st.write(f"Sexo: {sexo}")
-
-# -------------------------
-# CÁLCULOS
-# -------------------------
-elif seccion == "Cálculos":
-    st.header("Cálculos")
-
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
-            st.rerun()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        ctdi_vol = st.number_input("CTDIvol (mGy)", min_value=0.0, value=10.0)
-        longitud_scan = st.number_input("Longitud de escaneo (cm)", min_value=0.0, value=30.0)
-
-    with col2:
-        factor_ssde = st.number_input("Factor SSDE", min_value=0.1, value=1.0, step=0.1)
-        usar_ssde = st.selectbox("¿Calcular SSDE?", ["Seleccionar", "Sí", "No"], index=0)
-
-    dlp = ctdi_vol * longitud_scan
-    st.metric("DLP (mGy·cm)", f"{dlp:.2f}")
-
-    if usar_ssde == "Sí":
-        ssde = ctdi_vol * factor_ssde
-        st.metric("SSDE (mGy)", f"{ssde:.2f}")
