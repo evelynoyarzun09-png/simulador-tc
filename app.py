@@ -324,7 +324,7 @@ elif seccion == "A Practicar":
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
         if st.button("Preparación de paciente", use_container_width=True):
@@ -351,9 +351,6 @@ elif seccion == "A Practicar":
         if st.button("Reformación", use_container_width=True):
             st.session_state.seccion = "Reformación"
             st.rerun()
-
-    with col3:
-        st.empty()
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
