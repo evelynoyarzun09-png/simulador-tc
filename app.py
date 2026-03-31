@@ -294,11 +294,6 @@ input[type="date"] {
     margin-top: 0.4rem;
     margin-bottom: 1rem;
 }
-
-/* Mejora visual del topograma */
-.topo-fila {
-    margin-bottom: 0.25rem;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -529,17 +524,6 @@ elif seccion == "Preparación de paciente":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with col_img:
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
-
-        if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
-            st.image(str(PACIENTE_IMG), width=260)
-        else:
-            st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
     preparacion_completa = all([
         texto_completo(nombres),
         texto_completo(apellidos),
@@ -556,6 +540,23 @@ elif seccion == "Preparación de paciente":
             seleccion_completa(metodo_inyeccion),
             seleccion_completa(medio_contraste_oral),
         ])
+
+    with col_img:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
+
+        if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
+            st.image(str(PACIENTE_IMG), width=260)
+        else:
+            st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
+
+        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+
+        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa):
+            ir_a(SECCION_SIGUIENTE["Preparación de paciente"])
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
     st.subheader("Resumen")
@@ -576,14 +577,6 @@ elif seccion == "Preparación de paciente":
         st.write(f"**Medio de contraste oral:** {medio_contraste_oral}")
 
     st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
-
-    with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa):
-            ir_a(SECCION_SIGUIENTE["Preparación de paciente"])
-            st.rerun()
 
 # -------------------------
 # TOPOGRAMA
