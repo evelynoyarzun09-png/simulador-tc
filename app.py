@@ -598,7 +598,7 @@ elif seccion == "Topograma":
     col1, col2 = st.columns(2)
 
     with col1:
-        region = st.selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "eess", "Columna", "cuerpo", "eeii", "Angio"], index=0)
+        region = st.selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "EESS", "Columna", "cuerpo", "EEII", "Angio"], index=0)
         proyeccion = st.selectbox("Proyección", ["Seleccionar", "AP", "Lateral", "AP y lateral"], index=0)
 
     with col2:
