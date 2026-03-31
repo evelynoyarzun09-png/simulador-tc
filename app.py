@@ -558,6 +558,20 @@ elif seccion == "Topograma":
             volver_menu()
             st.rerun()
 
+    # Imagen superior
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
+
+    if TOPOGRAMA_IMG.exists():
+        col_img1, col_img2, col_img3 = st.columns([1, 2.8, 1])
+        with col_img2:
+            st.image(str(TOPOGRAMA_IMG), width="stretch")
+    else:
+        st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Opciones debajo de la imagen
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
 
@@ -594,6 +608,8 @@ elif seccion == "Topograma":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -621,6 +637,8 @@ elif seccion == "Topograma":
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
         termino = st.text_input("Término topograma", value="Hasta", key="termino_topograma")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     st.subheader("Resumen")
