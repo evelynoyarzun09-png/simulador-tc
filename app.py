@@ -546,7 +546,6 @@ elif seccion == "Jeringa inyectora":
     st.write(f"Flush: {flush} mL")
     st.write(f"Delay: {tiempo_delay} s")
     st.write(f"Sitio de punción: {sitio_puncion}")
-
 # -------------------------
 # TOPOGRAMA
 # -------------------------
@@ -601,24 +600,27 @@ elif seccion == "Topograma":
         region = st.selectbox(
             "Región anatómica",
             ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
-            index=0
+            index=0,
+            key="region_topograma"
         )
-        proyeccion = st.selectbox(
+
+        plano = st.selectbox(
             "Plano",
             ["Seleccionar", "AP", "Lateral", "AP y lateral"],
-            index=0
+            index=0,
+            key="plano_topograma"
         )
 
         posicion_tubo = st.selectbox(
             "Posición del tubo",
             ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
-            index=0
+            index=0,
+            key="posicion_tubo"
         )
 
     with col2:
-        inicio = st.text_input("Inicio topograma", value="Desde")
-        termino = st.text_input("Término topograma", value="Hasta")
-        observaciones_topo = st.text_area("Observaciones")
+        inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
+        termino = st.text_input("Término topograma", value="Hasta", key="termino_topograma")
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     st.subheader("Resumen")
@@ -628,11 +630,10 @@ elif seccion == "Topograma":
     st.write(f"**Posicionamiento:** {posicionamiento}")
     st.write(f"**Posición de brazos / extremidades:** {posicion_brazos}")
     st.write(f"**Región:** {region}")
-    st.write(f"**Plano:** {proyeccion}")
+    st.write(f"**Plano:** {plano}")
     st.write(f"**Posición del tubo:** {posicion_tubo}")
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
-    st.write(f"**Observaciones:** {observaciones_topo}")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
