@@ -579,6 +579,12 @@ elif seccion == "Topograma":
                 ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
                 index=0,
                 key="posicionamiento_paciente")
+            
+        posicion_tubo = st.selectbox(
+            "Posición del tubo",
+            ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+            index=0,
+            key="posicion_tubo")
 
         posicion_brazos = st.selectbox(
             "Posición de brazos / extremidades",
@@ -603,12 +609,6 @@ elif seccion == "Topograma":
             ["Seleccionar", "AP", "Lateral", "AP y lateral"],
             index=0,
             key="plano_topograma")
-
-        posicion_tubo = st.selectbox(
-            "Posición del tubo",
-            ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
-            index=0,
-            key="posicion_tubo")
 
         ctop1, ctop2 = st.columns(2)
         with ctop1:
