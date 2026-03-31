@@ -599,7 +599,7 @@ elif seccion == "Topograma":
 
     with col1:
         region = st.selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], index=0)
-        proyeccion = st.selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], index=0)
+        proyeccion = st.selectbox("Plano", ["Seleccionar", "AP", "Lateral"], index=0)
 
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde")
