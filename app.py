@@ -353,13 +353,7 @@ elif seccion == "A Practicar":
             st.rerun()
 
     with col3:
-        if st.button("Medida paciente", use_container_width=True):
-            st.session_state.seccion = "Medida paciente"
-            st.rerun()
-
-        if st.button("Cálculos", use_container_width=True):
-            st.session_state.seccion = "Cálculos"
-            st.rerun()
+        st.empty()
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
