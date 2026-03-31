@@ -609,6 +609,12 @@ elif seccion == "Topograma":
             index=0
         )
 
+        posicion_tubo = st.selectbox(
+            "Posición del tubo",
+            ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+            index=0
+        )
+
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde")
         termino = st.text_input("Término topograma", value="Hasta")
@@ -623,6 +629,7 @@ elif seccion == "Topograma":
     st.write(f"**Posición de brazos / extremidades:** {posicion_brazos}")
     st.write(f"**Región:** {region}")
     st.write(f"**Plano:** {proyeccion}")
+    st.write(f"**Posición del tubo:** {posicion_tubo}")
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
     st.write(f"**Observaciones:** {observaciones_topo}")
@@ -723,65 +730,3 @@ elif seccion == "Reformación":
     st.write(f"Grosor slab: {grosor_mip} mm")
     st.write(f"Orientación: {orientacion}")
     st.write(f"Observaciones: {observaciones_reform}")
-
-# -------------------------
-# MEDIDA PACIENTE
-# -------------------------
-elif seccion == "Medida paciente":
-    st.header("Medida paciente")
-
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
-            st.rerun()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        diametro_ap = st.number_input("Diámetro AP (cm)", min_value=0.0, value=25.0)
-        diametro_lat = st.number_input("Diámetro lateral (cm)", min_value=0.0, value=35.0)
-
-    with col2:
-        edad_medida = st.number_input("Edad", min_value=0, value=30)
-        sexo = st.selectbox("Sexo", ["Seleccionar", "Femenino", "Masculino", "Otro"], index=0)
-
-    if diametro_ap > 0 and diametro_lat > 0:
-        diametro_efectivo = (diametro_ap * diametro_lat) ** 0.5
-    else:
-        diametro_efectivo = 0.0
-
-    st.metric("Diámetro efectivo (cm)", f"{diametro_efectivo:.2f}")
-
-    st.subheader("Resumen")
-    st.write(f"Edad: {edad_medida}")
-    st.write(f"Sexo: {sexo}")
-
-# -------------------------
-# CÁLCULOS
-# -------------------------
-elif seccion == "Cálculos":
-    st.header("Cálculos")
-
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
-            st.rerun()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        ctdi_vol = st.number_input("CTDIvol (mGy)", min_value=0.0, value=10.0)
-        longitud_scan = st.number_input("Longitud de escaneo (cm)", min_value=0.0, value=30.0)
-
-    with col2:
-        factor_ssde = st.number_input("Factor SSDE", min_value=0.1, value=1.0, step=0.1)
-        usar_ssde = st.selectbox("¿Calcular SSDE?", ["Seleccionar", "Sí", "No"], index=0)
-
-    dlp = ctdi_vol * longitud_scan
-    st.metric("DLP (mGy·cm)", f"{dlp:.2f}")
-
-    if usar_ssde == "Sí":
-        ssde = ctdi_vol * factor_ssde
-        st.metric("SSDE (mGy)", f"{ssde:.2f}")
