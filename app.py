@@ -562,9 +562,75 @@ elif seccion == "Topograma":
     # Dos columnas: opciones a la izquierda, imagen a la derecha
     col_izq, col_der = st.columns([1.25, 0.9], vertical_alignment="top")
 
-    with col_izq:
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
+ with col_izq:
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
+
+    cpos1, cpos2 = st.columns([1, 1])
+    with cpos1:
+        entrada_paciente = st.selectbox(
+            "Entrada paciente",
+            ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+            index=0,
+            key="entrada_paciente"
+        )
+    with cpos2:
+        posicionamiento = st.selectbox(
+            "Posicionamiento",
+            ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+            index=0,
+            key="posicionamiento_paciente"
+        )
+
+    # Estos quedan en una zona más angosta
+    col_angosta1, col_angosta2 = st.columns([0.9, 1.1])
+
+    with col_angosta1:
+        posicion_tubo = st.selectbox(
+            "Posición del tubo",
+            ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+            index=0,
+            key="posicion_tubo"
+        )
+
+        region = st.selectbox(
+            "Región anatómica",
+            ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
+            index=0,
+            key="region_topograma"
+        )
+
+    with col_angosta2:
+        posicion_brazos = st.selectbox(
+            "Posición de brazos / extremidades",
+            [
+                "Seleccionar",
+                "BRAZOS ARRIBA",
+                "BRAZOS ABAJO",
+                "ELEVA BRAZO DERECHO",
+                "ELEVA BRAZO IZQUIERDO",
+                "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
+                "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
+            ],
+            index=0,
+            key="posicion_brazos_paciente"
+        )
+
+        plano = st.selectbox(
+            "Plano",
+            ["Seleccionar", "AP", "Lateral", "AP y lateral"],
+            index=0,
+            key="plano_topograma"
+        )
+
+    # Estos quedan más grandes
+    ctop1, ctop2 = st.columns([1.35, 1.35])
+    with ctop1:
+        inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
+    with ctop2:
+        termino = st.text_input("Término topograma", value="Hasta", key="termino_topograma")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
         cpos1, cpos2 = st.columns(2)
         with cpos1:
