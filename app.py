@@ -11,6 +11,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
 A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
+TOPOGRAMA_IMG = BASE_DIR / "topograma.png"
 
 PACIENTE_IMG_PNG = BASE_DIR / "paciente.png"
 PACIENTE_IMG_JPG = BASE_DIR / "paciente.jpg"
@@ -181,7 +182,7 @@ div.stButton > button {
 }
 .bloque-seccion {
     background-color: #616161;
-    padding: 1rem 1rem 0.6rem 1rem;
+    padding: 1rem 1rem 0.8rem 1rem;
     border-radius: 14px;
     border: 1px solid #7a7a7a;
     margin-bottom: 1rem;
@@ -546,6 +547,7 @@ elif seccion == "Jeringa inyectora":
     st.write(f"Flush: {flush} mL")
     st.write(f"Delay: {tiempo_delay} s")
     st.write(f"Sitio de punción: {sitio_puncion}")
+
 # -------------------------
 # TOPOGRAMA
 # -------------------------
@@ -581,25 +583,30 @@ elif seccion == "Topograma":
             "Entrada paciente",
             ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
             index=0,
-            key="entrada_paciente")
+            key="entrada_paciente"
+        )
     with cpos2:
         posicionamiento = st.selectbox(
             "Posicionamiento",
             ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
             index=0,
-            key="posicionamiento_paciente")
+            key="posicionamiento_paciente"
+        )
 
     posicion_brazos = st.selectbox(
         "Posición de brazos / extremidades",
-        [ "Seleccionar",
+        [
+            "Seleccionar",
             "BRAZOS ARRIBA",
             "BRAZOS ABAJO",
             "ELEVA BRAZO DERECHO",
             "ELEVA BRAZO IZQUIERDO",
             "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
-            "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+            "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
+        ],
         index=0,
-        key="posicion_brazos_paciente")
+        key="posicion_brazos_paciente"
+    )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -612,19 +619,22 @@ elif seccion == "Topograma":
             "Región anatómica",
             ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
             index=0,
-            key="region_topograma")
+            key="region_topograma"
+        )
 
         plano = st.selectbox(
             "Plano",
             ["Seleccionar", "AP", "Lateral", "AP y lateral"],
             index=0,
-            key="plano_topograma")
+            key="plano_topograma"
+        )
 
         posicion_tubo = st.selectbox(
             "Posición del tubo",
             ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
             index=0,
-            key="posicion_tubo")
+            key="posicion_tubo"
+        )
 
     with col2:
         inicio = st.text_input("Inicio topograma", value="Desde", key="inicio_topograma")
@@ -645,6 +655,7 @@ elif seccion == "Topograma":
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
     st.markdown('</div>', unsafe_allow_html=True)
+
 # -------------------------
 # ADQUISICIÓN
 # -------------------------
