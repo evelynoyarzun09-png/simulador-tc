@@ -106,7 +106,7 @@ if not st.session_state.autenticado:
     )
 
     if PORTADA_IMG.exists():
-        st.image(str(PORTADA_IMG), width="stretch")
+        st.image(str(PORTADA_IMG), use_container_width=True)
 
     st.text_input(
         "Clave de acceso",
@@ -172,6 +172,12 @@ div.stButton > button {
     font-weight: 600 !important;
     min-height: 46px !important;
 }
+div.stButton > button:disabled {
+    background-color: #8a8f97 !important;
+    color: #e6e6e6 !important;
+    border: 1px solid #7a7a7a !important;
+    opacity: 0.75 !important;
+}
 
 /* Bloques */
 .bloque-resumen {
@@ -197,7 +203,7 @@ div.stButton > button {
 .titulo-bloque {
     font-size: 1.05rem;
     font-weight: 700;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.8rem;
     color: white;
 }
 
@@ -288,20 +294,66 @@ input[type="date"] {
     margin-top: 0.4rem;
     margin-bottom: 1rem;
 }
+
+/* Mejora visual del topograma */
+.topo-fila {
+    margin-bottom: 0.25rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# FUNCIONES
+# NAVEGACIÓN
 # -------------------------
+SECCION_ANTERIOR = {
+    "Preparación de paciente": "A Practicar",
+    "Topograma": "Preparación de paciente",
+    "Adquisición": "Topograma",
+    "Reconstrucción": "Adquisición",
+    "Reformación": "Reconstrucción",
+    "Jeringa inyectora": "Reformación",
+}
+
+SECCION_SIGUIENTE = {
+    "Preparación de paciente": "Topograma",
+    "Topograma": "Adquisición",
+    "Adquisición": "Reconstrucción",
+    "Reconstrucción": "Reformación",
+    "Reformación": "Jeringa inyectora",
+}
+
+
 def ir_a_practicar():
     st.session_state.seccion = "A Practicar"
 
-def volver_menu():
-    st.session_state.seccion = "A Practicar"
 
-def ir_a_topograma():
-    st.session_state.seccion = "Topograma"
+def ir_a(seccion_destino):
+    st.session_state.seccion = seccion_destino
+
+
+def volver_anterior():
+    st.session_state.seccion = SECCION_ANTERIOR.get(st.session_state.seccion, "A Practicar")
+
+
+# -------------------------
+# FUNCIONES DE VALIDACIÓN
+# -------------------------
+def texto_completo(valor):
+    return str(valor).strip() != ""
+
+
+def seleccion_completa(valor):
+    return valor not in ["", None, "Seleccionar"]
+
+
+def lista_completa(valor):
+    return isinstance(valor, list) and len(valor) > 0
+
+
+def topograma_texto_completo(valor):
+    v = str(valor).strip()
+    return v != "" and v.lower() not in ["desde", "hasta"]
+
 
 # -------------------------
 # PORTADA
@@ -317,7 +369,7 @@ if seccion == "Portada":
     if PORTADA_IMG.exists():
         col1, col2, col3 = st.columns([1, 3, 1])
         with col2:
-            st.image(str(PORTADA_IMG), width="stretch")
+            st.image(str(PORTADA_IMG), use_container_width=True)
     else:
         st.warning("No se encontró la imagen de portada 'tomografo_portada.png'.")
 
@@ -345,7 +397,7 @@ elif seccion == "A Practicar":
         st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
 
         if A_PRACTICAR_IMG.exists():
-            st.image(str(A_PRACTICAR_IMG), width="stretch")
+            st.image(str(A_PRACTICAR_IMG), use_container_width=True)
         else:
             st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
 
@@ -355,27 +407,27 @@ elif seccion == "A Practicar":
         st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
 
         if st.button("Preparación del paciente", use_container_width=True):
-            st.session_state.seccion = "Preparación de paciente"
+            ir_a("Preparación de paciente")
             st.rerun()
 
         if st.button("Topograma", use_container_width=True):
-            st.session_state.seccion = "Topograma"
+            ir_a("Topograma")
             st.rerun()
 
         if st.button("Adquisición", use_container_width=True):
-            st.session_state.seccion = "Adquisición"
+            ir_a("Adquisición")
             st.rerun()
 
         if st.button("Reconstrucción", use_container_width=True):
-            st.session_state.seccion = "Reconstrucción"
+            ir_a("Reconstrucción")
             st.rerun()
 
         if st.button("Reformación", use_container_width=True):
-            st.session_state.seccion = "Reformación"
+            ir_a("Reformación")
             st.rerun()
 
         if st.button("Jeringa inyectora", use_container_width=True):
-            st.session_state.seccion = "Jeringa inyectora"
+            ir_a("Jeringa inyectora")
             st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
@@ -393,7 +445,7 @@ elif seccion == "Preparación de paciente":
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
         if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
+            volver_anterior()
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -488,6 +540,23 @@ elif seccion == "Preparación de paciente":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
+    preparacion_completa = all([
+        texto_completo(nombres),
+        texto_completo(apellidos),
+        texto_completo(examen),
+        seleccion_completa(embarazo),
+        seleccion_completa(creatinina),
+        seleccion_completa(medio_contraste_ev),
+    ])
+
+    if medio_contraste_ev != "NO":
+        preparacion_completa = preparacion_completa and all([
+            seleccion_completa(via_venosa),
+            seleccion_completa(cantidad_contraste),
+            seleccion_completa(metodo_inyeccion),
+            seleccion_completa(medio_contraste_oral),
+        ])
+
     st.divider()
     st.subheader("Resumen")
 
@@ -512,41 +581,10 @@ elif seccion == "Preparación de paciente":
     col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
 
     with col_sig2:
-        if st.button("Siguiente", use_container_width=True):
-            ir_a_topograma()
+        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa):
+            ir_a(SECCION_SIGUIENTE["Preparación de paciente"])
             st.rerun()
 
-# -------------------------
-# JERINGA INYECTORA
-# -------------------------
-elif seccion == "Jeringa inyectora":
-    st.header("Jeringa inyectora")
-
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
-            st.rerun()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        tipo_contraste = st.text_input("Tipo de contraste", value="Yodado")
-        volumen_contraste = st.number_input("Volumen de contraste (mL)", min_value=0.0, value=80.0)
-        flujo = st.number_input("Flujo (mL/s)", min_value=0.1, value=3.5, step=0.1)
-
-    with col2:
-        flush = st.number_input("Volumen de flush / suero (mL)", min_value=0.0, value=30.0)
-        tiempo_delay = st.number_input("Delay / retardo (s)", min_value=0.0, value=25.0)
-        sitio_puncion = st.selectbox("Sitio de punción", ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"], index=0)
-
-    st.subheader("Resumen")
-    st.write(f"Tipo de contraste: {tipo_contraste}")
-    st.write(f"Volumen de contraste: {volumen_contraste} mL")
-    st.write(f"Flujo: {flujo} mL/s")
-    st.write(f"Flush: {flush} mL")
-    st.write(f"Delay: {tiempo_delay} s")
-    st.write(f"Sitio de punción: {sitio_puncion}")
 # -------------------------
 # TOPOGRAMA
 # -------------------------
@@ -556,7 +594,7 @@ elif seccion == "Topograma":
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
         if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
+            volver_anterior()
             st.rerun()
 
     col_izq, col_der = st.columns([1.35, 0.85], vertical_alignment="top")
@@ -565,7 +603,7 @@ elif seccion == "Topograma":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
 
-        fila1_col1, fila1_col2 = st.columns([1, 1])
+        fila1_col1, fila1_col2 = st.columns(2)
         with fila1_col1:
             entrada_paciente = st.selectbox(
                 "Entrada paciente",
@@ -581,7 +619,7 @@ elif seccion == "Topograma":
                 key="posicionamiento_paciente"
             )
 
-        fila2_col1, fila2_col2 = st.columns([0.9, 1.1])
+        fila2_col1, fila2_col2 = st.columns(2)
         with fila2_col1:
             posicion_tubo = st.selectbox(
                 "Posición del tubo",
@@ -605,7 +643,7 @@ elif seccion == "Topograma":
                 key="posicion_brazos_paciente"
             )
 
-        fila3_col1, fila3_col2 = st.columns([0.9, 1.1])
+        fila3_col1, fila3_col2 = st.columns(2)
         with fila3_col1:
             region = st.selectbox(
                 "Región anatómica",
@@ -621,7 +659,7 @@ elif seccion == "Topograma":
                 key="plano_topograma"
             )
 
-        fila4_col1, fila4_col2 = st.columns([1.3, 1.3])
+        fila4_col1, fila4_col2 = st.columns(2)
         with fila4_col1:
             inicio = st.text_input(
                 "Inicio topograma",
@@ -642,17 +680,22 @@ elif seccion == "Topograma":
         st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
 
         if TOPOGRAMA_IMG.exists():
-            st.image(str(TOPOGRAMA_IMG), width="stretch")
+            st.image(str(TOPOGRAMA_IMG), use_container_width=True)
         else:
             st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
 
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-        if st.button("Siguiente", use_container_width=True):
-            st.session_state.seccion = "Adquisición"
-            st.rerun()
-
         st.markdown('</div>', unsafe_allow_html=True)
+
+    topograma_completo = all([
+        seleccion_completa(entrada_paciente),
+        seleccion_completa(posicionamiento),
+        seleccion_completa(posicion_tubo),
+        seleccion_completa(posicion_brazos),
+        seleccion_completa(region),
+        seleccion_completa(plano),
+        topograma_texto_completo(inicio),
+        topograma_texto_completo(termino),
+    ])
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     st.subheader("Resumen")
@@ -667,6 +710,14 @@ elif seccion == "Topograma":
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
     st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
+    with col_sig2:
+        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
+            ir_a(SECCION_SIGUIENTE["Topograma"])
+            st.rerun()
+
 # -------------------------
 # ADQUISICIÓN
 # -------------------------
@@ -676,7 +727,7 @@ elif seccion == "Adquisición":
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
         if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
+            volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
@@ -688,10 +739,16 @@ elif seccion == "Adquisición":
         rotacion = st.number_input("Tiempo de rotación (s)", min_value=0.1, value=0.5, step=0.1)
 
     with col2:
-        colimacion = st.text_input("Colimación", value="64 x 0.625 mm")
+        colimacion = st.text_input("Colimación", value="")
         espesor_corte = st.number_input("Espesor de corte (mm)", min_value=0.1, value=1.0, step=0.1)
         longitud = st.number_input("Longitud de barrido (cm)", min_value=1.0, value=30.0)
         modo = st.selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], index=0)
+
+    adquisicion_completa = all([
+        seleccion_completa(kvp),
+        texto_completo(colimacion),
+        seleccion_completa(modo),
+    ])
 
     st.subheader("Resumen")
     st.write(f"kVp: {kvp}")
@@ -703,6 +760,13 @@ elif seccion == "Adquisición":
     st.write(f"Longitud: {longitud} cm")
     st.write(f"Modo: {modo}")
 
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
+    with col_sig2:
+        if st.button("Siguiente", use_container_width=True, disabled=not adquisicion_completa):
+            ir_a(SECCION_SIGUIENTE["Adquisición"])
+            st.rerun()
+
 # -------------------------
 # RECONSTRUCCIÓN
 # -------------------------
@@ -712,7 +776,7 @@ elif seccion == "Reconstrucción":
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
         if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
+            volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
@@ -727,6 +791,13 @@ elif seccion == "Reconstrucción":
         algoritmo = st.selectbox("Algoritmo", ["Seleccionar", "FBP", "Iterativa", "Otro"], index=0)
         ventana = st.selectbox("Ventana principal", ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"], index=0)
 
+    reconstruccion_completa = all([
+        seleccion_completa(kernel),
+        lista_completa(plano_recon),
+        seleccion_completa(algoritmo),
+        seleccion_completa(ventana),
+    ])
+
     st.subheader("Resumen")
     st.write(f"Kernel: {kernel}")
     st.write(f"Grosor: {grosor_recon} mm")
@@ -734,6 +805,13 @@ elif seccion == "Reconstrucción":
     st.write(f"Planos: {', '.join(plano_recon) if plano_recon else 'Ninguno'}")
     st.write(f"Algoritmo: {algoritmo}")
     st.write(f"Ventana: {ventana}")
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
+    with col_sig2:
+        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa):
+            ir_a(SECCION_SIGUIENTE["Reconstrucción"])
+            st.rerun()
 
 # -------------------------
 # REFORMACIÓN
@@ -744,7 +822,7 @@ elif seccion == "Reformación":
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
         if st.button("⬅ Volver", use_container_width=True):
-            volver_menu()
+            volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
@@ -757,8 +835,53 @@ elif seccion == "Reformación":
         orientacion = st.selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], index=0)
         observaciones_reform = st.text_area("Observaciones de reformación")
 
+    reformacion_completa = all([
+        lista_completa(tipo_reformacion),
+        seleccion_completa(orientacion),
+        texto_completo(observaciones_reform),
+    ])
+
     st.subheader("Resumen")
     st.write(f"Tipo: {', '.join(tipo_reformacion) if tipo_reformacion else 'Ninguno'}")
     st.write(f"Grosor slab: {grosor_mip} mm")
     st.write(f"Orientación: {orientacion}")
     st.write(f"Observaciones: {observaciones_reform}")
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
+    with col_sig2:
+        if st.button("Siguiente", use_container_width=True, disabled=not reformacion_completa):
+            ir_a(SECCION_SIGUIENTE["Reformación"])
+            st.rerun()
+
+# -------------------------
+# JERINGA INYECTORA
+# -------------------------
+elif seccion == "Jeringa inyectora":
+    st.header("Jeringa inyectora")
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior()
+            st.rerun()
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        tipo_contraste = st.text_input("Tipo de contraste", value="Yodado")
+        volumen_contraste = st.number_input("Volumen de contraste (mL)", min_value=0.0, value=80.0)
+        flujo = st.number_input("Flujo (mL/s)", min_value=0.1, value=3.5, step=0.1)
+
+    with col2:
+        flush = st.number_input("Volumen de flush / suero (mL)", min_value=0.0, value=30.0)
+        tiempo_delay = st.number_input("Delay / retardo (s)", min_value=0.0, value=25.0)
+        sitio_puncion = st.selectbox("Sitio de punción", ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"], index=0)
+
+    st.subheader("Resumen")
+    st.write(f"Tipo de contraste: {tipo_contraste}")
+    st.write(f"Volumen de contraste: {volumen_contraste} mL")
+    st.write(f"Flujo: {flujo} mL/s")
+    st.write(f"Flush: {flush} mL")
+    st.write(f"Delay: {tiempo_delay} s")
+    st.write(f"Sitio de punción: {sitio_puncion}")
