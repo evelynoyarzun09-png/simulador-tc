@@ -646,6 +646,12 @@ elif seccion == "Topograma":
         else:
             st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
 
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+
+        if st.button("Siguiente", use_container_width=True):
+            st.session_state.seccion = "Adquisición"
+            st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
