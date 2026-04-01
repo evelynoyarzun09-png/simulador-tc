@@ -56,6 +56,17 @@ DEFAULTS = {
     "topo_plano": "Seleccionar",
     "topo_inicio": "", 
     "topo_termino": "",
+    "topo_agregar_segundo": "NO",
+
+    # Topograma 2
+    "topo2_entrada_paciente": "Seleccionar",
+    "topo2_posicionamiento": "Seleccionar",
+    "topo2_posicion_tubo": "Seleccionar",
+    "topo2_posicion_brazos": "Seleccionar",
+    "topo2_region": "Seleccionar",
+    "topo2_plano": "Seleccionar",
+    "topo2_inicio": "",
+    "topo2_termino": "",
 
     # Adquisición
     "adq_kvp": "Seleccionar",
@@ -400,6 +411,19 @@ def seleccion_completa(valor):
 def lista_completa(valor):
     return isinstance(valor, list) and len(valor) > 0
 
+
+def topograma_completo(prefijo="topo"):
+    return all([
+        seleccion_completa(st.session_state[f"{prefijo}_entrada_paciente"]),
+        seleccion_completa(st.session_state[f"{prefijo}_posicionamiento"]),
+        seleccion_completa(st.session_state[f"{prefijo}_posicion_tubo"]),
+        seleccion_completa(st.session_state[f"{prefijo}_posicion_brazos"]),
+        seleccion_completa(st.session_state[f"{prefijo}_region"]),
+        seleccion_completa(st.session_state[f"{prefijo}_plano"]),
+        texto_completo(st.session_state[f"{prefijo}_inicio"]),
+        texto_completo(st.session_state[f"{prefijo}_termino"]),
+    ])
+
 # -------------------------
 # IMAGEN DINÁMICA TOPOGRAMA
 # -------------------------
@@ -418,23 +442,24 @@ def normalizar_texto_archivo(valor):
         .replace(" ", "_")
     )
 
-def obtener_imagen_topograma():
-    entrada = st.session_state.get("topo_entrada_paciente", "Seleccionar")
-    posicionamiento = st.session_state.get("topo_posicionamiento", "Seleccionar")
-    tubo = st.session_state.get("topo_posicion_tubo", "Seleccionar")
+def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
+    entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
+    posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
+    tubo = st.session_state.get(f"{prefijo_estado}_posicion_tubo", "Seleccionar")
+    plano = st.session_state.get(f"{prefijo_estado}_plano", "Seleccionar")
 
     if (
         entrada == "Seleccionar"
         or posicionamiento == "Seleccionar"
         or tubo == "Seleccionar"
+        or plano == "Seleccionar"
     ):
-        st.session_state["nombre_topograma_actual"] = "topograma.png"
-        st.session_state["topograma_busqueda"] = "selección incompleta"
         return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
     entrada_norm = normalizar_texto_archivo(entrada)
     posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
     tubo_norm = normalizar_texto_archivo(tubo)
+    plano_norm = normalizar_texto_archivo(plano)
 
     variantes_tubo = [tubo_norm]
     if tubo_norm == "derecha":
@@ -442,30 +467,51 @@ def obtener_imagen_topograma():
     elif tubo_norm == "izquierda":
         variantes_tubo.append("izquierdo")
 
+    variantes_plano = [plano_norm]
+    if plano_norm == "ap_y_lateral":
+        variantes_plano.extend(["ap_lateral", "apy_lateral", "apylateral"])
+
     candidatos = []
     extensiones = [".png", ".jpg", ".jpeg", ".webp"]
 
     for tubo_variante in variantes_tubo:
-        bases = [
-            f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_variante}",
-            f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_variante}",
-            f"topograma_{entrada_norm}_{posicionamiento_norm}__{tubo_variante}",
-            f"topograma_{entrada_norm}__{posicionamiento_norm}_{tubo_variante}",
-        ]
-        for base in bases:
-            for ext in extensiones:
-                candidatos.append(f"{base}{ext}")
+        for plano_variante in variantes_plano:
+            bases = [
+                f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_variante}_{plano_variante}",
+                f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_variante}__{plano_variante}",
+                f"topograma_{entrada_norm}_{posicionamiento_norm}__{tubo_variante}__{plano_variante}",
+                f"topograma_{entrada_norm}__{posicionamiento_norm}_{tubo_variante}_{plano_variante}",
+                f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_variante}__{plano_variante}",
+                f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_variante}",
+                f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_variante}",
+                f"topograma_{entrada_norm}_{posicionamiento_norm}__{tubo_variante}",
+                f"topograma_{entrada_norm}__{posicionamiento_norm}_{tubo_variante}",
+            ]
+            for base in bases:
+                for ext in extensiones:
+                    candidatos.append(f"{base}{ext}")
 
-    st.session_state["topograma_busqueda"] = " | ".join(candidatos)
-
+    candidatos_unicos = []
     for nombre in candidatos:
+        if nombre not in candidatos_unicos:
+            candidatos_unicos.append(nombre)
+
+    for nombre in candidatos_unicos:
         ruta_imagen = BASE_DIR / nombre
         if ruta_imagen.exists():
-            st.session_state["nombre_topograma_actual"] = nombre
+            if sufijo_imagen:
+                st.session_state[f"nombre_topograma_actual_{sufijo_imagen}"] = nombre
+            else:
+                st.session_state["nombre_topograma_actual"] = nombre
             return ruta_imagen
 
-    st.session_state["nombre_topograma_actual"] = "topograma.png"
     return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
+
+def obtener_imagen_topograma():
+    return obtener_imagen_topograma_generico("topo", "")
+
+def obtener_imagen_topograma_2():
+    return obtener_imagen_topograma_generico("topo2", "2")
 
 # -------------------------
 # PÁGINAS
@@ -573,7 +619,7 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Preparación para contraste</div>', unsafe_allow_html=True)
 
-        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO"], "prep_medio_contraste_ev")
+        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO", "NO APLICA"], "prep_medio_contraste_ev")
 
         if st.session_state["prep_medio_contraste_ev"] != "NO":
             c5, c6 = st.columns(2)
@@ -659,7 +705,7 @@ elif seccion == "Topograma":
 
     with col_izq:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Posicionamiento del paciente</div>', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
 
         fila1_col1, fila1_col2 = st.columns(2)
         with fila1_col1:
@@ -682,7 +728,7 @@ elif seccion == "Topograma":
         with fila3_col1:
             persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
         with fila3_col2:
-            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral"], "topo_plano")
+            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo_plano")
 
         fila4_col1, fila4_col2 = st.columns(2)
         with fila4_col1:
@@ -690,22 +736,53 @@ elif seccion == "Topograma":
         with fila4_col2:
             persistent_text_input("Término topograma", "topo_termino")
 
+        st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+        persistent_selectbox("Agregar segundo topograma", ["NO", "SI"], "topo_agregar_segundo")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    topograma_completo = all([
-        seleccion_completa(st.session_state["topo_entrada_paciente"]),
-        seleccion_completa(st.session_state["topo_posicionamiento"]),
-        seleccion_completa(st.session_state["topo_posicion_tubo"]),
-        seleccion_completa(st.session_state["topo_posicion_brazos"]),
-        seleccion_completa(st.session_state["topo_region"]),
-        seleccion_completa(st.session_state["topo_plano"]),
-        texto_completo(st.session_state["topo_inicio"]),
-        texto_completo(st.session_state["topo_termino"]),
-    ])
+        if st.session_state["topo_agregar_segundo"] == "SI":
+            st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-bloque">Topograma 2</div>', unsafe_allow_html=True)
+
+            fila1b_col1, fila1b_col2 = st.columns(2)
+            with fila1b_col1:
+                persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo2_entrada_paciente")
+            with fila1b_col2:
+                persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo2_posicionamiento")
+
+            fila2b_col1, fila2b_col2 = st.columns(2)
+            with fila2b_col1:
+                persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo2_posicion_tubo")
+            with fila2b_col2:
+                persistent_selectbox(
+                    "Posición de brazos / extremidades",
+                    ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
+                     "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+                    "topo2_posicion_brazos"
+                )
+
+            fila3b_col1, fila3b_col2 = st.columns(2)
+            with fila3b_col1:
+                persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo2_region")
+            with fila3b_col2:
+                persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo2_plano")
+
+            fila4b_col1, fila4b_col2 = st.columns(2)
+            with fila4b_col1:
+                persistent_text_input("Inicio topograma", "topo2_inicio")
+            with fila4b_col2:
+                persistent_text_input("Término topograma", "topo2_termino")
+
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    topograma1_completo = topograma_completo("topo")
+    topograma2_completo = True
+    if st.session_state["topo_agregar_segundo"] == "SI":
+        topograma2_completo = topograma_completo("topo2")
 
     with col_der:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Imagen de topograma 1</div>', unsafe_allow_html=True)
 
         imagen_topograma_actual = obtener_imagen_topograma()
 
@@ -717,14 +794,33 @@ elif seccion == "Topograma":
                 "Revisa que el archivo exista en la misma carpeta de app.py."
             )
 
-        st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
-        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if st.session_state["topo_agregar_segundo"] == "SI":
+            st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-bloque">Imagen de topograma 2</div>', unsafe_allow_html=True)
+
+            imagen_topograma_actual_2 = obtener_imagen_topograma_2()
+
+            if imagen_topograma_actual_2 is not None and imagen_topograma_actual_2.exists():
+                st.image(str(imagen_topograma_actual_2), use_container_width=True)
+            else:
+                st.info(
+                    "No se encontró la imagen del segundo topograma. "
+                    "Revisa que el archivo exista en la misma carpeta de app.py."
+                )
+
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        if st.button("Siguiente", use_container_width=True, disabled=not (topograma1_completo and topograma2_completo)):
             ir_a("Adquisición"); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
+    st.write("**Topograma 1**")
     st.write(f"**Entrada del paciente:** {st.session_state['topo_entrada_paciente']}")
     st.write(f"**Posicionamiento:** {st.session_state['topo_posicionamiento']}")
     st.write(f"**Posición del tubo:** {st.session_state['topo_posicion_tubo']}")
@@ -733,6 +829,18 @@ elif seccion == "Topograma":
     st.write(f"**Plano:** {st.session_state['topo_plano']}")
     st.write(f"**Inicio:** {st.session_state['topo_inicio']}")
     st.write(f"**Término:** {st.session_state['topo_termino']}")
+
+    if st.session_state["topo_agregar_segundo"] == "SI":
+        st.write("")
+        st.write("**Topograma 2**")
+        st.write(f"**Entrada del paciente:** {st.session_state['topo2_entrada_paciente']}")
+        st.write(f"**Posicionamiento:** {st.session_state['topo2_posicionamiento']}")
+        st.write(f"**Posición del tubo:** {st.session_state['topo2_posicion_tubo']}")
+        st.write(f"**Posición de brazos / extremidades:** {st.session_state['topo2_posicion_brazos']}")
+        st.write(f"**Región:** {st.session_state['topo2_region']}")
+        st.write(f"**Plano:** {st.session_state['topo2_plano']}")
+        st.write(f"**Inicio:** {st.session_state['topo2_inicio']}")
+        st.write(f"**Término:** {st.session_state['topo2_termino']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif seccion == "Adquisición":
