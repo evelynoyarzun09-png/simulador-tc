@@ -54,7 +54,7 @@ DEFAULTS = {
     "topo_posicion_brazos": "Seleccionar",
     "topo_region": "Seleccionar",
     "topo_plano": "Seleccionar",
-    "topo_inicio": "",
+    "topo_inicio": "", 
     "topo_termino": "",
 
     # Adquisición
@@ -373,6 +373,50 @@ def lista_completa(valor):
     return isinstance(valor, list) and len(valor) > 0
 
 # -------------------------
+# IMAGEN DINÁMICA TOPOGRAMA
+# -------------------------
+def normalizar_texto_archivo(valor):
+    return (
+        str(valor)
+        .strip()
+        .lower()
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ñ", "n")
+        .replace("/", "_")
+        .replace(" ", "_")
+    )
+
+def obtener_imagen_topograma():
+    entrada = st.session_state.get("topo_entrada_paciente", "Seleccionar")
+    posicionamiento = st.session_state.get("topo_posicionamiento", "Seleccionar")
+    tubo = st.session_state.get("topo_posicion_tubo", "Seleccionar")
+
+    if (
+        entrada == "Seleccionar"
+        or posicionamiento == "Seleccionar"
+        or tubo == "Seleccionar"
+    ):
+        return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
+
+    nombre_archivo = (
+        f"topograma_"
+        f"{normalizar_texto_archivo(entrada)}_"
+        f"{normalizar_texto_archivo(posicionamiento)}_"
+        f"{normalizar_texto_archivo(tubo)}.png"
+    )
+
+    ruta_imagen = BASE_DIR / nombre_archivo
+
+    if ruta_imagen.exists():
+        return ruta_imagen
+
+    return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
+
+# -------------------------
 # PÁGINAS
 # -------------------------
 seccion = st.session_state.seccion
@@ -612,10 +656,16 @@ elif seccion == "Topograma":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
 
-        if TOPOGRAMA_IMG.exists():
-            st.image(str(TOPOGRAMA_IMG), use_container_width=True)
+        imagen_topograma_actual = obtener_imagen_topograma()
+
+        if imagen_topograma_actual is not None and imagen_topograma_actual.exists():
+            st.image(str(imagen_topograma_actual), use_container_width=True)
         else:
-            st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
+            st.info(
+                "No se encontró la imagen del topograma. "
+                "Guarda las imágenes con nombres como: "
+                "'topograma_cabeza_primero_supino_arriba.png'"
+            )
 
         st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
         if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
@@ -768,21 +818,30 @@ elif seccion == "Jeringa inyectora":
 
     col1, col2 = st.columns(2)
     with col1:
-        persistent_text_input("Tipo de contraste", "jer_tipo_contraste")
-        persistent_number_input("Volumen de contraste (mL)", "jer_volumen_contraste", min_value=0.0)
-        persistent_number_input("Flujo (mL/s)", "jer_flujo", min_value=0.1, step=0.1)
+        persistent_selectbox("Tipo de contraste", ["Yodado", "No iónico", "Isoosmolar"], "jer_tipo_contraste")
+        persistent_number_input("Volumen de contraste (ml)", "jer_volumen_contraste", min_value=1.0, step=1.0)
+        persistent_number_input("Flujo (ml/s)", "jer_flujo", min_value=0.1, step=0.1)
+
     with col2:
-        persistent_number_input("Volumen de flush / suero (mL)", "jer_flush", min_value=0.0)
-        persistent_number_input("Delay / retardo (s)", "jer_tiempo_delay", min_value=0.0)
-        persistent_selectbox("Sitio de punción", ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"], "jer_sitio_puncion")
+        persistent_number_input("Flush / suero (ml)", "jer_flush", min_value=0.0, step=1.0)
+        persistent_number_input("Tiempo delay (s)", "jer_tiempo_delay", min_value=0.0, step=1.0)
+        persistent_selectbox("Sitio de punción", ["Seleccionar", "MSD", "MSI", "Pliegue antecubital derecho", "Pliegue antecubital izquierdo", "CVC"], "jer_sitio_puncion")
+
+    jeringa_completa = all([
+        texto_completo(st.session_state["jer_tipo_contraste"]),
+        seleccion_completa(st.session_state["jer_sitio_puncion"]),
+    ])
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Tipo de contraste:** {st.session_state['jer_tipo_contraste']}")
-    st.write(f"**Volumen de contraste:** {st.session_state['jer_volumen_contraste']} mL")
-    st.write(f"**Flujo:** {st.session_state['jer_flujo']} mL/s")
-    st.write(f"**Flush:** {st.session_state['jer_flush']} mL")
-    st.write(f"**Delay:** {st.session_state['jer_tiempo_delay']} s")
+    st.write(f"**Volumen de contraste:** {st.session_state['jer_volumen_contraste']} ml")
+    st.write(f"**Flujo:** {st.session_state['jer_flujo']} ml/s")
+    st.write(f"**Flush:** {st.session_state['jer_flush']} ml")
+    st.write(f"**Tiempo delay:** {st.session_state['jer_tiempo_delay']} s")
     st.write(f"**Sitio de punción:** {st.session_state['jer_sitio_puncion']}")
     st.markdown('</div>', unsafe_allow_html=True)
+
+    if jeringa_completa:
+        st.success("Simulación completada.")
