@@ -423,7 +423,6 @@ elif seccion == "A Practicar":
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
-
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
 
@@ -443,7 +442,12 @@ elif seccion == "Preparación de paciente":
 
         c1, c2 = st.columns([1.2, 0.8])
         with c1:
-            persistent_date_input("Fecha de nacimiento", "prep_fecha_nac")
+            persistent_date_input(
+                "Fecha de nacimiento",
+                "prep_fecha_nac",
+                min_value=date(1900, 1, 1),
+                max_value=date.today()
+            )
         with c2:
             hoy = date.today()
             fecha_nac = st.session_state["prep_fecha_nac"]
@@ -471,7 +475,11 @@ elif seccion == "Preparación de paciente":
         if st.session_state["prep_medio_contraste_ev"] != "NO":
             c5, c6 = st.columns(2)
             with c5:
-                persistent_selectbox("Vía venosa", ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"], "prep_via_venosa")
+                persistent_selectbox(
+                    "Vía venosa",
+                    ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
+                    "prep_via_venosa"
+                )
             with c6:
                 persistent_selectbox(
                     "Cantidad contraste",
@@ -483,9 +491,17 @@ elif seccion == "Preparación de paciente":
 
             c7, c8 = st.columns(2)
             with c7:
-                persistent_selectbox("Método de inyección", ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"], "prep_metodo_inyeccion")
+                persistent_selectbox(
+                    "Método de inyección",
+                    ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
+                    "prep_metodo_inyeccion"
+                )
             with c8:
-                persistent_selectbox("Contraste oral", ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"], "prep_medio_contraste_oral")
+                persistent_selectbox(
+                    "Contraste oral",
+                    ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
+                    "prep_medio_contraste_oral"
+                )
 
         st.markdown('</div>', unsafe_allow_html=True)
 
