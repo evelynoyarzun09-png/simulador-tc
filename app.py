@@ -173,10 +173,7 @@ if not st.session_state.autenticado:
     <style>
     .stApp { background-color: #111111; }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 820px; }
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
-        color: white !important;
-        text-transform: uppercase !important;
-    }
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; text-transform: uppercase !important; }
     .login-box {
         background-color: #000000;
         padding: 2rem;
@@ -238,10 +235,7 @@ st.markdown("""
 <style>
 .stApp { background-color: #505050; }
 .block-container { padding-top: 1.2rem; padding-bottom: 2rem; }
-h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
-    color: white !important;
-    text-transform: uppercase !important;
-}
+h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; text-transform: uppercase !important; }
 
 .portada-titulo {
     text-align: center;
@@ -320,9 +314,11 @@ div[data-baseweb="select"] svg {
     color: #000000 !important;
     fill: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
-    text-transform: lowercase !important;
 }
 div[data-baseweb="select"] > div,
+div[data-baseweb="select"] div,
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] input,
 div[role="listbox"],
 div[role="option"],
 div[role="option"] * {
@@ -432,20 +428,25 @@ def obtener_imagen_topograma():
         or posicionamiento == "Seleccionar"
         or tubo == "Seleccionar"
     ):
+        st.session_state["nombre_topograma_actual"] = "topograma.png"
         return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
-    nombre_archivo = (
+    nombre_base = (
         f"topograma_"
         f"{normalizar_texto_archivo(entrada)}_"
         f"{normalizar_texto_archivo(posicionamiento)}_"
-        f"{normalizar_texto_archivo(tubo)}.png"
+        f"{normalizar_texto_archivo(tubo)}"
     )
 
-    ruta_imagen = BASE_DIR / nombre_archivo
+    extensiones = [".png", ".jpg", ".jpeg", ".webp"]
 
-    if ruta_imagen.exists():
-        return ruta_imagen
+    for ext in extensiones:
+        ruta_imagen = BASE_DIR / f"{nombre_base}{ext}"
+        if ruta_imagen.exists():
+            st.session_state["nombre_topograma_actual"] = f"{nombre_base}{ext}"
+            return ruta_imagen
 
+    st.session_state["nombre_topograma_actual"] = f"{nombre_base}.png"
     return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
 # -------------------------
@@ -692,12 +693,14 @@ elif seccion == "Topograma":
 
         if imagen_topograma_actual is not None and imagen_topograma_actual.exists():
             st.image(str(imagen_topograma_actual), use_container_width=True)
+            st.caption(f"Imagen cargada: {st.session_state.get('nombre_topograma_actual', 'sin nombre')}")
         else:
             st.info(
                 "No se encontró la imagen del topograma. "
                 "Guarda las imágenes con nombres como: "
                 "'topograma_cabeza_primero_supino_arriba.png'"
             )
+            st.caption(f"El sistema está buscando: {st.session_state.get('nombre_topograma_actual', 'sin nombre')}")
 
         st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
         if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
