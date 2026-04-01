@@ -705,14 +705,11 @@ elif seccion == "Topograma":
         with sub2_b:
             placeholder_rx_1 = st.empty()
 
-    form_col1, form_col2 = st.columns(2)
+    form_col1, form_col2, form_col3 = st.columns(3)
 
     with form_col1:
         persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
         persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
-        persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
-        persistent_text_input("Inicio topograma", "topo_inicio")
-        persistent_text_input("Término topograma", "topo_termino")
 
     with form_col2:
         persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
@@ -722,6 +719,11 @@ elif seccion == "Topograma":
              "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
             "topo_posicion_brazos"
         )
+
+    with form_col3:
+        persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
+        persistent_text_input("Inicio topograma", "topo_inicio")
+        persistent_text_input("Término topograma", "topo_termino")
 
     topograma1_completo = topograma_completo("topo")
 
@@ -790,14 +792,11 @@ elif seccion == "Topograma":
             with sub4_b:
                 placeholder_rx_2 = st.empty()
 
-        form2_col1, form2_col2 = st.columns(2)
+        form2_col1, form2_col2, form2_col3 = st.columns(3)
 
         with form2_col1:
             persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo2_entrada_paciente")
             persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo2_posicion_tubo")
-            persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo2_region")
-            persistent_text_input("Inicio topograma", "topo2_inicio")
-            persistent_text_input("Término topograma", "topo2_termino")
 
         with form2_col2:
             persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo2_posicionamiento")
@@ -807,6 +806,11 @@ elif seccion == "Topograma":
                  "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
                 "topo2_posicion_brazos"
             )
+
+        with form2_col3:
+            persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo2_region")
+            persistent_text_input("Inicio topograma", "topo2_inicio")
+            persistent_text_input("Término topograma", "topo2_termino")
 
         topograma2_completo = topograma_completo("topo2")
 
