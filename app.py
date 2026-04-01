@@ -106,31 +106,20 @@ for clave, valor in DEFAULTS.items():
         st.session_state[clave] = valor
 
 # -------------------------
-# FUNCIONES PERSISTENCIA
+# FUNCIONES DE WIDGETS
 # -------------------------
-def load_widget(key):
-    st.session_state[f"_{key}"] = st.session_state[key]
-
-def store_widget(key):
-    st.session_state[key] = st.session_state[f"_{key}"]
-
 def persistent_text_input(label, key):
-    load_widget(key)
-    st.text_input(label, key=f"_{key}", on_change=store_widget, args=(key,))
+    st.text_input(label, key=key)
 
 def persistent_text_area(label, key):
-    load_widget(key)
-    st.text_area(label, key=f"_{key}", on_change=store_widget, args=(key,))
+    st.text_area(label, key=key)
 
 def persistent_date_input(label, key, min_value=None, max_value=None):
-    load_widget(key)
     st.date_input(
         label,
-        key=f"_{key}",
+        key=key,
         min_value=min_value,
         max_value=max_value,
-        on_change=store_widget,
-        args=(key,)
     )
 
 def mostrar_opcion_minuscula(opcion):
@@ -139,30 +128,23 @@ def mostrar_opcion_minuscula(opcion):
     return str(opcion)
 
 def persistent_selectbox(label, options, key):
-    load_widget(key)
     st.selectbox(
         label,
         options,
-        key=f"_{key}",
+        key=key,
         format_func=mostrar_opcion_minuscula,
-        on_change=store_widget,
-        args=(key,)
     )
 
 def persistent_multiselect(label, options, key):
-    load_widget(key)
     st.multiselect(
         label,
         options,
-        key=f"_{key}",
+        key=key,
         format_func=mostrar_opcion_minuscula,
-        on_change=store_widget,
-        args=(key,)
     )
 
 def persistent_number_input(label, key, **kwargs):
-    load_widget(key)
-    st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
+    st.number_input(label, key=key, **kwargs)
 
 # -------------------------
 # CONTROL DE ACCESO
@@ -499,6 +481,99 @@ def obtener_imagen_topograma():
 def obtener_imagen_topograma_2():
     return obtener_imagen_topograma_generico("topo2", "2")
 
+
+def determinar_vista_rx_topograma(posicionamiento, tubo):
+    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
+    tubo_norm = normalizar_texto_archivo(tubo)
+
+    if posicionamiento_norm in ["supino", "prono"]:
+        if tubo_norm in ["arriba", "abajo"]:
+            return "frontal"
+        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
+            return "lateral"
+
+    if posicionamiento_norm in ["lateral_derecho", "lateral_izquierdo"]:
+        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
+            return "frontal"
+        if tubo_norm in ["arriba", "abajo"]:
+            return "lateral"
+
+    return None
+
+def obtener_imagen_rx_topograma(prefijo_estado="topo"):
+    entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
+    posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
+    tubo = st.session_state.get(f"{prefijo_estado}_posicion_tubo", "Seleccionar")
+    region = st.session_state.get(f"{prefijo_estado}_region", "Seleccionar")
+
+    if (
+        entrada == "Seleccionar"
+        or posicionamiento == "Seleccionar"
+        or tubo == "Seleccionar"
+        or region == "Seleccionar"
+    ):
+        return None
+
+    entrada_norm = normalizar_texto_archivo(entrada)
+    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
+    tubo_norm = normalizar_texto_archivo(tubo)
+    region_norm = normalizar_texto_archivo(region)
+
+    vista = determinar_vista_rx_topograma(posicionamiento, tubo)
+    if vista is None:
+        return None
+
+    variantes_tubo = [tubo_norm]
+    if tubo_norm == "derecha":
+        variantes_tubo.append("derecho")
+    elif tubo_norm == "izquierda":
+        variantes_tubo.append("izquierdo")
+
+    variantes_region = [region_norm]
+    if region_norm == "cuerpo_completo":
+        variantes_region.extend(["cuerpo", "body"])
+    if region_norm == "torax":
+        variantes_region.extend(["torace"])
+
+    variantes_vista = [vista]
+    if vista == "frontal":
+        variantes_vista.extend(["ap"])
+    elif vista == "lateral":
+        variantes_vista.extend(["perfil"])
+
+    candidatos = []
+    extensiones = [".png", ".jpg", ".jpeg", ".webp"]
+
+    for region_var in variantes_region:
+        for vista_var in variantes_vista:
+            candidatos.extend([
+                f"topograma_rx_{entrada_norm}_{posicionamiento_norm}_{tubo_norm}_{region_var}_{vista_var}",
+                f"topograma_rx_{entrada_norm}_{posicionamiento_norm}_{region_var}_{vista_var}",
+                f"topograma_rx_{entrada_norm}_{region_var}_{vista_var}",
+                f"topograma_rx_{region_var}_{vista_var}",
+                f"topograma_{region_var}_{vista_var}",
+                f"rx_topograma_{region_var}_{vista_var}",
+            ])
+            for tubo_var in variantes_tubo:
+                candidatos.extend([
+                    f"topograma_rx_{entrada_norm}_{posicionamiento_norm}_{tubo_var}_{region_var}_{vista_var}",
+                    f"topograma_rx_{entrada_norm}__{posicionamiento_norm}__{tubo_var}__{region_var}__{vista_var}",
+                    f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_var}_{region_var}_{vista_var}",
+                ])
+
+    candidatos_unicos = []
+    for nombre in candidatos:
+        if nombre not in candidatos_unicos:
+            candidatos_unicos.append(nombre)
+
+    for base in candidatos_unicos:
+        for ext in extensiones:
+            ruta = BASE_DIR / f"{base}{ext}"
+            if ruta.exists():
+                return ruta
+
+    return None
+
 # -------------------------
 # PÁGINAS
 # -------------------------
@@ -734,7 +809,7 @@ elif seccion == "Topograma":
         placeholder_equipo_1.info("No se encontró la imagen de posicionamiento del topograma 1.")
 
     if st.session_state.get("topo_rx_iniciado", False):
-        imagen_rx_topo_1 = obtener_imagen_topograma()
+        imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
         if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
             placeholder_rx_1.image(str(imagen_rx_topo_1), width=280)
         else:
@@ -821,7 +896,7 @@ elif seccion == "Topograma":
             placeholder_equipo_2.info("No se encontró la imagen de posicionamiento del topograma 2.")
 
         if st.session_state.get("topo2_rx_iniciado", False):
-            imagen_rx_topo_2 = obtener_imagen_topograma_2()
+            imagen_rx_topo_2 = obtener_imagen_rx_topograma("topo2")
             if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
                 placeholder_rx_2.image(str(imagen_rx_topo_2), width=280)
             else:
