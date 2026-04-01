@@ -431,22 +431,25 @@ def obtener_imagen_topograma():
         st.session_state["nombre_topograma_actual"] = "topograma.png"
         return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
-    nombre_base = (
-        f"topograma_"
-        f"{normalizar_texto_archivo(entrada)}_"
-        f"{normalizar_texto_archivo(posicionamiento)}_"
-        f"{normalizar_texto_archivo(tubo)}"
-    )
+    entrada_norm = normalizar_texto_archivo(entrada)
+    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
+    tubo_norm = normalizar_texto_archivo(tubo)
+
+    nombres_base = [
+        f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_norm}",
+        f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_norm}",
+    ]
 
     extensiones = [".png", ".jpg", ".jpeg", ".webp"]
 
-    for ext in extensiones:
-        ruta_imagen = BASE_DIR / f"{nombre_base}{ext}"
-        if ruta_imagen.exists():
-            st.session_state["nombre_topograma_actual"] = f"{nombre_base}{ext}"
-            return ruta_imagen
+    for nombre_base in nombres_base:
+        for ext in extensiones:
+            ruta_imagen = BASE_DIR / f"{nombre_base}{ext}"
+            if ruta_imagen.exists():
+                st.session_state["nombre_topograma_actual"] = f"{nombre_base}{ext}"
+                return ruta_imagen
 
-    st.session_state["nombre_topograma_actual"] = f"{nombre_base}.png"
+    st.session_state["nombre_topograma_actual"] = f"{nombres_base[0]}.png"
     return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
 # -------------------------
@@ -693,7 +696,14 @@ elif seccion == "Topograma":
 
         if imagen_topograma_actual is not None and imagen_topograma_actual.exists():
             st.image(str(imagen_topograma_actual), use_container_width=True)
-            st.caption(f"Imagen cargada: {st.session_state.get('nombre_topograma_actual', 'sin nombre')}")
+
+            nombre_actual = st.session_state.get("nombre_topograma_actual", "")
+            nombre_base = TOPOGRAMA_IMG.name if TOPOGRAMA_IMG is not None else "topograma.png"
+
+            if nombre_actual.lower() == nombre_base.lower():
+                st.caption("Mostrando imagen base: topograma.png")
+            else:
+                st.caption(f"Imagen cargada: {nombre_actual}")
         else:
             st.info(
                 "No se encontró la imagen del topograma. "
