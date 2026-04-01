@@ -111,9 +111,16 @@ def persistent_text_area(label, key):
     load_widget(key)
     st.text_area(label, key=f"_{key}", on_change=store_widget, args=(key,))
 
-def persistent_date_input(label, key):
+def persistent_date_input(label, key, min_value=None, max_value=None):
     load_widget(key)
-    st.date_input(label, key=f"_{key}", on_change=store_widget, args=(key,))
+    st.date_input(
+        label,
+        key=f"_{key}",
+        min_value=min_value,
+        max_value=max_value,
+        on_change=store_widget,
+        args=(key,)
+    )
 
 def persistent_selectbox(label, options, key):
     load_widget(key)
@@ -423,6 +430,7 @@ elif seccion == "A Practicar":
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
+
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
 
@@ -475,11 +483,7 @@ elif seccion == "Preparación de paciente":
         if st.session_state["prep_medio_contraste_ev"] != "NO":
             c5, c6 = st.columns(2)
             with c5:
-                persistent_selectbox(
-                    "Vía venosa",
-                    ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
-                    "prep_via_venosa"
-                )
+                persistent_selectbox("Vía venosa", ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"], "prep_via_venosa")
             with c6:
                 persistent_selectbox(
                     "Cantidad contraste",
@@ -491,17 +495,9 @@ elif seccion == "Preparación de paciente":
 
             c7, c8 = st.columns(2)
             with c7:
-                persistent_selectbox(
-                    "Método de inyección",
-                    ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
-                    "prep_metodo_inyeccion"
-                )
+                persistent_selectbox("Método de inyección", ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"], "prep_metodo_inyeccion")
             with c8:
-                persistent_selectbox(
-                    "Contraste oral",
-                    ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
-                    "prep_medio_contraste_oral"
-                )
+                persistent_selectbox("Contraste oral", ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"], "prep_medio_contraste_oral")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
