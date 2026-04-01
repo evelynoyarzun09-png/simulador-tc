@@ -573,7 +573,7 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Preparación para contraste</div>', unsafe_allow_html=True)
 
-        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO", "NO APLICA"], "prep_medio_contraste_ev")
+        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO"], "prep_medio_contraste_ev")
 
         if st.session_state["prep_medio_contraste_ev"] != "NO":
             c5, c6 = st.columns(2)
