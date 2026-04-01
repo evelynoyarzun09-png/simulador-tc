@@ -736,9 +736,6 @@ elif seccion == "Topograma":
             ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
              "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
             "topo_posicion_brazos"
-        )
-        persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo_plano")
-        persistent_text_input("Término topograma", "topo_termino")
 
     topograma1_completo = topograma_completo("topo")
 
