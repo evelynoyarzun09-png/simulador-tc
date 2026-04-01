@@ -621,7 +621,7 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Preparación para contraste</div>', unsafe_allow_html=True)
 
-        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO"], "prep_medio_contraste_ev")
+        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO", "NO APLICA"], "prep_medio_contraste_ev")
 
         if st.session_state["prep_medio_contraste_ev"] != "NO":
             c5, c6 = st.columns(2)
@@ -717,19 +717,23 @@ elif seccion == "Topograma":
     img_col1, img_col2 = st.columns([1.1, 0.9], vertical_alignment="top")
 
     with img_col1:
-        imagen_equipo_topo_1 = obtener_imagen_topograma()
-        if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
-            st.image(str(imagen_equipo_topo_1), width=360)
-        else:
-            st.info("No se encontró la imagen de posicionamiento del topograma 1.")
+        sub1_a, sub1_b, sub1_c = st.columns([1, 6, 1])
+        with sub1_b:
+            imagen_equipo_topo_1 = obtener_imagen_topograma()
+            if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
+                st.image(str(imagen_equipo_topo_1), width=360)
+            else:
+                st.info("No se encontró la imagen de posicionamiento del topograma 1.")
 
     with img_col2:
         if st.session_state.get("topo_rx_iniciado", False):
-            imagen_rx_topo_1 = obtener_imagen_topograma()
-            if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
-                st.image(str(imagen_rx_topo_1), width=280)
-            else:
-                st.info("No se encontró la imagen RX del topograma 1.")
+            sub2_a, sub2_b, sub2_c = st.columns([1, 5, 1])
+            with sub2_b:
+                imagen_rx_topo_1 = obtener_imagen_topograma()
+                if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
+                    st.image(str(imagen_rx_topo_1), width=280)
+                else:
+                    st.info("No se encontró la imagen RX del topograma 1.")
         else:
             st.markdown(
                 """
@@ -792,19 +796,23 @@ elif seccion == "Topograma":
         img2_col1, img2_col2 = st.columns([1, 0.8], vertical_alignment="top")
 
         with img2_col1:
-            imagen_equipo_topo_2 = obtener_imagen_topograma_2()
-            if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
-                st.image(str(imagen_equipo_topo_2), width=360)
-            else:
-                st.info("No se encontró la imagen de posicionamiento del topograma 2.")
+            sub3_a, sub3_b, sub3_c = st.columns([1, 6, 1])
+            with sub3_b:
+                imagen_equipo_topo_2 = obtener_imagen_topograma_2()
+                if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
+                    st.image(str(imagen_equipo_topo_2), width=360)
+                else:
+                    st.info("No se encontró la imagen de posicionamiento del topograma 2.")
 
         with img2_col2:
             if st.session_state.get("topo2_rx_iniciado", False):
-                imagen_rx_topo_2 = obtener_imagen_topograma_2()
-                if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
-                    st.image(str(imagen_rx_topo_2), width=280)
-                else:
-                    st.info("No se encontró la imagen RX del topograma 2.")
+                sub4_a, sub4_b, sub4_c = st.columns([1, 5, 1])
+                with sub4_b:
+                    imagen_rx_topo_2 = obtener_imagen_topograma_2()
+                    if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
+                        st.image(str(imagen_rx_topo_2), width=280)
+                    else:
+                        st.info("No se encontró la imagen RX del topograma 2.")
             else:
                 st.markdown(
                     """
@@ -844,7 +852,7 @@ elif seccion == "Topograma":
                  "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
                 "topo2_posicion_brazos"
             )
-            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo2_plano")
+            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral"], "topo2_plano")
             persistent_text_input("Término topograma", "topo2_termino")
 
         boton2_col1, boton2_col2, boton2_col3 = st.columns([1, 1, 1])
