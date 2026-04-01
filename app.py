@@ -436,27 +436,37 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Datos del paciente</div>', unsafe_allow_html=True)
 
-        nombres = st.text_input("Nombres")
-        apellidos = st.text_input("Apellidos")
+        nombres = st.text_input("Nombres", key="prep_nombres")
+        apellidos = st.text_input("Apellidos", key="prep_apellidos")
 
         c1, c2 = st.columns([1.2, 0.8])
         with c1:
-            fecha_nac = st.date_input("Fecha de nacimiento", value=date(2000, 1, 1))
+            fecha_nac = st.date_input("Fecha de nacimiento", value=date(2000, 1, 1), key="prep_fecha_nac")
         with c2:
             hoy = date.today()
             edad = hoy.year - fecha_nac.year - ((hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day))
             st.markdown("<br>", unsafe_allow_html=True)
             st.metric("Edad", f"{edad} años")
 
-        examen = st.text_input("Examen")
+        examen = st.text_input("Examen", key="prep_examen")
 
         c3, c4 = st.columns(2)
         with c3:
-            peso = st.selectbox("Peso (kg)", list(range(1, 201)), index=69)
+            peso = st.selectbox("Peso (kg)", list(range(1, 201)), index=69, key="prep_peso")
         with c4:
-            embarazo = st.selectbox("Embarazo", ["Seleccionar", "SI", "NO", "NO APLICA"], index=0)
+            embarazo = st.selectbox(
+                "Embarazo",
+                ["Seleccionar", "SI", "NO", "NO APLICA"],
+                index=0,
+                key="prep_embarazo"
+            )
 
-        creatinina = st.selectbox("Creatinina", ["Seleccionar", "SI", "NO"], index=0)
+        creatinina = st.selectbox(
+            "Creatinina",
+            ["Seleccionar", "SI", "NO"],
+            index=0,
+            key="prep_creatinina"
+        )
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -467,7 +477,8 @@ elif seccion == "Preparación de paciente":
         medio_contraste_ev = st.selectbox(
             "Medio de contraste EV",
             ["Seleccionar", "SI", "NO", "NO APLICA"],
-            index=0
+            index=0,
+            key="prep_medio_contraste_ev"
         )
 
         if medio_contraste_ev != "NO":
@@ -476,7 +487,8 @@ elif seccion == "Preparación de paciente":
                 via_venosa = st.selectbox(
                     "Vía venosa",
                     ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
-                    index=0
+                    index=0,
+                    key="prep_via_venosa"
                 )
             with c6:
                 cantidad_contraste = st.selectbox(
@@ -486,7 +498,8 @@ elif seccion == "Preparación de paciente":
                         "90 cc", "100 cc", "110 cc", "120 cc", "130 cc", "140 cc", "150 cc",
                         "160 cc", "170 cc", "180 cc", "190 cc", "200 cc"
                     ],
-                    index=0
+                    index=0,
+                    key="prep_cantidad_contraste"
                 )
 
             c7, c8 = st.columns(2)
@@ -494,19 +507,21 @@ elif seccion == "Preparación de paciente":
                 metodo_inyeccion = st.selectbox(
                     "Método de inyección",
                     ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
-                    index=0
+                    index=0,
+                    key="prep_metodo_inyeccion"
                 )
             with c8:
                 medio_contraste_oral = st.selectbox(
                     "Contraste oral",
                     ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
-                    index=0
+                    index=0,
+                    key="prep_medio_contraste_oral"
                 )
         else:
-            via_venosa = ""
-            cantidad_contraste = ""
-            metodo_inyeccion = ""
-            medio_contraste_oral = ""
+            via_venosa = st.session_state.get("prep_via_venosa", "")
+            cantidad_contraste = st.session_state.get("prep_cantidad_contraste", "")
+            metodo_inyeccion = st.session_state.get("prep_metodo_inyeccion", "")
+            medio_contraste_oral = st.session_state.get("prep_medio_contraste_oral", "")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -538,7 +553,7 @@ elif seccion == "Preparación de paciente":
 
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa):
+        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa, key="btn_sig_prep"):
             ir_a(SECCION_SIGUIENTE["Preparación de paciente"])
             st.rerun()
 
@@ -572,7 +587,7 @@ elif seccion == "Topograma":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
+        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_topo"):
             volver_anterior()
             st.rerun()
 
@@ -588,14 +603,14 @@ elif seccion == "Topograma":
                 "Entrada paciente",
                 ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
                 index=0,
-                key="entrada_paciente"
+                key="topo_entrada_paciente"
             )
         with fila1_col2:
             posicionamiento = st.selectbox(
                 "Posicionamiento",
                 ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
                 index=0,
-                key="posicionamiento_paciente"
+                key="topo_posicionamiento"
             )
 
         fila2_col1, fila2_col2 = st.columns(2)
@@ -604,7 +619,7 @@ elif seccion == "Topograma":
                 "Posición del tubo",
                 ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
                 index=0,
-                key="posicion_tubo"
+                key="topo_posicion_tubo"
             )
         with fila2_col2:
             posicion_brazos = st.selectbox(
@@ -619,7 +634,7 @@ elif seccion == "Topograma":
                     "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
                 ],
                 index=0,
-                key="posicion_brazos_paciente"
+                key="topo_posicion_brazos"
             )
 
         fila3_col1, fila3_col2 = st.columns(2)
@@ -628,14 +643,14 @@ elif seccion == "Topograma":
                 "Región anatómica",
                 ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
                 index=0,
-                key="region_topograma"
+                key="topo_region"
             )
         with fila3_col2:
             plano = st.selectbox(
                 "Plano",
                 ["Seleccionar", "AP", "Lateral", "AP y lateral"],
                 index=0,
-                key="plano_topograma"
+                key="topo_plano"
             )
 
         fila4_col1, fila4_col2 = st.columns(2)
@@ -643,13 +658,13 @@ elif seccion == "Topograma":
             inicio = st.text_input(
                 "Inicio topograma",
                 value="Desde",
-                key="inicio_topograma"
+                key="topo_inicio"
             )
         with fila4_col2:
             termino = st.text_input(
                 "Término topograma",
                 value="Hasta",
-                key="termino_topograma"
+                key="topo_termino"
             )
 
         st.markdown('</div>', unsafe_allow_html=True)
@@ -676,7 +691,7 @@ elif seccion == "Topograma":
 
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
+        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo, key="btn_sig_topo"):
             ir_a(SECCION_SIGUIENTE["Topograma"])
             st.rerun()
 
@@ -704,23 +719,23 @@ elif seccion == "Adquisición":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
+        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_adq"):
             volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
 
     with col1:
-        kvp = st.selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], index=0)
-        mas = st.number_input("mAs", min_value=1, value=100)
-        pitch = st.number_input("Pitch", min_value=0.1, value=1.0, step=0.1)
-        rotacion = st.number_input("Tiempo de rotación (s)", min_value=0.1, value=0.5, step=0.1)
+        kvp = st.selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], index=0, key="adq_kvp")
+        mas = st.number_input("mAs", min_value=1, value=100, key="adq_mas")
+        pitch = st.number_input("Pitch", min_value=0.1, value=1.0, step=0.1, key="adq_pitch")
+        rotacion = st.number_input("Tiempo de rotación (s)", min_value=0.1, value=0.5, step=0.1, key="adq_rotacion")
 
     with col2:
-        colimacion = st.text_input("Colimación", value="")
-        espesor_corte = st.number_input("Espesor de corte (mm)", min_value=0.1, value=1.0, step=0.1)
-        longitud = st.number_input("Longitud de barrido (cm)", min_value=1.0, value=30.0)
-        modo = st.selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], index=0)
+        colimacion = st.text_input("Colimación", value="", key="adq_colimacion")
+        espesor_corte = st.number_input("Espesor de corte (mm)", min_value=0.1, value=1.0, step=0.1, key="adq_espesor_corte")
+        longitud = st.number_input("Longitud de barrido (cm)", min_value=1.0, value=30.0, key="adq_longitud")
+        modo = st.selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], index=0, key="adq_modo")
 
     adquisicion_completa = all([
         seleccion_completa(kvp),
@@ -741,7 +756,7 @@ elif seccion == "Adquisición":
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
     with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not adquisicion_completa):
+        if st.button("Siguiente", use_container_width=True, disabled=not adquisicion_completa, key="btn_sig_adq"):
             ir_a(SECCION_SIGUIENTE["Adquisición"])
             st.rerun()
 
@@ -753,21 +768,53 @@ elif seccion == "Reconstrucción":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
+        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_recon"):
             volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
 
     with col1:
-        kernel = st.selectbox("Kernel / filtro", ["Seleccionar", "Blando", "Estándar", "Óseo", "Pulmonar", "Otro"], index=0)
-        grosor_recon = st.number_input("Grosor de reconstrucción (mm)", min_value=0.1, value=1.0, step=0.1)
-        intervalo_recon = st.number_input("Intervalo de reconstrucción (mm)", min_value=0.1, value=0.5, step=0.1)
+        kernel = st.selectbox(
+            "Kernel / filtro",
+            ["Seleccionar", "Blando", "Estándar", "Óseo", "Pulmonar", "Otro"],
+            index=0,
+            key="recon_kernel"
+        )
+        grosor_recon = st.number_input(
+            "Grosor de reconstrucción (mm)",
+            min_value=0.1,
+            value=1.0,
+            step=0.1,
+            key="recon_grosor"
+        )
+        intervalo_recon = st.number_input(
+            "Intervalo de reconstrucción (mm)",
+            min_value=0.1,
+            value=0.5,
+            step=0.1,
+            key="recon_intervalo"
+        )
 
     with col2:
-        plano_recon = st.multiselect("Planos reconstruidos", ["Axial", "Coronal", "Sagital", "Oblicuo"], default=[])
-        algoritmo = st.selectbox("Algoritmo", ["Seleccionar", "FBP", "Iterativa", "Otro"], index=0)
-        ventana = st.selectbox("Ventana principal", ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"], index=0)
+        plano_recon = st.multiselect(
+            "Planos reconstruidos",
+            ["Axial", "Coronal", "Sagital", "Oblicuo"],
+            default=[],
+            key="recon_planos"
+        )
+        algoritmo = st.selectbox(
+            "Algoritmo",
+            ["Seleccionar", "FBP", "Iterativa", "Otro"],
+            index=0,
+            key="recon_algoritmo"
+        )
+        ventana = st.selectbox(
+            "Ventana principal",
+            ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"],
+            index=0,
+            key="recon_ventana"
+        )
 
     reconstruccion_completa = all([
         seleccion_completa(kernel),
@@ -787,7 +834,7 @@ elif seccion == "Reconstrucción":
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
     with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa):
+        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa, key="btn_sig_recon"):
             ir_a(SECCION_SIGUIENTE["Reconstrucción"])
             st.rerun()
 
@@ -799,19 +846,38 @@ elif seccion == "Reformación":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
+        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_reform"):
             volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
 
     with col1:
-        tipo_reformacion = st.multiselect("Tipo de reformación", ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"], default=[])
-        grosor_mip = st.number_input("Grosor MIP / slab (mm)", min_value=0.1, value=10.0, step=0.1)
+        tipo_reformacion = st.multiselect(
+            "Tipo de reformación",
+            ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"],
+            default=[],
+            key="reform_tipo"
+        )
+        grosor_mip = st.number_input(
+            "Grosor MIP / slab (mm)",
+            min_value=0.1,
+            value=10.0,
+            step=0.1,
+            key="reform_grosor"
+        )
 
     with col2:
-        orientacion = st.selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], index=0)
-        observaciones_reform = st.text_area("Observaciones de reformación")
+        orientacion = st.selectbox(
+            "Orientación principal",
+            ["Seleccionar", "Coronal", "Sagital", "Oblicua"],
+            index=0,
+            key="reform_orientacion"
+        )
+        observaciones_reform = st.text_area(
+            "Observaciones de reformación",
+            key="reform_observaciones"
+        )
 
     reformacion_completa = all([
         lista_completa(tipo_reformacion),
@@ -828,7 +894,7 @@ elif seccion == "Reformación":
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
     with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not reformacion_completa):
+        if st.button("Siguiente", use_container_width=True, disabled=not reformacion_completa, key="btn_sig_reform"):
             ir_a(SECCION_SIGUIENTE["Reformación"])
             st.rerun()
 
@@ -840,21 +906,26 @@ elif seccion == "Jeringa inyectora":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
+        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_jeringa"):
             volver_anterior()
             st.rerun()
 
     col1, col2 = st.columns(2)
 
     with col1:
-        tipo_contraste = st.text_input("Tipo de contraste", value="Yodado")
-        volumen_contraste = st.number_input("Volumen de contraste (mL)", min_value=0.0, value=80.0)
-        flujo = st.number_input("Flujo (mL/s)", min_value=0.1, value=3.5, step=0.1)
+        tipo_contraste = st.text_input("Tipo de contraste", value="Yodado", key="jer_tipo_contraste")
+        volumen_contraste = st.number_input("Volumen de contraste (mL)", min_value=0.0, value=80.0, key="jer_volumen_contraste")
+        flujo = st.number_input("Flujo (mL/s)", min_value=0.1, value=3.5, step=0.1, key="jer_flujo")
 
     with col2:
-        flush = st.number_input("Volumen de flush / suero (mL)", min_value=0.0, value=30.0)
-        tiempo_delay = st.number_input("Delay / retardo (s)", min_value=0.0, value=25.0)
-        sitio_puncion = st.selectbox("Sitio de punción", ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"], index=0)
+        flush = st.number_input("Volumen de flush / suero (mL)", min_value=0.0, value=30.0, key="jer_flush")
+        tiempo_delay = st.number_input("Delay / retardo (s)", min_value=0.0, value=25.0, key="jer_tiempo_delay")
+        sitio_puncion = st.selectbox(
+            "Sitio de punción",
+            ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"],
+            index=0,
+            key="jer_sitio_puncion"
+        )
 
     st.subheader("Resumen")
     st.write(f"Tipo de contraste: {tipo_contraste}")
