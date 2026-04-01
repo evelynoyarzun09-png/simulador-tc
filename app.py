@@ -429,27 +429,42 @@ def obtener_imagen_topograma():
         or tubo == "Seleccionar"
     ):
         st.session_state["nombre_topograma_actual"] = "topograma.png"
+        st.session_state["topograma_busqueda"] = "selección incompleta"
         return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
     entrada_norm = normalizar_texto_archivo(entrada)
     posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
     tubo_norm = normalizar_texto_archivo(tubo)
 
-    nombres_base = [
-        f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_norm}",
-        f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_norm}",
-    ]
+    variantes_tubo = [tubo_norm]
+    if tubo_norm == "derecha":
+        variantes_tubo.append("derecho")
+    elif tubo_norm == "izquierda":
+        variantes_tubo.append("izquierdo")
 
+    candidatos = []
     extensiones = [".png", ".jpg", ".jpeg", ".webp"]
 
-    for nombre_base in nombres_base:
-        for ext in extensiones:
-            ruta_imagen = BASE_DIR / f"{nombre_base}{ext}"
-            if ruta_imagen.exists():
-                st.session_state["nombre_topograma_actual"] = f"{nombre_base}{ext}"
-                return ruta_imagen
+    for tubo_variante in variantes_tubo:
+        bases = [
+            f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_variante}",
+            f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_variante}",
+            f"topograma_{entrada_norm}_{posicionamiento_norm}__{tubo_variante}",
+            f"topograma_{entrada_norm}__{posicionamiento_norm}_{tubo_variante}",
+        ]
+        for base in bases:
+            for ext in extensiones:
+                candidatos.append(f"{base}{ext}")
 
-    st.session_state["nombre_topograma_actual"] = f"{nombres_base[0]}.png"
+    st.session_state["topograma_busqueda"] = " | ".join(candidatos)
+
+    for nombre in candidatos:
+        ruta_imagen = BASE_DIR / nombre
+        if ruta_imagen.exists():
+            st.session_state["nombre_topograma_actual"] = nombre
+            return ruta_imagen
+
+    st.session_state["nombre_topograma_actual"] = "topograma.png"
     return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
 # -------------------------
@@ -702,6 +717,7 @@ elif seccion == "Topograma":
 
             if nombre_actual.lower() == nombre_base.lower():
                 st.caption("Mostrando imagen base: topograma.png")
+                st.caption(f"El sistema intentó buscar: {st.session_state.get('topograma_busqueda', 'sin búsqueda')}")
             else:
                 st.caption(f"Imagen cargada: {nombre_actual}")
         else:
@@ -710,7 +726,7 @@ elif seccion == "Topograma":
                 "Guarda las imágenes con nombres como: "
                 "'topograma_cabeza_primero_supino_arriba.png'"
             )
-            st.caption(f"El sistema está buscando: {st.session_state.get('nombre_topograma_actual', 'sin nombre')}")
+            st.caption(f"El sistema intentó buscar: {st.session_state.get('topograma_busqueda', 'sin búsqueda')}")
 
         st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
         if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
