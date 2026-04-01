@@ -137,12 +137,10 @@ st.markdown("""
     padding-bottom: 2rem;
 }
 
-/* Texto general */
 h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
     color: white !important;
 }
 
-/* Portada */
 .portada-titulo {
     text-align: center;
     font-size: 2.6rem;
@@ -163,7 +161,6 @@ h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
     border-radius: 18px;
 }
 
-/* Botones */
 div.stButton > button {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
@@ -179,7 +176,6 @@ div.stButton > button:disabled {
     opacity: 0.75 !important;
 }
 
-/* Bloques */
 .bloque-resumen {
     background-color: #616161;
     padding: 1rem 1.2rem;
@@ -207,13 +203,11 @@ div.stButton > button:disabled {
     color: white;
 }
 
-/* Imagen */
 .bloque-a-practicar img,
 .bloque-seccion img {
     border-radius: 14px;
 }
 
-/* Edad más pequeña */
 [data-testid="stMetricValue"] {
     font-size: 1.35rem !important;
 }
@@ -221,14 +215,12 @@ div.stButton > button:disabled {
     color: white !important;
 }
 
-/* Selectbox cerrado */
 div[data-baseweb="select"] > div {
     background-color: #b8bec7 !important;
     border-radius: 12px !important;
     color: #000000 !important;
 }
 
-/* Todo el texto del select cerrado */
 div[data-baseweb="select"] div,
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] input,
@@ -238,13 +230,11 @@ div[data-baseweb="select"] svg {
     -webkit-text-fill-color: #000000 !important;
 }
 
-/* Menú desplegable */
 div[role="listbox"] {
     background-color: #c7ccd4 !important;
     border: 1px solid #9ca3ad !important;
 }
 
-/* Opciones del desplegable */
 div[role="option"] {
     background-color: #c7ccd4 !important;
     color: #000000 !important;
@@ -259,14 +249,12 @@ div[role="option"]:hover {
     color: #000000 !important;
 }
 
-/* Inputs */
 div[data-baseweb="input"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
 }
 
-/* Textarea */
 div[data-baseweb="textarea"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
@@ -278,13 +266,11 @@ input, textarea {
     -webkit-text-fill-color: #1f1f1f !important;
 }
 
-/* Calendario */
 input[type="date"] {
     color: #1f1f1f !important;
     -webkit-text-fill-color: #1f1f1f !important;
 }
 
-/* Caja info */
 [data-testid="stInfo"] {
     background-color: #5a6478 !important;
     color: white !important;
@@ -668,17 +654,6 @@ elif seccion == "Topograma":
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with col_der:
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
-
-        if TOPOGRAMA_IMG.exists():
-            st.image(str(TOPOGRAMA_IMG), use_container_width=True)
-        else:
-            st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
     topograma_completo = all([
         seleccion_completa(entrada_paciente),
         seleccion_completa(posicionamiento),
@@ -689,6 +664,23 @@ elif seccion == "Topograma":
         topograma_texto_completo(inicio),
         topograma_texto_completo(termino),
     ])
+
+    with col_der:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Imagen de topograma</div>', unsafe_allow_html=True)
+
+        if TOPOGRAMA_IMG.exists():
+            st.image(str(TOPOGRAMA_IMG), use_container_width=True)
+        else:
+            st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
+
+        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+
+        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
+            ir_a(SECCION_SIGUIENTE["Topograma"])
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     st.subheader("Resumen")
@@ -703,13 +695,6 @@ elif seccion == "Topograma":
     st.write(f"**Inicio:** {inicio}")
     st.write(f"**Término:** {termino}")
     st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
-    with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
-            ir_a(SECCION_SIGUIENTE["Topograma"])
-            st.rerun()
 
 # -------------------------
 # ADQUISICIÓN
