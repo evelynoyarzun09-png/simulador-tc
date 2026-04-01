@@ -682,7 +682,7 @@ elif seccion == "Topograma":
         with fila3_col1:
             persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
         with fila3_col2:
-            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo_plano")
+            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral"], "topo_plano")
 
         fila4_col1, fila4_col2 = st.columns(2)
         with fila4_col1:
