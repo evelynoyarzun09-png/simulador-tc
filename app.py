@@ -95,6 +95,39 @@ for clave, valor in DEFAULTS.items():
         st.session_state[clave] = valor
 
 # -------------------------
+# FUNCIONES PERSISTENCIA
+# -------------------------
+def load_widget(key):
+    st.session_state[f"_{key}"] = st.session_state[key]
+
+def store_widget(key):
+    st.session_state[key] = st.session_state[f"_{key}"]
+
+def persistent_text_input(label, key):
+    load_widget(key)
+    st.text_input(label, key=f"_{key}", on_change=store_widget, args=(key,))
+
+def persistent_text_area(label, key):
+    load_widget(key)
+    st.text_area(label, key=f"_{key}", on_change=store_widget, args=(key,))
+
+def persistent_date_input(label, key):
+    load_widget(key)
+    st.date_input(label, key=f"_{key}", on_change=store_widget, args=(key,))
+
+def persistent_selectbox(label, options, key):
+    load_widget(key)
+    st.selectbox(label, options, key=f"_{key}", on_change=store_widget, args=(key,))
+
+def persistent_multiselect(label, options, key):
+    load_widget(key)
+    st.multiselect(label, options, key=f"_{key}", on_change=store_widget, args=(key,))
+
+def persistent_number_input(label, key, **kwargs):
+    load_widget(key)
+    st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
+
+# -------------------------
 # CONTROL DE ACCESO
 # -------------------------
 def verificar_clave():
@@ -112,17 +145,9 @@ def verificar_clave():
 if not st.session_state.autenticado:
     st.markdown("""
     <style>
-    .stApp {
-        background-color: #111111;
-    }
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        max-width: 820px;
-    }
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
-        color: white !important;
-    }
+    .stApp { background-color: #111111; }
+    .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 820px; }
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; }
     .login-box {
         background-color: #000000;
         padding: 2rem;
@@ -164,20 +189,12 @@ if not st.session_state.autenticado:
 
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
     st.markdown('<div class="login-titulo">Tomografía Computada Aplicada</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="login-subtitulo">Ingrese la clave para acceder al simulador.</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="login-subtitulo">Ingrese la clave para acceder al simulador.</div>', unsafe_allow_html=True)
 
     if PORTADA_IMG.exists():
         st.image(str(PORTADA_IMG), use_container_width=True)
 
-    st.text_input(
-        "Clave de acceso",
-        type="password",
-        key="clave_ingresada",
-        on_change=verificar_clave
-    )
+    st.text_input("Clave de acceso", type="password", key="clave_ingresada", on_change=verificar_clave)
 
     if st.session_state.get("error_clave", False):
         st.error("Clave incorrecta. Inténtalo nuevamente.")
@@ -190,18 +207,9 @@ if not st.session_state.autenticado:
 # -------------------------
 st.markdown("""
 <style>
-.stApp {
-    background-color: #505050;
-}
-
-.block-container {
-    padding-top: 1.2rem;
-    padding-bottom: 2rem;
-}
-
-h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
-    color: white !important;
-}
+.stApp { background-color: #505050; }
+.block-container { padding-top: 1.2rem; padding-bottom: 2rem; }
+h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; }
 
 .portada-titulo {
     text-align: center;
@@ -222,7 +230,6 @@ h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
     padding: 1.2rem 1.2rem 2rem 1.2rem;
     border-radius: 18px;
 }
-
 div.stButton > button {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
@@ -237,7 +244,6 @@ div.stButton > button:disabled {
     border: 1px solid #7a7a7a !important;
     opacity: 0.75 !important;
 }
-
 .bloque-resumen {
     background-color: #616161;
     padding: 1rem 1.2rem;
@@ -264,25 +270,17 @@ div.stButton > button:disabled {
     margin-bottom: 0.8rem;
     color: white;
 }
-
 .bloque-a-practicar img,
-.bloque-seccion img {
-    border-radius: 14px;
-}
+.bloque-seccion img { border-radius: 14px; }
 
-[data-testid="stMetricValue"] {
-    font-size: 1.35rem !important;
-}
-[data-testid="stMetricLabel"] {
-    color: white !important;
-}
+[data-testid="stMetricValue"] { font-size: 1.35rem !important; }
+[data-testid="stMetricLabel"] { color: white !important; }
 
 div[data-baseweb="select"] > div {
     background-color: #b8bec7 !important;
     border-radius: 12px !important;
     color: #000000 !important;
 }
-
 div[data-baseweb="select"] div,
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] input,
@@ -291,12 +289,10 @@ div[data-baseweb="select"] svg {
     fill: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
 }
-
 div[role="listbox"] {
     background-color: #c7ccd4 !important;
     border: 1px solid #9ca3ad !important;
 }
-
 div[role="option"] {
     background-color: #c7ccd4 !important;
     color: #000000 !important;
@@ -310,37 +306,23 @@ div[role="option"]:hover {
     background-color: #b2b8c1 !important;
     color: #000000 !important;
 }
-
-div[data-baseweb="input"] > div {
-    background-color: #b8bec7 !important;
-    color: #1f1f1f !important;
-    border-radius: 12px !important;
-}
-
+div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
 }
-
 input, textarea {
     color: #1f1f1f !important;
     -webkit-text-fill-color: #1f1f1f !important;
 }
-
 input[type="date"] {
     color: #1f1f1f !important;
     -webkit-text-fill-color: #1f1f1f !important;
 }
-
 [data-testid="stInfo"] {
     background-color: #5a6478 !important;
     color: white !important;
-}
-
-.boton-volver {
-    margin-top: 0.4rem;
-    margin-bottom: 1rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -384,29 +366,24 @@ def lista_completa(valor):
     return isinstance(valor, list) and len(valor) > 0
 
 # -------------------------
-# PORTADA
+# PÁGINAS
 # -------------------------
 seccion = st.session_state.seccion
 
 if seccion == "Portada":
     st.markdown('<div class="portada-fondo">', unsafe_allow_html=True)
     st.markdown('<div class="portada-titulo">Tomografía Computada Aplicada</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="portada-subtitulo">Simulador interactivo para práctica de preparación, adquisición, reconstrucción y cálculos.</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="portada-subtitulo">Simulador interactivo para práctica de preparación, adquisición, reconstrucción y cálculos.</div>', unsafe_allow_html=True)
 
     if PORTADA_IMG.exists():
         col1, col2, col3 = st.columns([1, 3, 1])
         with col2:
             st.image(str(PORTADA_IMG), use_container_width=True)
-    else:
-        st.warning("No se encontró la imagen de portada 'tomografo_portada.png'.")
 
-    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
-    col_btn1, col_btn2, col_btn3 = st.columns([1.5, 2, 1.5])
-    with col_btn2:
+    c1, c2, c3 = st.columns([1.5, 2, 1.5])
+    with c2:
         if st.button("Ir a A Practicar", use_container_width=True):
             ir_a("A Practicar")
             st.rerun()
@@ -430,47 +407,30 @@ elif seccion == "A Practicar":
 
     with col_menu:
         st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
-
         if st.button("Preparación del paciente", use_container_width=True):
-            ir_a("Preparación de paciente")
-            st.rerun()
-
+            ir_a("Preparación de paciente"); st.rerun()
         if st.button("Topograma", use_container_width=True):
-            ir_a("Topograma")
-            st.rerun()
-
+            ir_a("Topograma"); st.rerun()
         if st.button("Adquisición", use_container_width=True):
-            ir_a("Adquisición")
-            st.rerun()
-
+            ir_a("Adquisición"); st.rerun()
         if st.button("Reconstrucción", use_container_width=True):
-            ir_a("Reconstrucción")
-            st.rerun()
-
+            ir_a("Reconstrucción"); st.rerun()
         if st.button("Reformación", use_container_width=True):
-            ir_a("Reformación")
-            st.rerun()
-
+            ir_a("Reformación"); st.rerun()
         if st.button("Jeringa inyectora", use_container_width=True):
-            ir_a("Jeringa inyectora")
-            st.rerun()
-
+            ir_a("Jeringa inyectora"); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
 
-# -------------------------
-# PREPARACIÓN DE PACIENTE
-# -------------------------
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_prep"):
-            volver_anterior()
-            st.rerun()
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.75])
 
@@ -478,12 +438,12 @@ elif seccion == "Preparación de paciente":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Datos del paciente</div>', unsafe_allow_html=True)
 
-        st.text_input("Nombres", key="prep_nombres")
-        st.text_input("Apellidos", key="prep_apellidos")
+        persistent_text_input("Nombres", "prep_nombres")
+        persistent_text_input("Apellidos", "prep_apellidos")
 
         c1, c2 = st.columns([1.2, 0.8])
         with c1:
-            st.date_input("Fecha de nacimiento", key="prep_fecha_nac")
+            persistent_date_input("Fecha de nacimiento", "prep_fecha_nac")
         with c2:
             hoy = date.today()
             fecha_nac = st.session_state["prep_fecha_nac"]
@@ -491,59 +451,41 @@ elif seccion == "Preparación de paciente":
             st.markdown("<br>", unsafe_allow_html=True)
             st.metric("Edad", f"{edad} años")
 
-        st.text_input("Examen", key="prep_examen")
+        persistent_text_input("Examen", "prep_examen")
 
         c3, c4 = st.columns(2)
         with c3:
-            st.selectbox("Peso (kg)", list(range(1, 201)), key="prep_peso")
+            persistent_selectbox("Peso (kg)", list(range(1, 201)), "prep_peso")
         with c4:
-            st.selectbox("Embarazo", ["Seleccionar", "SI", "NO", "NO APLICA"], key="prep_embarazo")
+            persistent_selectbox("Embarazo", ["Seleccionar", "SI", "NO", "NO APLICA"], "prep_embarazo")
 
-        st.selectbox("Creatinina", ["Seleccionar", "SI", "NO"], key="prep_creatinina")
+        persistent_selectbox("Creatinina", ["Seleccionar", "SI", "NO"], "prep_creatinina")
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_centro:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Preparación para contraste</div>', unsafe_allow_html=True)
 
-        st.selectbox(
-            "Medio de contraste EV",
-            ["Seleccionar", "SI", "NO", "NO APLICA"],
-            key="prep_medio_contraste_ev"
-        )
+        persistent_selectbox("Medio de contraste EV", ["Seleccionar", "SI", "NO", "NO APLICA"], "prep_medio_contraste_ev")
 
         if st.session_state["prep_medio_contraste_ev"] != "NO":
             c5, c6 = st.columns(2)
             with c5:
-                st.selectbox(
-                    "Vía venosa",
-                    ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"],
-                    key="prep_via_venosa"
-                )
+                persistent_selectbox("Vía venosa", ["Seleccionar", "24G", "22G", "20G", "18G", "16G", "CVC", "NO APLICA"], "prep_via_venosa")
             with c6:
-                st.selectbox(
+                persistent_selectbox(
                     "Cantidad contraste",
-                    [
-                        "Seleccionar", "10 cc", "20 cc", "30 cc", "40 cc", "50 cc", "60 cc", "70 cc", "80 cc",
-                        "90 cc", "100 cc", "110 cc", "120 cc", "130 cc", "140 cc", "150 cc",
-                        "160 cc", "170 cc", "180 cc", "190 cc", "200 cc"
-                    ],
-                    key="prep_cantidad_contraste"
+                    ["Seleccionar", "10 cc", "20 cc", "30 cc", "40 cc", "50 cc", "60 cc", "70 cc", "80 cc",
+                     "90 cc", "100 cc", "110 cc", "120 cc", "130 cc", "140 cc", "150 cc",
+                     "160 cc", "170 cc", "180 cc", "190 cc", "200 cc"],
+                    "prep_cantidad_contraste"
                 )
 
             c7, c8 = st.columns(2)
             with c7:
-                st.selectbox(
-                    "Método de inyección",
-                    ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"],
-                    key="prep_metodo_inyeccion"
-                )
+                persistent_selectbox("Método de inyección", ["Seleccionar", "JERINGA INYECTORA", "JERINGA MANUAL", "NO APLICA"], "prep_metodo_inyeccion")
             with c8:
-                st.selectbox(
-                    "Contraste oral",
-                    ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"],
-                    key="prep_medio_contraste_oral"
-                )
+                persistent_selectbox("Contraste oral", ["Seleccionar", "NO APLICA", "AGUA", "AIRE", "CONTRASTE POSITIVO"], "prep_medio_contraste_oral")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -567,18 +509,14 @@ elif seccion == "Preparación de paciente":
     with col_img:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Imagen</div>', unsafe_allow_html=True)
-
         if PACIENTE_IMG is not None and PACIENTE_IMG.exists():
             st.image(str(PACIENTE_IMG), width=260)
         else:
             st.info("Guarda la imagen como 'paciente.png' o 'paciente.jpg' en la misma carpeta del app.py.")
 
-        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-
-        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa, key="btn_sig_prep"):
-            ir_a(SECCION_SIGUIENTE["Preparación de paciente"])
-            st.rerun()
-
+        st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
+        if st.button("Siguiente", use_container_width=True, disabled=not preparacion_completa):
+            ir_a("Topograma"); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     hoy = date.today()
@@ -595,26 +533,20 @@ elif seccion == "Preparación de paciente":
     st.write(f"**Embarazo:** {st.session_state['prep_embarazo']}")
     st.write(f"**Creatinina:** {st.session_state['prep_creatinina']}")
     st.write(f"**Medio de contraste EV:** {st.session_state['prep_medio_contraste_ev']}")
-
     if st.session_state["prep_medio_contraste_ev"] != "NO":
         st.write(f"**Vía venosa:** {st.session_state['prep_via_venosa']}")
         st.write(f"**Cantidad de contraste:** {st.session_state['prep_cantidad_contraste']}")
         st.write(f"**Método de inyección:** {st.session_state['prep_metodo_inyeccion']}")
         st.write(f"**Medio de contraste oral:** {st.session_state['prep_medio_contraste_oral']}")
-
     st.markdown('</div>', unsafe_allow_html=True)
 
-# -------------------------
-# TOPOGRAMA
-# -------------------------
 elif seccion == "Topograma":
     st.header("Topograma")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_topo"):
-            volver_anterior()
-            st.rerun()
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col_izq, col_der = st.columns([1.35, 0.85], vertical_alignment="top")
 
@@ -624,59 +556,32 @@ elif seccion == "Topograma":
 
         fila1_col1, fila1_col2 = st.columns(2)
         with fila1_col1:
-            st.selectbox(
-                "Entrada paciente",
-                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
-                key="topo_entrada_paciente"
-            )
+            persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
         with fila1_col2:
-            st.selectbox(
-                "Posicionamiento",
-                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
-                key="topo_posicionamiento"
-            )
+            persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
 
         fila2_col1, fila2_col2 = st.columns(2)
         with fila2_col1:
-            st.selectbox(
-                "Posición del tubo",
-                ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
-                key="topo_posicion_tubo"
-            )
+            persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
         with fila2_col2:
-            st.selectbox(
+            persistent_selectbox(
                 "Posición de brazos / extremidades",
-                [
-                    "Seleccionar",
-                    "BRAZOS ARRIBA",
-                    "BRAZOS ABAJO",
-                    "ELEVA BRAZO DERECHO",
-                    "ELEVA BRAZO IZQUIERDO",
-                    "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
-                    "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"
-                ],
-                key="topo_posicion_brazos"
+                ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
+                 "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+                "topo_posicion_brazos"
             )
 
         fila3_col1, fila3_col2 = st.columns(2)
         with fila3_col1:
-            st.selectbox(
-                "Región anatómica",
-                ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"],
-                key="topo_region"
-            )
+            persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
         with fila3_col2:
-            st.selectbox(
-                "Plano",
-                ["Seleccionar", "AP", "Lateral", "AP y lateral"],
-                key="topo_plano"
-            )
+            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo_plano")
 
         fila4_col1, fila4_col2 = st.columns(2)
         with fila4_col1:
-            st.text_input("Inicio topograma", key="topo_inicio")
+            persistent_text_input("Inicio topograma", "topo_inicio")
         with fila4_col2:
-            st.text_input("Término topograma", key="topo_termino")
+            persistent_text_input("Término topograma", "topo_termino")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -700,12 +605,9 @@ elif seccion == "Topograma":
         else:
             st.info("Guarda la imagen como 'topograma.png' en la misma carpeta del app.py.")
 
-        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-
-        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo, key="btn_sig_topo"):
-            ir_a(SECCION_SIGUIENTE["Topograma"])
-            st.rerun()
-
+        st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
+        if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
+            ir_a("Adquisición"); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
@@ -721,31 +623,26 @@ elif seccion == "Topograma":
     st.write(f"**Término:** {st.session_state['topo_termino']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# -------------------------
-# ADQUISICIÓN
-# -------------------------
 elif seccion == "Adquisición":
     st.header("Adquisición")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_adq"):
-            volver_anterior()
-            st.rerun()
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], key="adq_kvp")
-        st.number_input("mAs", min_value=1, key="adq_mas")
-        st.number_input("Pitch", min_value=0.1, step=0.1, key="adq_pitch")
-        st.number_input("Tiempo de rotación (s)", min_value=0.1, step=0.1, key="adq_rotacion")
+        persistent_selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], "adq_kvp")
+        persistent_number_input("mAs", "adq_mas", min_value=1)
+        persistent_number_input("Pitch", "adq_pitch", min_value=0.1, step=0.1)
+        persistent_number_input("Tiempo de rotación (s)", "adq_rotacion", min_value=0.1, step=0.1)
 
     with col2:
-        st.text_input("Colimación", key="adq_colimacion")
-        st.number_input("Espesor de corte (mm)", min_value=0.1, step=0.1, key="adq_espesor_corte")
-        st.number_input("Longitud de barrido (cm)", min_value=1.0, key="adq_longitud")
-        st.selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], key="adq_modo")
+        persistent_text_input("Colimación", "adq_colimacion")
+        persistent_number_input("Espesor de corte (mm)", "adq_espesor_corte", min_value=0.1, step=0.1)
+        persistent_number_input("Longitud de barrido (cm)", "adq_longitud", min_value=1.0)
+        persistent_selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], "adq_modo")
 
     adquisicion_completa = all([
         seleccion_completa(st.session_state["adq_kvp"]),
@@ -766,40 +663,29 @@ elif seccion == "Adquisición":
     st.write(f"**Modo:** {st.session_state['adq_modo']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
-    with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not adquisicion_completa, key="btn_sig_adq"):
-            ir_a(SECCION_SIGUIENTE["Adquisición"])
-            st.rerun()
+    c1, c2, c3 = st.columns([1.5, 2, 1.5])
+    with c2:
+        if st.button("Siguiente", use_container_width=True, disabled=not adquisicion_completa):
+            ir_a("Reconstrucción"); st.rerun()
 
-# -------------------------
-# RECONSTRUCCIÓN
-# -------------------------
 elif seccion == "Reconstrucción":
     st.header("Reconstrucción")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_recon"):
-            volver_anterior()
-            st.rerun()
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.selectbox(
-            "Kernel / filtro",
-            ["Seleccionar", "Blando", "Estándar", "Óseo", "Pulmonar", "Otro"],
-            key="recon_kernel"
-        )
-        st.number_input("Grosor de reconstrucción (mm)", min_value=0.1, step=0.1, key="recon_grosor")
-        st.number_input("Intervalo de reconstrucción (mm)", min_value=0.1, step=0.1, key="recon_intervalo")
+        persistent_selectbox("Kernel / filtro", ["Seleccionar", "Blando", "Estándar", "Óseo", "Pulmonar", "Otro"], "recon_kernel")
+        persistent_number_input("Grosor de reconstrucción (mm)", "recon_grosor", min_value=0.1, step=0.1)
+        persistent_number_input("Intervalo de reconstrucción (mm)", "recon_intervalo", min_value=0.1, step=0.1)
 
     with col2:
-        st.multiselect("Planos reconstruidos", ["Axial", "Coronal", "Sagital", "Oblicuo"], key="recon_planos")
-        st.selectbox("Algoritmo", ["Seleccionar", "FBP", "Iterativa", "Otro"], key="recon_algoritmo")
-        st.selectbox("Ventana principal", ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"], key="recon_ventana")
+        persistent_multiselect("Planos reconstruidos", ["Axial", "Coronal", "Sagital", "Oblicuo"], "recon_planos")
+        persistent_selectbox("Algoritmo", ["Seleccionar", "FBP", "Iterativa", "Otro"], "recon_algoritmo")
+        persistent_selectbox("Ventana principal", ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"], "recon_ventana")
 
     reconstruccion_completa = all([
         seleccion_completa(st.session_state["recon_kernel"]),
@@ -819,38 +705,26 @@ elif seccion == "Reconstrucción":
     st.write(f"**Ventana:** {st.session_state['recon_ventana']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
-    with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa, key="btn_sig_recon"):
-            ir_a(SECCION_SIGUIENTE["Reconstrucción"])
-            st.rerun()
+    c1, c2, c3 = st.columns([1.5, 2, 1.5])
+    with c2:
+        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa):
+            ir_a("Reformación"); st.rerun()
 
-# -------------------------
-# REFORMACIÓN
-# -------------------------
 elif seccion == "Reformación":
     st.header("Reformación")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_reform"):
-            volver_anterior()
-            st.rerun()
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.multiselect(
-            "Tipo de reformación",
-            ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"],
-            key="reform_tipo"
-        )
-        st.number_input("Grosor MIP / slab (mm)", min_value=0.1, step=0.1, key="reform_grosor")
-
+        persistent_multiselect("Tipo de reformación", ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"], "reform_tipo")
+        persistent_number_input("Grosor MIP / slab (mm)", "reform_grosor", min_value=0.1, step=0.1)
     with col2:
-        st.selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], key="reform_orientacion")
-        st.text_area("Observaciones de reformación", key="reform_observaciones")
+        persistent_selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], "reform_orientacion")
+        persistent_text_area("Observaciones de reformación", "reform_observaciones")
 
     reformacion_completa = all([
         lista_completa(st.session_state["reform_tipo"]),
@@ -867,36 +741,28 @@ elif seccion == "Reformación":
     st.write(f"**Observaciones:** {st.session_state['reform_observaciones']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    col_sig1, col_sig2, col_sig3 = st.columns([1.5, 2, 1.5])
-    with col_sig2:
-        if st.button("Siguiente", use_container_width=True, disabled=not reformacion_completa, key="btn_sig_reform"):
-            ir_a(SECCION_SIGUIENTE["Reformación"])
-            st.rerun()
+    c1, c2, c3 = st.columns([1.5, 2, 1.5])
+    with c2:
+        if st.button("Siguiente", use_container_width=True, disabled=not reformacion_completa):
+            ir_a("Jeringa inyectora"); st.rerun()
 
-# -------------------------
-# JERINGA INYECTORA
-# -------------------------
 elif seccion == "Jeringa inyectora":
     st.header("Jeringa inyectora")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True, key="btn_volver_jeringa"):
-            volver_anterior()
-            st.rerun()
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.text_input("Tipo de contraste", key="jer_tipo_contraste")
-        st.number_input("Volumen de contraste (mL)", min_value=0.0, key="jer_volumen_contraste")
-        st.number_input("Flujo (mL/s)", min_value=0.1, step=0.1, key="jer_flujo")
-
+        persistent_text_input("Tipo de contraste", "jer_tipo_contraste")
+        persistent_number_input("Volumen de contraste (mL)", "jer_volumen_contraste", min_value=0.0)
+        persistent_number_input("Flujo (mL/s)", "jer_flujo", min_value=0.1, step=0.1)
     with col2:
-        st.number_input("Volumen de flush / suero (mL)", min_value=0.0, key="jer_flush")
-        st.number_input("Delay / retardo (s)", min_value=0.0, key="jer_tiempo_delay")
-        st.selectbox("Sitio de punción", ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"], key="jer_sitio_puncion")
+        persistent_number_input("Volumen de flush / suero (mL)", "jer_flush", min_value=0.0)
+        persistent_number_input("Delay / retardo (s)", "jer_tiempo_delay", min_value=0.0)
+        persistent_selectbox("Sitio de punción", ["Seleccionar", "Brazo derecho", "Brazo izquierdo", "Otro"], "jer_sitio_puncion")
 
     st.divider()
     st.subheader("Resumen")
