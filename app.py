@@ -122,13 +122,32 @@ def persistent_date_input(label, key, min_value=None, max_value=None):
         args=(key,)
     )
 
+def mostrar_opcion_minuscula(opcion):
+    if isinstance(opcion, str):
+        return opcion.lower()
+    return str(opcion)
+
 def persistent_selectbox(label, options, key):
     load_widget(key)
-    st.selectbox(label, options, key=f"_{key}", on_change=store_widget, args=(key,))
+    st.selectbox(
+        label,
+        options,
+        key=f"_{key}",
+        format_func=mostrar_opcion_minuscula,
+        on_change=store_widget,
+        args=(key,)
+    )
 
 def persistent_multiselect(label, options, key):
     load_widget(key)
-    st.multiselect(label, options, key=f"_{key}", on_change=store_widget, args=(key,))
+    st.multiselect(
+        label,
+        options,
+        key=f"_{key}",
+        format_func=mostrar_opcion_minuscula,
+        on_change=store_widget,
+        args=(key,)
+    )
 
 def persistent_number_input(label, key, **kwargs):
     load_widget(key)
@@ -154,7 +173,10 @@ if not st.session_state.autenticado:
     <style>
     .stApp { background-color: #111111; }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 820px; }
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; }
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
+        color: white !important;
+        text-transform: uppercase !important;
+    }
     .login-box {
         background-color: #000000;
         padding: 2rem;
@@ -216,7 +238,10 @@ st.markdown("""
 <style>
 .stApp { background-color: #505050; }
 .block-container { padding-top: 1.2rem; padding-bottom: 2rem; }
-h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; }
+h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText {
+    color: white !important;
+    text-transform: uppercase !important;
+}
 
 .portada-titulo {
     text-align: center;
@@ -295,6 +320,13 @@ div[data-baseweb="select"] svg {
     color: #000000 !important;
     fill: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
+    text-transform: lowercase !important;
+}
+div[data-baseweb="select"] > div,
+div[role="listbox"],
+div[role="option"],
+div[role="option"] * {
+    text-transform: lowercase !important;
 }
 div[role="listbox"] {
     background-color: #c7ccd4 !important;
