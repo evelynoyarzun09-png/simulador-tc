@@ -711,22 +711,11 @@ elif seccion == "Topograma":
 
         if imagen_topograma_actual is not None and imagen_topograma_actual.exists():
             st.image(str(imagen_topograma_actual), use_container_width=True)
-
-            nombre_actual = st.session_state.get("nombre_topograma_actual", "")
-            nombre_base = TOPOGRAMA_IMG.name if TOPOGRAMA_IMG is not None else "topograma.png"
-
-            if nombre_actual.lower() == nombre_base.lower():
-                st.caption("Mostrando imagen base: topograma.png")
-                st.caption(f"El sistema intentó buscar: {st.session_state.get('topograma_busqueda', 'sin búsqueda')}")
-            else:
-                st.caption(f"Imagen cargada: {nombre_actual}")
         else:
             st.info(
                 "No se encontró la imagen del topograma. "
-                "Guarda las imágenes con nombres como: "
-                "'topograma_cabeza_primero_supino_arriba.png'"
+                "Revisa que el archivo exista en la misma carpeta de app.py."
             )
-            st.caption(f"El sistema intentó buscar: {st.session_state.get('topograma_busqueda', 'sin búsqueda')}")
 
         st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
         if st.button("Siguiente", use_container_width=True, disabled=not topograma_completo):
