@@ -773,7 +773,7 @@ elif seccion == "Topograma":
              "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
             "topo_posicion_brazos"
         )
-        persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral"], "topo_plano")
+        persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo_plano")
         persistent_text_input("Término topograma", "topo_termino")
 
     boton_col1, boton_col2, boton_col3 = st.columns([1, 1, 1])
@@ -852,7 +852,7 @@ elif seccion == "Topograma":
                  "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
                 "topo2_posicion_brazos"
             )
-            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral"], "topo2_plano")
+            persistent_selectbox("Plano", ["Seleccionar", "AP", "Lateral", "AP y lateral"], "topo2_plano")
             persistent_text_input("Término topograma", "topo2_termino")
 
         boton2_col1, boton2_col2, boton2_col3 = st.columns([1, 1, 1])
