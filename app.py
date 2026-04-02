@@ -816,7 +816,7 @@ elif seccion == "Topograma":
         )
 
     with form_col3:
-        persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
+        persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
         persistent_text_input("Inicio topograma", "topo_inicio")
         persistent_text_input("Término topograma", "topo_termino")
 
@@ -932,7 +932,7 @@ elif seccion == "Topograma":
             )
 
         with form2_col3:
-            persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo2_region")
+            persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
             persistent_text_input("Inicio topograma", "topo2_inicio")
             persistent_text_input("Término topograma", "topo2_termino")
 
