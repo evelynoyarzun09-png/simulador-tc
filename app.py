@@ -838,13 +838,12 @@ elif seccion == "Topograma":
         persistent_selectbox(
             "protocolo",
             [
-                "Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial",
+                "Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial",
                 "orbitas", "oidos", "Cuello", "columna cervical", "Tórax",
                 "Abdomen", "Pelvis", "columna dorsal", "columna lumbar",
-                "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano",
+                "hombro", "brazo", "codo", "antebrazo", "muñeca", "mano",
                 "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie",
-                "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
-                "cerebro cuello torax abdomen y pelvis",
+                "torax abdomen y pelvis",
             ],
             "topo_region"
         )
@@ -986,13 +985,12 @@ elif seccion == "Topograma":
             persistent_selectbox(
                 "protocolo",
                 [
-                    "Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial",
+                    "Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial",
                     "orbitas", "oidos", "Cuello", "columna cervical", "Tórax",
                     "Abdomen", "Pelvis", "columna dorsal", "columna lumbar",
-                    "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano",
+                    "hombro", "brazo", "codo", "antebrazo", "muñeca", "mano",
                     "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie",
-                    "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
-                    "cerebro cuello torax abdomen y pelvis",
+                    "torax abdomen y pelvis", 
                 ],
                 "topo2_region"
             )
