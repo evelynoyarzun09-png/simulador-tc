@@ -164,6 +164,59 @@ def persistent_number_input(label, key, **kwargs):
     load_widget(key)
     st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
 
+
+def inicializar_form_topograma():
+    pares = [
+        ("topo_entrada_paciente", "form_topo_entrada_paciente"),
+        ("topo_posicion_tubo", "form_topo_posicion_tubo"),
+        ("topo_posicionamiento", "form_topo_posicionamiento"),
+        ("topo_posicion_brazos", "form_topo_posicion_brazos"),
+        ("topo_region", "form_topo_region"),
+        ("topo_inicio", "form_topo_inicio"),
+        ("topo_termino", "form_topo_termino"),
+        ("topo2_entrada_paciente", "form_topo2_entrada_paciente"),
+        ("topo2_posicion_tubo", "form_topo2_posicion_tubo"),
+        ("topo2_posicionamiento", "form_topo2_posicionamiento"),
+        ("topo2_posicion_brazos", "form_topo2_posicion_brazos"),
+        ("topo2_region", "form_topo2_region"),
+        ("topo2_inicio", "form_topo2_inicio"),
+        ("topo2_termino", "form_topo2_termino"),
+        ("topo_agregar_segundo", "form_topo_agregar_segundo"),
+    ]
+    for origen, destino in pares:
+        if destino not in st.session_state:
+            st.session_state[destino] = st.session_state[origen]
+
+def aplicar_form_topograma_1():
+    mapeo = {
+        "topo_entrada_paciente": "form_topo_entrada_paciente",
+        "topo_posicion_tubo": "form_topo_posicion_tubo",
+        "topo_posicionamiento": "form_topo_posicionamiento",
+        "topo_posicion_brazos": "form_topo_posicion_brazos",
+        "topo_region": "form_topo_region",
+        "topo_inicio": "form_topo_inicio",
+        "topo_termino": "form_topo_termino",
+    }
+    for real, temporal in mapeo.items():
+        st.session_state[real] = st.session_state[temporal]
+
+def aplicar_form_topograma_2():
+    mapeo = {
+        "topo2_entrada_paciente": "form_topo2_entrada_paciente",
+        "topo2_posicion_tubo": "form_topo2_posicion_tubo",
+        "topo2_posicionamiento": "form_topo2_posicionamiento",
+        "topo2_posicion_brazos": "form_topo2_posicion_brazos",
+        "topo2_region": "form_topo2_region",
+        "topo2_inicio": "form_topo2_inicio",
+        "topo2_termino": "form_topo2_termino",
+    }
+    for real, temporal in mapeo.items():
+        st.session_state[real] = st.session_state[temporal]
+
+def aplicar_config_topogramas():
+    st.session_state["topo_agregar_segundo"] = st.session_state["form_topo_agregar_segundo"]
+
+
 # -------------------------
 # CONTROL DE ACCESO
 # -------------------------
@@ -594,62 +647,6 @@ def obtener_imagen_rx_topograma(prefijo_estado="topo"):
 
     return None
 
-
-def preparar_campos_form_topograma():
-    pares = [
-        ("topo_entrada_paciente", "_form_topo_entrada_paciente"),
-        ("topo_posicionamiento", "_form_topo_posicionamiento"),
-        ("topo_posicion_tubo", "_form_topo_posicion_tubo"),
-        ("topo_posicion_brazos", "_form_topo_posicion_brazos"),
-        ("topo_region", "_form_topo_region"),
-        ("topo_inicio", "_form_topo_inicio"),
-        ("topo_termino", "_form_topo_termino"),
-        ("topo_agregar_segundo", "_form_topo_agregar_segundo"),
-        ("topo2_entrada_paciente", "_form_topo2_entrada_paciente"),
-        ("topo2_posicionamiento", "_form_topo2_posicionamiento"),
-        ("topo2_posicion_tubo", "_form_topo2_posicion_tubo"),
-        ("topo2_posicion_brazos", "_form_topo2_posicion_brazos"),
-        ("topo2_region", "_form_topo2_region"),
-        ("topo2_inicio", "_form_topo2_inicio"),
-        ("topo2_termino", "_form_topo2_termino"),
-    ]
-    for real_key, form_key in pares:
-        if form_key not in st.session_state:
-            st.session_state[form_key] = st.session_state.get(real_key, "")
-
-def aplicar_form_topograma_1():
-    mapeo = {
-        "_form_topo_entrada_paciente": "topo_entrada_paciente",
-        "_form_topo_posicionamiento": "topo_posicionamiento",
-        "_form_topo_posicion_tubo": "topo_posicion_tubo",
-        "_form_topo_posicion_brazos": "topo_posicion_brazos",
-        "_form_topo_region": "topo_region",
-        "_form_topo_inicio": "topo_inicio",
-        "_form_topo_termino": "topo_termino",
-    }
-    for form_key, real_key in mapeo.items():
-        st.session_state[real_key] = st.session_state[form_key]
-    st.session_state["topo_rx_iniciado"] = False
-
-def aplicar_form_topograma_2():
-    mapeo = {
-        "_form_topo2_entrada_paciente": "topo2_entrada_paciente",
-        "_form_topo2_posicionamiento": "topo2_posicionamiento",
-        "_form_topo2_posicion_tubo": "topo2_posicion_tubo",
-        "_form_topo2_posicion_brazos": "topo2_posicion_brazos",
-        "_form_topo2_region": "topo2_region",
-        "_form_topo2_inicio": "topo2_inicio",
-        "_form_topo2_termino": "topo2_termino",
-    }
-    for form_key, real_key in mapeo.items():
-        st.session_state[real_key] = st.session_state[form_key]
-    st.session_state["topo2_rx_iniciado"] = False
-
-def aplicar_config_topogramas():
-    st.session_state["topo_agregar_segundo"] = st.session_state["_form_topo_agregar_segundo"]
-    st.session_state["topo_rx_iniciado"] = False
-    st.session_state["topo2_rx_iniciado"] = False
-
 # -------------------------
 # PÁGINAS
 # -------------------------
@@ -832,7 +829,7 @@ elif seccion == "Preparación de paciente":
 
 elif seccion == "Topograma":
     st.header("Topograma")
-    preparar_campos_form_topograma()
+    inicializar_form_topograma()
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
@@ -840,9 +837,35 @@ elif seccion == "Topograma":
             volver_anterior(); st.rerun()
 
     # -------------------------
+    # CONFIGURACIÓN GENERAL
+    # -------------------------
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Configuración general</div>', unsafe_allow_html=True)
+
+    with st.form("form_config_topogramas", clear_on_submit=False):
+        st.selectbox(
+            "Agregar segundo topograma",
+            ["NO", "SI"],
+            key="form_topo_agregar_segundo",
+            format_func=mostrar_opcion_minuscula,
+        )
+        cfa, cfb, cfc = st.columns([1.5, 2, 1.5])
+        with cfb:
+            aplicar_config = st.form_submit_button("Aplicar configuración", use_container_width=True)
+
+    if aplicar_config:
+        aplicar_config_topogramas()
+        st.session_state["topo_rx_iniciado"] = False
+        st.session_state["topo2_rx_iniciado"] = False
+        st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # -------------------------
     # TOPGRAMA 1
     # -------------------------
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
 
     img_col1, img_col2 = st.columns([1, 1], vertical_alignment="top")
 
@@ -906,34 +929,52 @@ elif seccion == "Topograma":
                 )
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
 
     with st.form("form_topograma_1", clear_on_submit=False):
         form_col1, form_col2, form_col3 = st.columns(3)
 
         with form_col1:
-            st.selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], key="_form_topo_entrada_paciente", format_func=mostrar_opcion_minuscula)
-            st.selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], key="_form_topo_posicion_tubo", format_func=mostrar_opcion_minuscula)
+            st.selectbox(
+                "Entrada paciente",
+                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                key="form_topo_entrada_paciente",
+                format_func=mostrar_opcion_minuscula,
+            )
+            st.selectbox(
+                "Posición del tubo",
+                ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+                key="form_topo_posicion_tubo",
+                format_func=mostrar_opcion_minuscula,
+            )
 
         with form_col2:
-            st.selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], key="_form_topo_posicionamiento", format_func=mostrar_opcion_minuscula)
+            st.selectbox(
+                "Posicionamiento",
+                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                key="form_topo_posicionamiento",
+                format_func=mostrar_opcion_minuscula,
+            )
             st.selectbox(
                 "Posición de brazos / extremidades",
                 ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
                  "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
-                key="_form_topo_posicion_brazos",
-                format_func=mostrar_opcion_minuscula
+                key="form_topo_posicion_brazos",
+                format_func=mostrar_opcion_minuscula,
             )
 
         with form_col3:
             st.selectbox(
-                "protocolo",
-                ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis"],
-                key="_form_topo_region",
-                format_func=mostrar_opcion_minuscula
+                "Protocolo",
+                ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello",
+                 "columna cervical", "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro",
+                 "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna",
+                 "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
+                 "cerebro cuello torax abdomen y pelvis"],
+                key="form_topo_region",
+                format_func=mostrar_opcion_minuscula,
             )
-            st.text_input("Inicio topograma", key="_form_topo_inicio")
-            st.text_input("Término topograma", key="_form_topo_termino")
+            st.text_input("Inicio topograma", key="form_topo_inicio")
+            st.text_input("Término topograma", key="form_topo_termino")
 
         ufa, ufb, ufc = st.columns([1.5, 2, 1.5])
         with ufb:
@@ -941,27 +982,16 @@ elif seccion == "Topograma":
 
     if actualizar_topo_1:
         aplicar_form_topograma_1()
+        st.session_state["topo_rx_iniciado"] = False
         st.rerun()
 
     topograma1_completo = topograma_completo("topo")
 
-    btn1, btn2, btn3 = st.columns([2, 2, 2])
-    with btn2:
+    b1, b2, b3 = st.columns([2, 2, 2])
+    with b2:
         if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not topograma1_completo):
             st.session_state["topo_rx_iniciado"] = True
             st.rerun()
-
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-
-    with st.form("form_config_topogramas", clear_on_submit=False):
-        st.selectbox("Agregar segundo topograma", ["NO", "SI"], key="_form_topo_agregar_segundo", format_func=mostrar_opcion_minuscula)
-        cfa, cfb, cfc = st.columns([1.5, 2, 1.5])
-        with cfb:
-            aplicar_config = st.form_submit_button("Aplicar configuración", use_container_width=True)
-
-    if aplicar_config:
-        aplicar_config_topogramas()
-        st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1040,28 +1070,47 @@ elif seccion == "Topograma":
             form2_col1, form2_col2, form2_col3 = st.columns(3)
 
             with form2_col1:
-                st.selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], key="_form_topo2_entrada_paciente", format_func=mostrar_opcion_minuscula)
-                st.selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], key="_form_topo2_posicion_tubo", format_func=mostrar_opcion_minuscula)
+                st.selectbox(
+                    "Entrada paciente",
+                    ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                    key="form_topo2_entrada_paciente",
+                    format_func=mostrar_opcion_minuscula,
+                )
+                st.selectbox(
+                    "Posición del tubo",
+                    ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+                    key="form_topo2_posicion_tubo",
+                    format_func=mostrar_opcion_minuscula,
+                )
 
             with form2_col2:
-                st.selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], key="_form_topo2_posicionamiento", format_func=mostrar_opcion_minuscula)
+                st.selectbox(
+                    "Posicionamiento",
+                    ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                    key="form_topo2_posicionamiento",
+                    format_func=mostrar_opcion_minuscula,
+                )
                 st.selectbox(
                     "Posición de brazos / extremidades",
                     ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
                      "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
-                    key="_form_topo2_posicion_brazos",
-                    format_func=mostrar_opcion_minuscula
+                    key="form_topo2_posicion_brazos",
+                    format_func=mostrar_opcion_minuscula,
                 )
 
             with form2_col3:
                 st.selectbox(
-                    "protocolo",
-                    ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis"],
-                    key="_form_topo2_region",
-                    format_func=mostrar_opcion_minuscula
+                    "Protocolo",
+                    ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello",
+                     "columna cervical", "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro",
+                     "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna",
+                     "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
+                     "cerebro cuello torax abdomen y pelvis"],
+                    key="form_topo2_region",
+                    format_func=mostrar_opcion_minuscula,
                 )
-                st.text_input("Inicio topograma", key="_form_topo2_inicio")
-                st.text_input("Término topograma", key="_form_topo2_termino")
+                st.text_input("Inicio topograma", key="form_topo2_inicio")
+                st.text_input("Término topograma", key="form_topo2_termino")
 
             u2a, u2b, u2c = st.columns([1.5, 2, 1.5])
             with u2b:
@@ -1069,6 +1118,7 @@ elif seccion == "Topograma":
 
         if actualizar_topo_2:
             aplicar_form_topograma_2()
+            st.session_state["topo2_rx_iniciado"] = False
             st.rerun()
 
         topograma2_completo = topograma_completo("topo2")
