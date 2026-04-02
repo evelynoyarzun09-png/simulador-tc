@@ -249,7 +249,8 @@ h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important
     padding: 1.2rem 1.2rem 2rem 1.2rem;
     border-radius: 18px;
 }
-div.stButton > button {
+div.stButton > button,
+div[data-testid="stFormSubmitButton"] > button {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
@@ -257,7 +258,8 @@ div.stButton > button {
     font-weight: 600 !important;
     min-height: 46px !important;
 }
-div.stButton > button:disabled {
+div.stButton > button:disabled,
+div[data-testid="stFormSubmitButton"] > button:disabled {
     background-color: #8a8f97 !important;
     color: #e6e6e6 !important;
     border: 1px solid #7a7a7a !important;
@@ -762,13 +764,18 @@ elif seccion == "Topograma":
         if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Configuración general</div>', unsafe_allow_html=True)
     with st.form("form_config_topogramas", clear_on_submit=False):
         persistent_selectbox("Agregar segundo topograma", ["NO", "SI"], "topo_agregar_segundo")
-        aplicar_config_topogramas = st.form_submit_button("Aplicar configuración de topogramas", use_container_width=True)
+        col_cfg1, col_cfg2, col_cfg3 = st.columns([1.5, 2, 1.5])
+        with col_cfg2:
+            aplicar_config_topogramas = st.form_submit_button("Aplicar configuración", use_container_width=True)
         if aplicar_config_topogramas:
             st.session_state["topo_rx_iniciado"] = False
             st.session_state["topo2_rx_iniciado"] = False
             st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # -------------------------
     # TOPGRAMA 1
@@ -797,7 +804,9 @@ elif seccion == "Topograma":
             persistent_text_input("Inicio topograma", "topo_inicio")
             persistent_text_input("Término topograma", "topo_termino")
 
-        guardar_topo_1 = st.form_submit_button("Actualizar topograma 1", use_container_width=True)
+        btn_t1a, btn_t1b, btn_t1c = st.columns([1.5, 2, 1.5])
+        with btn_t1b:
+            guardar_topo_1 = st.form_submit_button("Actualizar topograma 1", use_container_width=True)
         if guardar_topo_1:
             st.session_state["topo_rx_iniciado"] = False
             st.rerun()
@@ -884,7 +893,9 @@ elif seccion == "Topograma":
                 persistent_text_input("Inicio topograma", "topo2_inicio")
                 persistent_text_input("Término topograma", "topo2_termino")
 
-            guardar_topo_2 = st.form_submit_button("Actualizar topograma 2", use_container_width=True)
+            btn_t2a, btn_t2b, btn_t2c = st.columns([1.5, 2, 1.5])
+            with btn_t2b:
+                guardar_topo_2 = st.form_submit_button("Actualizar topograma 2", use_container_width=True)
             if guardar_topo_2:
                 st.session_state["topo2_rx_iniciado"] = False
                 st.rerun()
