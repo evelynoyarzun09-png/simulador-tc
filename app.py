@@ -865,7 +865,7 @@ elif seccion == "Topograma":
         )
 
     with form_col3:
-        persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
+        persistent_selectbox("Protocolo", ["Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial","orbitas","oidos","Cuello","columna cervical", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
         persistent_text_input("Inicio topograma", "topo_inicio")
         persistent_text_input("Término topograma", "topo_termino")
 
