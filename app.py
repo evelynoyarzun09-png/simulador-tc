@@ -790,61 +790,12 @@ elif seccion == "Topograma":
     with img_col1:
         sub1_a, sub1_b, sub1_c = st.columns([1, 8, 1])
         with sub1_b:
-            imagen_equipo_topo_1 = obtener_imagen_topograma()
-            if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
-                st.image(str(imagen_equipo_topo_1), width=320)
-            else:
-                st.info("No se encontró la imagen de posicionamiento del topograma 1.")
+            placeholder_img_topo_1 = st.empty()
 
     with img_col2:
         sub2_a, sub2_b, sub2_c = st.columns([1, 8, 1])
         with sub2_b:
-            if st.session_state.get("topo_rx_iniciado", False):
-                imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
-                if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
-                    st.image(str(imagen_rx_topo_1), width=300)
-                else:
-                    st.markdown(
-                        """
-                        <div style="
-                            min-height:220px;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            border:1px solid #7a7a7a;
-                            border-radius:14px;
-                            background-color:#4a4a4a;
-                            color:white;
-                            font-weight:600;
-                            text-align:center;
-                            padding:1rem;
-                        ">
-                            No se encontró la imagen RX del topograma 1
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-            else:
-                st.markdown(
-                    """
-                    <div style="
-                        min-height:220px;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        border:1px solid #7a7a7a;
-                        border-radius:14px;
-                        background-color:#4a4a4a;
-                        color:white;
-                        font-weight:600;
-                        text-align:center;
-                        padding:1rem;
-                    ">
-                        La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+            placeholder_rx_topo_1 = st.empty()
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
@@ -865,11 +816,65 @@ elif seccion == "Topograma":
         )
 
     with form_col3:
-        persistent_selectbox("Protocolo", ["Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial","orbitas","oidos","Cuello","columna cervical", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
+        persistent_selectbox("Región anatómica", ["Seleccionar", "Cabeza", "Cuello", "Tórax", "Abdomen", "Pelvis", "Cuerpo completo"], "topo_region")
         persistent_text_input("Inicio topograma", "topo_inicio")
         persistent_text_input("Término topograma", "topo_termino")
 
     topograma1_completo = topograma_completo("topo")
+
+    # rellenar imágenes después de crear widgets
+    imagen_equipo_topo_1 = obtener_imagen_topograma()
+    if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
+        placeholder_img_topo_1.image(str(imagen_equipo_topo_1), width=320)
+    else:
+        placeholder_img_topo_1.info("No se encontró la imagen de posicionamiento del topograma 1.")
+
+    if st.session_state.get("topo_rx_iniciado", False):
+        imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
+        if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
+            placeholder_rx_topo_1.image(str(imagen_rx_topo_1), width=300)
+        else:
+            placeholder_rx_topo_1.markdown(
+                """
+                <div style="
+                    min-height:220px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border:1px solid #7a7a7a;
+                    border-radius:14px;
+                    background-color:#4a4a4a;
+                    color:white;
+                    font-weight:600;
+                    text-align:center;
+                    padding:1rem;
+                ">
+                    No se encontró la imagen RX del topograma 1
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+    else:
+        placeholder_rx_topo_1.markdown(
+            """
+            <div style="
+                min-height:220px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border:1px solid #7a7a7a;
+                border-radius:14px;
+                background-color:#4a4a4a;
+                color:white;
+                font-weight:600;
+                text-align:center;
+                padding:1rem;
+            ">
+                La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     btn1, btn2, btn3 = st.columns([2, 2, 2])
     with btn2:
@@ -901,61 +906,12 @@ elif seccion == "Topograma":
         with img2_col1:
             sub3_a, sub3_b, sub3_c = st.columns([1, 8, 1])
             with sub3_b:
-                imagen_equipo_topo_2 = obtener_imagen_topograma_2()
-                if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
-                    st.image(str(imagen_equipo_topo_2), width=320)
-                else:
-                    st.info("No se encontró la imagen de posicionamiento del topograma 2.")
+                placeholder_img_topo_2 = st.empty()
 
         with img2_col2:
             sub4_a, sub4_b, sub4_c = st.columns([1, 8, 1])
             with sub4_b:
-                if st.session_state.get("topo2_rx_iniciado", False):
-                    imagen_rx_topo_2 = obtener_imagen_rx_topograma("topo2")
-                    if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
-                        st.image(str(imagen_rx_topo_2), width=300)
-                    else:
-                        st.markdown(
-                            """
-                            <div style="
-                                min-height:220px;
-                                display:flex;
-                                align-items:center;
-                                justify-content:center;
-                                border:1px solid #7a7a7a;
-                                border-radius:14px;
-                                background-color:#4a4a4a;
-                                color:white;
-                                font-weight:600;
-                                text-align:center;
-                                padding:1rem;
-                            ">
-                                No se encontró la imagen RX del topograma 2
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-                else:
-                    st.markdown(
-                        """
-                        <div style="
-                            min-height:220px;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            border:1px solid #7a7a7a;
-                            border-radius:14px;
-                            background-color:#4a4a4a;
-                            color:white;
-                            font-weight:600;
-                            text-align:center;
-                            padding:1rem;
-                        ">
-                            La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                placeholder_rx_topo_2 = st.empty()
 
         st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Topograma 2</div>', unsafe_allow_html=True)
@@ -981,6 +937,59 @@ elif seccion == "Topograma":
             persistent_text_input("Término topograma", "topo2_termino")
 
         topograma2_completo = topograma_completo("topo2")
+
+        imagen_equipo_topo_2 = obtener_imagen_topograma_2()
+        if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
+            placeholder_img_topo_2.image(str(imagen_equipo_topo_2), width=320)
+        else:
+            placeholder_img_topo_2.info("No se encontró la imagen de posicionamiento del topograma 2.")
+
+        if st.session_state.get("topo2_rx_iniciado", False):
+            imagen_rx_topo_2 = obtener_imagen_rx_topograma("topo2")
+            if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
+                placeholder_rx_topo_2.image(str(imagen_rx_topo_2), width=300)
+            else:
+                placeholder_rx_topo_2.markdown(
+                    """
+                    <div style="
+                        min-height:220px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:1px solid #7a7a7a;
+                        border-radius:14px;
+                        background-color:#4a4a4a;
+                        color:white;
+                        font-weight:600;
+                        text-align:center;
+                        padding:1rem;
+                    ">
+                        No se encontró la imagen RX del topograma 2
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            placeholder_rx_topo_2.markdown(
+                """
+                <div style="
+                    min-height:220px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border:1px solid #7a7a7a;
+                    border-radius:14px;
+                    background-color:#4a4a4a;
+                    color:white;
+                    font-weight:600;
+                    text-align:center;
+                    padding:1rem;
+                ">
+                    La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
         b21, b22, b23 = st.columns([2, 2, 2])
         with b22:
