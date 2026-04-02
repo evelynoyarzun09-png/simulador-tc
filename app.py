@@ -425,6 +425,11 @@ input[type="date"] {
     background-color: #5a6478 !important;
     color: white !important;
 }
+div[data-testid="stForm"] {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -874,7 +879,7 @@ elif seccion == "Topograma":
         with sub1_b:
             imagen_equipo_topo_1 = obtener_imagen_topograma()
             if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
-                st.image(str(imagen_equipo_topo_1), width=320)
+                st.image(str(imagen_equipo_topo_1), width=300)
             else:
                 st.info("No se encontró la imagen de posicionamiento del topograma 1.")
 
@@ -884,7 +889,7 @@ elif seccion == "Topograma":
             if st.session_state.get("topo_rx_iniciado", False):
                 imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
                 if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
-                    st.image(str(imagen_rx_topo_1), width=300)
+                    st.image(str(imagen_rx_topo_1), width=280)
                 else:
                     st.markdown(
                         """
@@ -976,7 +981,7 @@ elif seccion == "Topograma":
             st.text_input("Inicio topograma", key="form_topo_inicio")
             st.text_input("Término topograma", key="form_topo_termino")
 
-        ufa, ufb, ufc = st.columns([1.5, 2, 1.5])
+        ufa, ufb, ufc = st.columns([2, 2, 2])
         with ufb:
             actualizar_topo_1 = st.form_submit_button("Actualizar topograma 1", use_container_width=True)
 
@@ -1010,7 +1015,7 @@ elif seccion == "Topograma":
             with sub3_b:
                 imagen_equipo_topo_2 = obtener_imagen_topograma_2()
                 if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
-                    st.image(str(imagen_equipo_topo_2), width=320)
+                    st.image(str(imagen_equipo_topo_2), width=300)
                 else:
                     st.info("No se encontró la imagen de posicionamiento del topograma 2.")
 
@@ -1020,7 +1025,7 @@ elif seccion == "Topograma":
                 if st.session_state.get("topo2_rx_iniciado", False):
                     imagen_rx_topo_2 = obtener_imagen_rx_topograma("topo2")
                     if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
-                        st.image(str(imagen_rx_topo_2), width=300)
+                        st.image(str(imagen_rx_topo_2), width=280)
                     else:
                         st.markdown(
                             """
@@ -1112,7 +1117,7 @@ elif seccion == "Topograma":
                 st.text_input("Inicio topograma", key="form_topo2_inicio")
                 st.text_input("Término topograma", key="form_topo2_termino")
 
-            u2a, u2b, u2c = st.columns([1.5, 2, 1.5])
+            u2a, u2b, u2c = st.columns([2, 2, 2])
             with u2b:
                 actualizar_topo_2 = st.form_submit_button("Actualizar topograma 2", use_container_width=True)
 
