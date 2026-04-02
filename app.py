@@ -267,7 +267,8 @@ h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important
     padding: 1.2rem 1.2rem 2rem 1.2rem;
     border-radius: 18px;
 }
-div.stButton > button {
+div.stButton > button,
+div[data-testid="stFormSubmitButton"] > button {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
     border-radius: 12px !important;
@@ -275,7 +276,8 @@ div.stButton > button {
     font-weight: 600 !important;
     min-height: 46px !important;
 }
-div.stButton > button:disabled {
+div.stButton > button:disabled,
+div[data-testid="stFormSubmitButton"] > button:disabled {
     background-color: #8a8f97 !important;
     color: #e6e6e6 !important;
     border: 1px solid #7a7a7a !important;
@@ -781,175 +783,77 @@ elif seccion == "Topograma":
             volver_anterior(); st.rerun()
 
     # -------------------------
+    # CONFIGURACIÓN GENERAL
+    # -------------------------
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Configuración general</div>', unsafe_allow_html=True)
+
+    with st.form("form_config_topogramas", clear_on_submit=False):
+        st.selectbox(
+            "Agregar segundo topograma",
+            ["NO", "SI"],
+            key="topo_agregar_segundo",
+            format_func=mostrar_opcion_minuscula,
+        )
+
+        cfa, cfb, cfc = st.columns([1.5, 2, 1.5])
+        with cfb:
+            aplicar_config = st.form_submit_button("Aplicar configuración", use_container_width=True)
+
+        if aplicar_config:
+            st.session_state["topo_rx_iniciado"] = False
+            st.session_state["topo2_rx_iniciado"] = False
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # -------------------------
     # TOPGRAMA 1
     # -------------------------
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
 
     img_col1, img_col2 = st.columns([1, 1], vertical_alignment="top")
 
     with img_col1:
         sub1_a, sub1_b, sub1_c = st.columns([1, 8, 1])
         with sub1_b:
-            placeholder_img_topo_1 = st.empty()
+            imagen_equipo_topo_1 = obtener_imagen_topograma()
+            if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
+                st.image(str(imagen_equipo_topo_1), width=320)
+            else:
+                st.info("No se encontró la imagen de posicionamiento del topograma 1.")
 
     with img_col2:
         sub2_a, sub2_b, sub2_c = st.columns([1, 8, 1])
         with sub2_b:
-            placeholder_rx_topo_1 = st.empty()
-
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
-
-    form_col1, form_col2, form_col3 = st.columns(3)
-
-    with form_col1:
-        persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
-        persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
-
-    with form_col2:
-        persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
-        persistent_selectbox(
-            "Posición de brazos / extremidades",
-            ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
-             "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
-            "topo_posicion_brazos"
-        )
-
-    with form_col3:
-        persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
-        persistent_text_input("Inicio topograma", "topo_inicio")
-        persistent_text_input("Término topograma", "topo_termino")
-
-    topograma1_completo = topograma_completo("topo")
-
-    # rellenar imágenes después de crear widgets
-    imagen_equipo_topo_1 = obtener_imagen_topograma()
-    if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
-        placeholder_img_topo_1.image(str(imagen_equipo_topo_1), width=320)
-    else:
-        placeholder_img_topo_1.info("No se encontró la imagen de posicionamiento del topograma 1.")
-
-    if st.session_state.get("topo_rx_iniciado", False):
-        imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
-        if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
-            placeholder_rx_topo_1.image(str(imagen_rx_topo_1), width=300)
-        else:
-            placeholder_rx_topo_1.markdown(
-                """
-                <div style="
-                    min-height:220px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    border:1px solid #7a7a7a;
-                    border-radius:14px;
-                    background-color:#4a4a4a;
-                    color:white;
-                    font-weight:600;
-                    text-align:center;
-                    padding:1rem;
-                ">
-                    No se encontró la imagen RX del topograma 1
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-    else:
-        placeholder_rx_topo_1.markdown(
-            """
-            <div style="
-                min-height:220px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                border:1px solid #7a7a7a;
-                border-radius:14px;
-                background-color:#4a4a4a;
-                color:white;
-                font-weight:600;
-                text-align:center;
-                padding:1rem;
-            ">
-                La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    btn1, btn2, btn3 = st.columns([2, 2, 2])
-    with btn2:
-        if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not topograma1_completo):
-            st.session_state["topo_rx_iniciado"] = True
-            st.rerun()
-
-    sig1, sig2, sig3 = st.columns([2, 2, 2])
-    with sig2:
-        topograma2_completo = True
-        if st.session_state["topo_agregar_segundo"] == "SI":
-            topograma2_completo = topograma_completo("topo2")
-        if st.button("Siguiente", use_container_width=True, disabled=not (topograma1_completo and topograma2_completo)):
-            ir_a("Adquisición"); st.rerun()
-
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-    persistent_selectbox("Agregar segundo topograma", ["NO", "SI"], "topo_agregar_segundo")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # -------------------------
-    # TOPGRAMA 2
-    # -------------------------
-    topograma2_completo = True
-    if st.session_state["topo_agregar_segundo"] == "SI":
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-
-        img2_col1, img2_col2 = st.columns([1, 1], vertical_alignment="top")
-
-        with img2_col1:
-            sub3_a, sub3_b, sub3_c = st.columns([1, 8, 1])
-            with sub3_b:
-                placeholder_img_topo_2 = st.empty()
-
-        with img2_col2:
-            sub4_a, sub4_b, sub4_c = st.columns([1, 8, 1])
-            with sub4_b:
-                placeholder_rx_topo_2 = st.empty()
-
-        st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Topograma 2</div>', unsafe_allow_html=True)
-
-        form2_col1, form2_col2, form2_col3 = st.columns(3)
-
-        with form2_col1:
-            persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo2_entrada_paciente")
-            persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo2_posicion_tubo")
-
-        with form2_col2:
-            persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo2_posicionamiento")
-            persistent_selectbox(
-                "Posición de brazos / extremidades",
-                ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
-                 "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
-                "topo2_posicion_brazos"
-            )
-
-        with form2_col3:
-            persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
-            persistent_text_input("Inicio topograma", "topo2_inicio")
-            persistent_text_input("Término topograma", "topo2_termino")
-
-        topograma2_completo = topograma_completo("topo2")
-
-        imagen_equipo_topo_2 = obtener_imagen_topograma_2()
-        if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
-            placeholder_img_topo_2.image(str(imagen_equipo_topo_2), width=320)
-        else:
-            placeholder_img_topo_2.info("No se encontró la imagen de posicionamiento del topograma 2.")
-
-        if st.session_state.get("topo2_rx_iniciado", False):
-            imagen_rx_topo_2 = obtener_imagen_rx_topograma("topo2")
-            if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
-                placeholder_rx_topo_2.image(str(imagen_rx_topo_2), width=300)
+            if st.session_state.get("topo_rx_iniciado", False):
+                imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
+                if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
+                    st.image(str(imagen_rx_topo_1), width=300)
+                else:
+                    st.markdown(
+                        """
+                        <div style="
+                            min-height:220px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            border:1px solid #7a7a7a;
+                            border-radius:14px;
+                            background-color:#4a4a4a;
+                            color:white;
+                            font-weight:600;
+                            text-align:center;
+                            padding:1rem;
+                        ">
+                            No se encontró la imagen RX del topograma 1
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
             else:
-                placeholder_rx_topo_2.markdown(
+                st.markdown(
                     """
                     <div style="
                         min-height:220px;
@@ -964,32 +868,204 @@ elif seccion == "Topograma":
                         text-align:center;
                         padding:1rem;
                     ">
-                        No se encontró la imagen RX del topograma 2
+                        La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
-        else:
-            placeholder_rx_topo_2.markdown(
-                """
-                <div style="
-                    min-height:220px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    border:1px solid #7a7a7a;
-                    border-radius:14px;
-                    background-color:#4a4a4a;
-                    color:white;
-                    font-weight:600;
-                    text-align:center;
-                    padding:1rem;
-                ">
-                    La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
-                </div>
-                """,
-                unsafe_allow_html=True
+
+    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+
+    with st.form("form_topograma_1", clear_on_submit=False):
+        form_col1, form_col2, form_col3 = st.columns(3)
+
+        with form_col1:
+            st.selectbox(
+                "Entrada paciente",
+                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                key="topo_entrada_paciente",
+                format_func=mostrar_opcion_minuscula,
             )
+            st.selectbox(
+                "Posición del tubo",
+                ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+                key="topo_posicion_tubo",
+                format_func=mostrar_opcion_minuscula,
+            )
+
+        with form_col2:
+            st.selectbox(
+                "Posicionamiento",
+                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                key="topo_posicionamiento",
+                format_func=mostrar_opcion_minuscula,
+            )
+            st.selectbox(
+                "Posición de brazos / extremidades",
+                ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
+                 "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+                key="topo_posicion_brazos",
+                format_func=mostrar_opcion_minuscula,
+            )
+
+        with form_col3:
+            st.selectbox(
+                "Protocolo",
+                ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello",
+                 "columna cervical", "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro",
+                 "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna",
+                 "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
+                 "cerebro cuello torax abdomen y pelvis"],
+                key="topo_region",
+                format_func=mostrar_opcion_minuscula,
+            )
+            st.text_input("Inicio topograma", key="topo_inicio")
+            st.text_input("Término topograma", key="topo_termino")
+
+        ufa, ufb, ufc = st.columns([1.5, 2, 1.5])
+        with ufb:
+            actualizar_topo_1 = st.form_submit_button("Actualizar topograma 1", use_container_width=True)
+
+        if actualizar_topo_1:
+            st.session_state["topo_rx_iniciado"] = False
+            st.rerun()
+
+    topograma1_completo = topograma_completo("topo")
+
+    b1, b2, b3 = st.columns([2, 2, 2])
+    with b2:
+        if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not topograma1_completo):
+            st.session_state["topo_rx_iniciado"] = True
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # -------------------------
+    # TOPGRAMA 2
+    # -------------------------
+    topograma2_completo = True
+    if st.session_state["topo_agregar_segundo"] == "SI":
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Topograma 2</div>', unsafe_allow_html=True)
+
+        img2_col1, img2_col2 = st.columns([1, 1], vertical_alignment="top")
+
+        with img2_col1:
+            sub3_a, sub3_b, sub3_c = st.columns([1, 8, 1])
+            with sub3_b:
+                imagen_equipo_topo_2 = obtener_imagen_topograma_2()
+                if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
+                    st.image(str(imagen_equipo_topo_2), width=320)
+                else:
+                    st.info("No se encontró la imagen de posicionamiento del topograma 2.")
+
+        with img2_col2:
+            sub4_a, sub4_b, sub4_c = st.columns([1, 8, 1])
+            with sub4_b:
+                if st.session_state.get("topo2_rx_iniciado", False):
+                    imagen_rx_topo_2 = obtener_imagen_rx_topograma("topo2")
+                    if imagen_rx_topo_2 is not None and imagen_rx_topo_2.exists():
+                        st.image(str(imagen_rx_topo_2), width=300)
+                    else:
+                        st.markdown(
+                            """
+                            <div style="
+                                min-height:220px;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                border:1px solid #7a7a7a;
+                                border-radius:14px;
+                                background-color:#4a4a4a;
+                                color:white;
+                                font-weight:600;
+                                text-align:center;
+                                padding:1rem;
+                            ">
+                                No se encontró la imagen RX del topograma 2
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.markdown(
+                        """
+                        <div style="
+                            min-height:220px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            border:1px solid #7a7a7a;
+                            border-radius:14px;
+                            background-color:#4a4a4a;
+                            color:white;
+                            font-weight:600;
+                            text-align:center;
+                            padding:1rem;
+                        ">
+                            La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+        st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+
+        with st.form("form_topograma_2", clear_on_submit=False):
+            form2_col1, form2_col2, form2_col3 = st.columns(3)
+
+            with form2_col1:
+                st.selectbox(
+                    "Entrada paciente",
+                    ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                    key="topo2_entrada_paciente",
+                    format_func=mostrar_opcion_minuscula,
+                )
+                st.selectbox(
+                    "Posición del tubo",
+                    ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+                    key="topo2_posicion_tubo",
+                    format_func=mostrar_opcion_minuscula,
+                )
+
+            with form2_col2:
+                st.selectbox(
+                    "Posicionamiento",
+                    ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                    key="topo2_posicionamiento",
+                    format_func=mostrar_opcion_minuscula,
+                )
+                st.selectbox(
+                    "Posición de brazos / extremidades",
+                    ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
+                     "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+                    key="topo2_posicion_brazos",
+                    format_func=mostrar_opcion_minuscula,
+                )
+
+            with form2_col3:
+                st.selectbox(
+                    "Protocolo",
+                    ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello",
+                     "columna cervical", "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro",
+                     "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna",
+                     "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
+                     "cerebro cuello torax abdomen y pelvis"],
+                    key="topo2_region",
+                    format_func=mostrar_opcion_minuscula,
+                )
+                st.text_input("Inicio topograma", key="topo2_inicio")
+                st.text_input("Término topograma", key="topo2_termino")
+
+            u2a, u2b, u2c = st.columns([1.5, 2, 1.5])
+            with u2b:
+                actualizar_topo_2 = st.form_submit_button("Actualizar topograma 2", use_container_width=True)
+
+            if actualizar_topo_2:
+                st.session_state["topo2_rx_iniciado"] = False
+                st.rerun()
+
+        topograma2_completo = topograma_completo("topo2")
 
         b21, b22, b23 = st.columns([2, 2, 2])
         with b22:
@@ -998,6 +1074,11 @@ elif seccion == "Topograma":
                 st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns([1.5, 2, 1.5])
+    with c2:
+        if st.button("Siguiente", use_container_width=True, disabled=not (topograma1_completo and topograma2_completo)):
+            ir_a("Adquisición"); st.rerun()
 
     st.divider()
     st.subheader("Resumen")
