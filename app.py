@@ -771,17 +771,17 @@ elif seccion == "Preparación de paciente":
         st.write(f"**Método de inyección:** {st.session_state['prep_metodo_inyeccion']}")
         st.write(f"**Medio de contraste oral:** {st.session_state['prep_medio_contraste_oral']}")
     st.markdown('</div>', unsafe_allow_html=True)
-
 elif seccion == "Topograma":
     st.header("Topograma")
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
         if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+            volver_anterior()
+            st.rerun()
 
     # -------------------------
-    # TOPGRAMA 1
+    # TOPOGRAMA 1
     # -------------------------
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
 
@@ -803,26 +803,56 @@ elif seccion == "Topograma":
     form_col1, form_col2, form_col3 = st.columns(3)
 
     with form_col1:
-        persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
-        persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
+        persistent_selectbox(
+            "Entrada paciente",
+            ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+            "topo_entrada_paciente"
+        )
+        persistent_selectbox(
+            "Posición del tubo",
+            ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+            "topo_posicion_tubo"
+        )
 
     with form_col2:
-        persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
+        persistent_selectbox(
+            "Posicionamiento",
+            ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+            "topo_posicionamiento"
+        )
         persistent_selectbox(
             "Posición de brazos / extremidades",
-            ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
-             "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+            [
+                "Seleccionar",
+                "BRAZOS ARRIBA",
+                "BRAZOS ABAJO",
+                "ELEVA BRAZO DERECHO",
+                "ELEVA BRAZO IZQUIERDO",
+                "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
+                "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA",
+            ],
             "topo_posicion_brazos"
         )
 
     with form_col3:
-        persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
+        persistent_selectbox(
+            "protocolo",
+            [
+                "Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial",
+                "orbitas", "oidos", "Cuello", "columna cervical", "Tórax",
+                "Abdomen", "Pelvis", "columna dorsal", "columna lumbar",
+                "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano",
+                "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie",
+                "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
+                "cerebro cuello torax abdomen y pelvis",
+            ],
+            "topo_region"
+        )
         persistent_text_input("Inicio topograma", "topo_inicio")
         persistent_text_input("Término topograma", "topo_termino")
 
     topograma1_completo = topograma_completo("topo")
 
-    # rellenar imágenes después de crear widgets
     imagen_equipo_topo_1 = obtener_imagen_topograma()
     if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
         placeholder_img_topo_1.image(str(imagen_equipo_topo_1), width=320)
@@ -887,15 +917,17 @@ elif seccion == "Topograma":
         topograma2_completo = True
         if st.session_state["topo_agregar_segundo"] == "SI":
             topograma2_completo = topograma_completo("topo2")
+
         if st.button("Siguiente", use_container_width=True, disabled=not (topograma1_completo and topograma2_completo)):
-            ir_a("Adquisición"); st.rerun()
+            ir_a("Adquisición")
+            st.rerun()
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
     persistent_selectbox("Agregar segundo topograma", ["NO", "SI"], "topo_agregar_segundo")
     st.markdown('</div>', unsafe_allow_html=True)
 
     # -------------------------
-    # TOPGRAMA 2
+    # TOPOGRAMA 2
     # -------------------------
     topograma2_completo = True
     if st.session_state["topo_agregar_segundo"] == "SI":
@@ -919,20 +951,51 @@ elif seccion == "Topograma":
         form2_col1, form2_col2, form2_col3 = st.columns(3)
 
         with form2_col1:
-            persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo2_entrada_paciente")
-            persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo2_posicion_tubo")
+            persistent_selectbox(
+                "Entrada paciente",
+                ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"],
+                "topo2_entrada_paciente"
+            )
+            persistent_selectbox(
+                "Posición del tubo",
+                ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"],
+                "topo2_posicion_tubo"
+            )
 
         with form2_col2:
-            persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo2_posicionamiento")
+            persistent_selectbox(
+                "Posicionamiento",
+                ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"],
+                "topo2_posicionamiento"
+            )
             persistent_selectbox(
                 "Posición de brazos / extremidades",
-                ["Seleccionar", "BRAZOS ARRIBA", "BRAZOS ABAJO", "ELEVA BRAZO DERECHO", "ELEVA BRAZO IZQUIERDO",
-                 "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
+                [
+                    "Seleccionar",
+                    "BRAZOS ARRIBA",
+                    "BRAZOS ABAJO",
+                    "ELEVA BRAZO DERECHO",
+                    "ELEVA BRAZO IZQUIERDO",
+                    "FLEXIÓN EXTREMIDAD INFERIOR DERECHA",
+                    "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA",
+                ],
                 "topo2_posicion_brazos"
             )
 
         with form2_col3:
-            persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
+            persistent_selectbox(
+                "protocolo",
+                [
+                    "Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial",
+                    "orbitas", "oidos", "Cuello", "columna cervical", "Tórax",
+                    "Abdomen", "Pelvis", "columna dorsal", "columna lumbar",
+                    "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano",
+                    "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie",
+                    "torax abdomen y pelvis", "cuello torax abdomen y pelvis",
+                    "cerebro cuello torax abdomen y pelvis",
+                ],
+                "topo2_region"
+            )
             persistent_text_input("Inicio topograma", "topo2_inicio")
             persistent_text_input("Término topograma", "topo2_termino")
 
@@ -1002,6 +1065,7 @@ elif seccion == "Topograma":
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
+
     st.write("**Topograma 1**")
     st.write(f"**Entrada del paciente:** {st.session_state['topo_entrada_paciente']}")
     st.write(f"**Posicionamiento:** {st.session_state['topo_posicionamiento']}")
@@ -1021,6 +1085,7 @@ elif seccion == "Topograma":
         st.write(f"**Región:** {st.session_state['topo2_region']}")
         st.write(f"**Inicio:** {st.session_state['topo2_inicio']}")
         st.write(f"**Término:** {st.session_state['topo2_termino']}")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif seccion == "Adquisición":
