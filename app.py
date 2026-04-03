@@ -430,6 +430,22 @@ def topograma_completo(prefijo="topo"):
         texto_completo(st.session_state[f"{prefijo}_termino"]),
     ])
 
+
+def normalizar_texto_archivo(valor):
+    return (
+        str(valor)
+        .strip()
+        .lower()
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ñ", "n")
+        .replace("/", "_")
+        .replace(" ", "_")
+    )
+
 # -------------------------
 # COMBINACIONES RX DESDE EXCEL
 # -------------------------
@@ -493,13 +509,33 @@ def obtener_nombre_rx_desde_combinacion(prefijo_estado="topo"):
     ):
         return None
 
-    clave = (
-        normalizar_texto_archivo(entrada),
-        normalizar_texto_archivo(posicionamiento),
-        normalizar_texto_archivo(tubo),
-        normalizar_texto_archivo(protocolo),
-    )
-    return MAPA_RX_TOPOGRAMA.get(clave)
+    entrada_norm = normalizar_texto_archivo(entrada)
+    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
+    tubo_norm = normalizar_texto_archivo(tubo)
+    protocolo_norm = normalizar_texto_archivo(protocolo)
+
+    alias_protocolo = {
+        "cabeza": ["cabeza", "cerebro"],
+        "cerebro": ["cerebro", "cabeza"],
+        "homnro": ["homnro", "hombro"],
+        "hombro": ["hombro", "homnro"],
+        "abdomen_y_pelvis": ["abdomen_y_pelvis", "abdomen_pelvis"],
+        "abdomen_pelvis": ["abdomen_pelvis", "abdomen_y_pelvis"],
+    }
+
+    protocolos_a_probar = alias_protocolo.get(protocolo_norm, [protocolo_norm])
+
+    for protocolo_var in protocolos_a_probar:
+        clave = (
+            entrada_norm,
+            posicionamiento_norm,
+            tubo_norm,
+            protocolo_var,
+        )
+        if clave in MAPA_RX_TOPOGRAMA:
+            return MAPA_RX_TOPOGRAMA[clave]
+
+    return None
 
 
 def combinacion_rx_disponible(prefijo_estado="topo"):
@@ -546,21 +582,6 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
 # -------------------------
 # IMAGEN DINÁMICA TOPOGRAMA
 # -------------------------
-def normalizar_texto_archivo(valor):
-    return (
-        str(valor)
-        .strip()
-        .lower()
-        .replace("á", "a")
-        .replace("é", "e")
-        .replace("í", "i")
-        .replace("ó", "o")
-        .replace("ú", "u")
-        .replace("ñ", "n")
-        .replace("/", "_")
-        .replace(" ", "_")
-    )
-
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
     posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
