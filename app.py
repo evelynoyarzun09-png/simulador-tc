@@ -380,7 +380,7 @@ input[type="date"] {
 
 /* Compacto para topograma */
 .topo-compacto .titulo-bloque {
-    font-size: 0.62rem !important;
+    font-size: 0.9rem !important;
     margin-bottom: 0.2rem !important;
 }
 .topo-compacto hr {
@@ -388,11 +388,17 @@ input[type="date"] {
 }
 .topo-compacto .stSelectbox label,
 .topo-compacto .stTextInput label {
-    font-size: 0.55rem !important;
+    font-size: 1.1rem !important;
 }
 .topo-compacto [data-baseweb="select"] > div,
 .topo-compacto [data-baseweb="input"] > div {
-    min-height: 1.8rem !important;
+    min-height: 3.6rem !important;
+}
+.topo-compacto [data-baseweb="select"] div,
+.topo-compacto [data-baseweb="select"] span,
+.topo-compacto [data-baseweb="select"] input,
+.topo-compacto [data-baseweb="input"] input {
+    font-size: 1.15rem !important;
 }
 .topo-compacto img {
     border-radius: 14px !important;
@@ -998,12 +1004,12 @@ elif seccion == "Topograma":
 
         st.markdown('<div style="padding:0.25rem 0.45rem 0.05rem 0.45rem; font-weight:700; color:white;">Configuración del topograma</div>', unsafe_allow_html=True)
 
-        st.markdown('<div style="padding:0 0.45rem 0.15rem 0.45rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="padding:0 0.55rem 0.3rem 0.55rem;">', unsafe_allow_html=True)
         persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
         persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
         st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.15rem 0.45rem 0.15rem 0.45rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.3rem 0.55rem 0.3rem 0.55rem;">', unsafe_allow_html=True)
         persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
         persistent_selectbox(
             "Posición de brazos / extremidades",
@@ -1013,7 +1019,7 @@ elif seccion == "Topograma":
         )
         st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.15rem 0.45rem 0.25rem 0.45rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.3rem 0.55rem 0.45rem 0.55rem;">', unsafe_allow_html=True)
         persistent_selectbox("Protocolo", TOPO_PROTOCOLOS, "topo_region")
 
         mini1, mini2 = st.columns(2)
