@@ -2,6 +2,7 @@ import streamlit as st
 from pathlib import Path
 from datetime import date
 import hmac
+import openpyxl
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
 
@@ -430,550 +431,55 @@ def topograma_completo(prefijo="topo"):
     ])
 
 # -------------------------
-# IMAGEN DINÁMICA TOPOGRAMA
+# COMBINACIONES RX DESDE EXCEL
 # -------------------------
-def normalizar_texto_archivo(valor):
-    return (
-        str(valor)
-        .strip()
-        .lower()
-        .replace("á", "a")
-        .replace("é", "e")
-        .replace("í", "i")
-        .replace("ó", "o")
-        .replace("ú", "u")
-        .replace("ñ", "n")
-        .replace("izquerdo", "izquierdo")
-        .replace("/", "_")
-        .replace(" ", "_")
-    )
+TOP_COMB_XLSX = BASE_DIR / "topograma combinaciones.xlsx"
 
-TOPO_RX_COMBINACIONES_RAW = [
-    ['cabeza primero', 'supino', 'arriba', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'arriba', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'arriba', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'arriba', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'arriba', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'arriba', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'abajo', 'cerebro', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'derecha', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'izquierda', 'cerebro', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'arriba', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'abajo', 'cavidades perinasales', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'derecha', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'izquierda', 'cavidades perinasales', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'arriba', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'abajo', 'maxilofacial', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'derecha', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'izquierda', 'maxilofacial', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'arriba', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'abajo', 'orbitas', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'derecha', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'izquierda', 'orbitas', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'arriba', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'abajo', 'oidos', 'cabeza lateral'],
-    ['cabeza primero', 'lateral izquerdo', 'derecha', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'lateral izquerdo', 'izquierda', 'oidos', 'cabeza frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'cuello', 'cuello lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'cuello', 'cuello frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'columna cervical', 'cuello lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'columna cervical', 'cuello frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'torax', 'torax frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'torax', 'torax frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'torax', 'torax lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'torax', 'torax lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'torax', 'torax frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'torax', 'torax frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'torax', 'torax lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'torax', 'torax lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'torax', 'torax lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'torax', 'torax lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'torax', 'torax frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'torax', 'torax frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'torax', 'torax lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'torax', 'torax lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'torax', 'torax frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'torax', 'torax frontal'],
-    ['pies primero', 'supino', 'arriba', 'torax', 'torax frontal'],
-    ['pies primero', 'supino', 'abajo', 'torax', 'torax frontal'],
-    ['pies primero', 'supino', 'derecha', 'torax', 'torax lateral'],
-    ['pies primero', 'supino', 'izquierda', 'torax', 'torax lateral'],
-    ['pies primero', 'prono', 'arriba', 'torax', 'torax frontal'],
-    ['pies primero', 'prono', 'abajo', 'torax', 'torax frontal'],
-    ['pies primero', 'prono', 'derecha', 'torax', 'torax lateral'],
-    ['pies primero', 'prono', 'izquierda', 'torax', 'torax lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'torax', 'torax lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'torax', 'torax lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'torax', 'torax frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'torax', 'torax frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'torax', 'torax lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'torax', 'torax lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'torax', 'torax frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'torax', 'torax frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'abdomen', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'arriba', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'abajo', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'derecha', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'supino', 'izquierda', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'prono', 'arriba', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'abajo', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'derecha', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'prono', 'izquierda', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'abdomen', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'abdomen', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'arriba', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'abajo', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'derecha', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'supino', 'izquierda', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'prono', 'arriba', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'abajo', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'derecha', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'prono', 'izquierda', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'supino', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'prono', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'prono', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'abdomen y pelvis', 'abdomen y pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'abdomen y pelvis', 'abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'columna dorsal', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'columna lumbar', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'prono', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'supino', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'prono', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'torax abdomen y pelvis', 'torax abdomen y pelvis  frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'hombro', 'hombro lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'hombro', 'hombro frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'brazo', 'brazo lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'brazo', 'brazo frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'codo', 'codo frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'codo', 'codo frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'codo', 'codo lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'codo', 'codo lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'codo', 'codo frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'codo', 'codo frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'codo', 'codo lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'codo', 'codo lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'codo', 'codo lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'codo', 'codo lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'codo', 'codo frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'codo', 'codo frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'codo', 'codo lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'codo', 'codo lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'codo', 'codo frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'codo', 'codo frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'antebrazo', 'antebrazo lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'antebrazo', 'antebrazo frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'muñeca', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'muñeca', 'mano muñeca frontal'],
-    ['cabeza primero', 'supino', 'arriba', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'supino', 'abajo', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'supino', 'derecha', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'supino', 'izquierda', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'prono', 'arriba', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'prono', 'abajo', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'prono', 'derecha', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'prono', 'izquierda', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral derecho', 'arriba', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral derecho', 'abajo', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral derecho', 'derecha', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'lateral derecho', 'izquierda', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'arriba', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'abajo', 'mano', 'mano muñeca lateral'],
-    ['cabeza primero', 'lateral izquierdo', 'derecha', 'mano', 'mano muñeca frontal'],
-    ['cabeza primero', 'lateral izquierdo', 'izquierda', 'mano', 'mano muñeca frontal'],
-    ['pies primero', 'supino', 'arriba', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'supino', 'abajo', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'supino', 'derecha', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'supino', 'izquierda', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'prono', 'arriba', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'prono', 'abajo', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'prono', 'derecha', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'prono', 'izquierda', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'cadera', 'pelvis lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'cadera', 'pelvis frontal'],
-    ['pies primero', 'supino', 'arriba', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'supino', 'abajo', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'supino', 'derecha', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'supino', 'izquierda', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'prono', 'arriba', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'prono', 'abajo', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'prono', 'derecha', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'prono', 'izquierda', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'rodilla', 'rodilla lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'rodilla', 'rodilla frontal'],
-    ['pies primero', 'supino', 'arriba', 'pierna', 'pierna frontal'],
-    ['pies primero', 'supino', 'abajo', 'pierna', 'pierna frontal'],
-    ['pies primero', 'supino', 'derecha', 'pierna', 'pierna lateral'],
-    ['pies primero', 'supino', 'izquierda', 'pierna', 'pierna lateral'],
-    ['pies primero', 'prono', 'arriba', 'pierna', 'pierna frontal'],
-    ['pies primero', 'prono', 'abajo', 'pierna', 'pierna frontal'],
-    ['pies primero', 'prono', 'derecha', 'pierna', 'pierna lateral'],
-    ['pies primero', 'prono', 'izquierda', 'pierna', 'pierna lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'pierna', 'pierna lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'pierna', 'pierna lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'pierna', 'pierna frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'pierna', 'pierna frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'pierna', 'pierna lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'pierna', 'pierna lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'pierna', 'pierna frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'pierna', 'pierna frontal'],
-    ['pies primero', 'supino', 'arriba', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'supino', 'abajo', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'supino', 'derecha', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'supino', 'izquierda', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'prono', 'arriba', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'prono', 'abajo', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'prono', 'derecha', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'prono', 'izquierda', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'tobillo', 'pie tobillo lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'tobillo', 'pie tobillo frontal'],
-    ['pies primero', 'supino', 'arriba', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'supino', 'abajo', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'supino', 'derecha', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'supino', 'izquierda', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'prono', 'arriba', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'prono', 'abajo', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'prono', 'derecha', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'prono', 'izquierda', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'lateral derecho', 'arriba', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'lateral derecho', 'abajo', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'lateral derecho', 'derecha', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'lateral derecho', 'izquierda', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'lateral izquierdo', 'arriba', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'lateral izquierdo', 'abajo', 'pie', 'pie tobillo lateral'],
-    ['pies primero', 'lateral izquierdo', 'derecha', 'pie', 'pie tobillo frontal'],
-    ['pies primero', 'lateral izquierdo', 'izquierda', 'pie', 'pie tobillo frontal']
-]
-TOPO_PROTOCOLOS = ['Seleccionar', 'cerebro', 'cavidades perinasales', 'maxilofacial', 'orbitas', 'oidos', 'cuello', 'columna cervical', 'torax', 'abdomen', 'pelvis', 'abdomen y pelvis', 'columna dorsal', 'columna lumbar', 'torax abdomen y pelvis', 'hombro', 'brazo', 'codo', 'antebrazo', 'muñeca', 'mano', 'cadera', 'rodilla', 'pierna', 'tobillo', 'pie']
-TOPO_RX_MAP = {
-    (
-        normalizar_texto_archivo(entrada),
-        normalizar_texto_archivo(posicionamiento),
-        normalizar_texto_archivo(tubo),
-        normalizar_texto_archivo(protocolo),
-    ): nombre_imagen
-    for entrada, posicionamiento, tubo, protocolo, nombre_imagen in TOPO_RX_COMBINACIONES_RAW
-}
 
-def obtener_clave_rx(prefijo_estado="topo"):
+def cargar_mapa_rx_topograma():
+    mapa = {}
+
+    if not TOP_COMB_XLSX.exists():
+        return mapa
+
+    try:
+        wb = openpyxl.load_workbook(TOP_COMB_XLSX, data_only=True)
+        ws = wb.active
+
+        for fila in ws.iter_rows(values_only=True):
+            if not fila or len(fila) < 6:
+                continue
+
+            entrada = fila[1]
+            posicionamiento = fila[2]
+            tubo = fila[3]
+            protocolo = fila[4]
+            nombre_imagen = fila[5]
+
+            if not all([entrada, posicionamiento, tubo, protocolo, nombre_imagen]):
+                continue
+
+            if str(entrada).strip().lower() == "entrada del paciente":
+                continue
+
+            clave = (
+                normalizar_texto_archivo(entrada),
+                normalizar_texto_archivo(posicionamiento),
+                normalizar_texto_archivo(tubo),
+                normalizar_texto_archivo(protocolo),
+            )
+            mapa[clave] = str(nombre_imagen).strip()
+
+    except Exception:
+        return {}
+
+    return mapa
+
+
+MAPA_RX_TOPOGRAMA = cargar_mapa_rx_topograma()
+
+
+def obtener_nombre_rx_desde_combinacion(prefijo_estado="topo"):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
     posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
     tubo = st.session_state.get(f"{prefijo_estado}_posicion_tubo", "Seleccionar")
@@ -987,17 +493,17 @@ def obtener_clave_rx(prefijo_estado="topo"):
     ):
         return None
 
-    return (
+    clave = (
         normalizar_texto_archivo(entrada),
         normalizar_texto_archivo(posicionamiento),
         normalizar_texto_archivo(tubo),
         normalizar_texto_archivo(protocolo),
     )
+    return MAPA_RX_TOPOGRAMA.get(clave)
 
 
 def combinacion_rx_disponible(prefijo_estado="topo"):
-    clave = obtener_clave_rx(prefijo_estado)
-    return clave in TOPO_RX_MAP if clave else False
+    return obtener_nombre_rx_desde_combinacion(prefijo_estado) is not None
 
 
 def buscar_archivo_imagen_por_nombre(nombre_base):
@@ -1005,15 +511,55 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
         return None
 
     nombre_base = str(nombre_base).strip()
+    nombre_norm = normalizar_texto_archivo(nombre_base)
+
+    candidatos = []
+    variantes_base = {
+        nombre_base,
+        nombre_norm,
+        nombre_base.replace("_", " "),
+        nombre_base.replace(" ", "_"),
+        nombre_norm.replace("_", " "),
+        nombre_norm.replace(" ", "_"),
+    }
+
+    for variante in variantes_base:
+        variante = str(variante).strip()
+        if variante:
+            candidatos.append(variante)
+
     extensiones = ["", ".png", ".jpg", ".jpeg", ".webp"]
 
-    for ext in extensiones:
-        ruta = BASE_DIR / f"{nombre_base}{ext}"
-        if ruta.exists():
-            return ruta
+    for candidato in candidatos:
+        for ext in extensiones:
+            ruta = BASE_DIR / f"{candidato}{ext}"
+            if ruta.exists():
+                return ruta
+
+    for archivo in BASE_DIR.iterdir():
+        if archivo.is_file() and normalizar_texto_archivo(archivo.stem) == nombre_norm:
+            return archivo
 
     return None
 
+
+# -------------------------
+# IMAGEN DINÁMICA TOPOGRAMA
+# -------------------------
+def normalizar_texto_archivo(valor):
+    return (
+        str(valor)
+        .strip()
+        .lower()
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ñ", "n")
+        .replace("/", "_")
+        .replace(" ", "_")
+    )
 
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
@@ -1092,19 +638,72 @@ def determinar_vista_rx_topograma(posicionamiento, tubo):
 
     return None
 
-
-def obtener_nombre_imagen_rx(prefijo_estado="topo"):
-    clave = obtener_clave_rx(prefijo_estado)
-    if clave is None:
-        return None
-    return TOPO_RX_MAP.get(clave)
-
-
 def obtener_imagen_rx_topograma(prefijo_estado="topo"):
-    nombre_imagen = obtener_nombre_imagen_rx(prefijo_estado)
+    nombre_imagen = obtener_nombre_rx_desde_combinacion(prefijo_estado)
     if not nombre_imagen:
         return None
+
     return buscar_archivo_imagen_por_nombre(nombre_imagen)
+
+    entrada_norm = normalizar_texto_archivo(entrada)
+    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
+    tubo_norm = normalizar_texto_archivo(tubo)
+    region_norm = normalizar_texto_archivo(region)
+
+    vista = determinar_vista_rx_topograma(posicionamiento, tubo)
+    if vista is None:
+        return None
+
+    variantes_tubo = [tubo_norm]
+    if tubo_norm == "derecha":
+        variantes_tubo.append("derecho")
+    elif tubo_norm == "izquierda":
+        variantes_tubo.append("izquierdo")
+
+    variantes_region = [region_norm]
+    if region_norm == "cuerpo_completo":
+        variantes_region.extend(["cuerpo", "body"])
+    if region_norm == "torax":
+        variantes_region.extend(["torace"])
+
+    variantes_vista = [vista]
+    if vista == "frontal":
+        variantes_vista.extend(["ap"])
+    elif vista == "lateral":
+        variantes_vista.extend(["perfil"])
+
+    candidatos = []
+    extensiones = [".png", ".jpg", ".jpeg", ".webp"]
+
+    for region_var in variantes_region:
+        for vista_var in variantes_vista:
+            candidatos.extend([
+                f"topograma_rx_{entrada_norm}_{posicionamiento_norm}_{tubo_norm}_{region_var}_{vista_var}",
+                f"topograma_rx_{entrada_norm}_{posicionamiento_norm}_{region_var}_{vista_var}",
+                f"topograma_rx_{entrada_norm}_{region_var}_{vista_var}",
+                f"topograma_rx_{region_var}_{vista_var}",
+                f"topograma_{region_var}_{vista_var}",
+                f"rx_topograma_{region_var}_{vista_var}",
+            ])
+            for tubo_var in variantes_tubo:
+                candidatos.extend([
+                    f"topograma_rx_{entrada_norm}_{posicionamiento_norm}_{tubo_var}_{region_var}_{vista_var}",
+                    f"topograma_rx_{entrada_norm}__{posicionamiento_norm}__{tubo_var}__{region_var}__{vista_var}",
+                    f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_var}_{region_var}_{vista_var}",
+                ])
+
+    candidatos_unicos = []
+    for nombre in candidatos:
+        if nombre not in candidatos_unicos:
+            candidatos_unicos.append(nombre)
+
+    for base in candidatos_unicos:
+        for ext in extensiones:
+            ruta = BASE_DIR / f"{base}{ext}"
+            if ruta.exists():
+                return ruta
+
+    return None
 
 # -------------------------
 # PÁGINAS
@@ -1295,7 +894,7 @@ elif seccion == "Topograma":
             volver_anterior(); st.rerun()
 
     # -------------------------
-    # TOPOGRAMA 1
+    # TOPGRAMA 1
     # -------------------------
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
 
@@ -1330,13 +929,13 @@ elif seccion == "Topograma":
         )
 
     with form_col3:
-        persistent_selectbox("Protocolo", TOPO_PROTOCOLOS, "topo_region")
+        persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo_region")
         persistent_text_input("Inicio topograma", "topo_inicio")
         persistent_text_input("Término topograma", "topo_termino")
 
     topograma1_completo = topograma_completo("topo")
-    topograma1_rx_disponible = combinacion_rx_disponible("topo")
 
+    # rellenar imágenes después de crear widgets
     imagen_equipo_topo_1 = obtener_imagen_topograma()
     if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
         placeholder_img_topo_1.image(str(imagen_equipo_topo_1), width=320)
@@ -1363,14 +962,18 @@ elif seccion == "Topograma":
                     text-align:center;
                     padding:1rem;
                 ">
-                    No se encontró el archivo de imagen para esta combinación
+                    No se encontró la imagen RX del topograma 1
                 </div>
                 """,
                 unsafe_allow_html=True
             )
     else:
+        mensaje_topo_1 = "La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>"
+        if topograma1_completo and not combinacion_rx_disponible("topo"):
+            mensaje_topo_1 = "No hay imagen configurada para esta combinación"
+
         placeholder_rx_topo_1.markdown(
-            """
+            f"""
             <div style="
                 min-height:220px;
                 display:flex;
@@ -1384,31 +987,34 @@ elif seccion == "Topograma":
                 text-align:center;
                 padding:1rem;
             ">
-                La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
+                {mensaje_topo_1}
             </div>
             """,
             unsafe_allow_html=True
         )
 
-    if topograma1_completo and not topograma1_rx_disponible:
-        st.warning("La combinación seleccionada no tiene imagen asociada en tu planilla, por eso Iniciar RX permanece desactivado.")
-
     btn1, btn2, btn3 = st.columns([2, 2, 2])
     with btn2:
-        if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not (topograma1_completo and topograma1_rx_disponible)):
+        if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not (topograma1_completo and combinacion_rx_disponible("topo"))):
             st.session_state["topo_rx_iniciado"] = True
             st.rerun()
+
+    sig1, sig2, sig3 = st.columns([2, 2, 2])
+    with sig2:
+        topograma2_completo = True
+        if st.session_state["topo_agregar_segundo"] == "SI":
+            topograma2_completo = topograma_completo("topo2")
+        if st.button("Siguiente", use_container_width=True, disabled=not (topograma1_completo and topograma2_completo)):
+            ir_a("Adquisición"); st.rerun()
 
     st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
     persistent_selectbox("Agregar segundo topograma", ["NO", "SI"], "topo_agregar_segundo")
     st.markdown('</div>', unsafe_allow_html=True)
 
     # -------------------------
-    # TOPOGRAMA 2
+    # TOPGRAMA 2
     # -------------------------
     topograma2_completo = True
-    topograma2_rx_disponible = True
-
     if st.session_state["topo_agregar_segundo"] == "SI":
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
 
@@ -1443,12 +1049,11 @@ elif seccion == "Topograma":
             )
 
         with form2_col3:
-            persistent_selectbox("Protocolo", TOPO_PROTOCOLOS, "topo2_region")
+            persistent_selectbox("protocolo", ["Seleccionar", "Cabeza", "cavidades perinasales", "maxilofacial", "orbitas", "oidos", "Cuello", "columna cervical",  "Tórax", "Abdomen", "Pelvis", "columna dorsal", "columna lumbar", "homnro", "brazo", "codo", "antebrazo", "muñeca", "mano", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie", "torax abdomen y pelvis", "cuello torax abdomen y pelvis", "cerebro cuello torax abdomen y pelvis",], "topo2_region")
             persistent_text_input("Inicio topograma", "topo2_inicio")
             persistent_text_input("Término topograma", "topo2_termino")
 
         topograma2_completo = topograma_completo("topo2")
-        topograma2_rx_disponible = combinacion_rx_disponible("topo2")
 
         imagen_equipo_topo_2 = obtener_imagen_topograma_2()
         if imagen_equipo_topo_2 is not None and imagen_equipo_topo_2.exists():
@@ -1476,14 +1081,18 @@ elif seccion == "Topograma":
                         text-align:center;
                         padding:1rem;
                     ">
-                        No se encontró el archivo de imagen para esta combinación
+                        No se encontró la imagen RX del topograma 2
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
         else:
+            mensaje_topo_2 = "La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>"
+            if topograma2_completo and not combinacion_rx_disponible("topo2"):
+                mensaje_topo_2 = "No hay imagen configurada para esta combinación"
+
             placeholder_rx_topo_2.markdown(
-                """
+                f"""
                 <div style="
                     min-height:220px;
                     display:flex;
@@ -1497,47 +1106,31 @@ elif seccion == "Topograma":
                     text-align:center;
                     padding:1rem;
                 ">
-                    La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
+                    {mensaje_topo_2}
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
-        if topograma2_completo and not topograma2_rx_disponible:
-            st.warning("La combinación seleccionada para el topograma 2 no tiene imagen asociada en tu planilla.")
-
         b21, b22, b23 = st.columns([2, 2, 2])
         with b22:
-            if st.button("Iniciar RX topograma 2", use_container_width=True, disabled=not (topograma2_completo and topograma2_rx_disponible)):
+            if st.button("Iniciar RX topograma 2", use_container_width=True, disabled=not (topograma2_completo and combinacion_rx_disponible("topo2"))):
                 st.session_state["topo2_rx_iniciado"] = True
                 st.rerun()
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    sig1, sig2, sig3 = st.columns([2, 2, 2])
-    with sig2:
-        puede_avanzar = topograma1_completo and topograma1_rx_disponible
-        if st.session_state["topo_agregar_segundo"] == "SI":
-            puede_avanzar = puede_avanzar and topograma2_completo and topograma2_rx_disponible
-
-        if st.button("Siguiente", use_container_width=True, disabled=not puede_avanzar):
-            ir_a("Adquisición")
-            st.rerun()
-
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-
     st.write("**Topograma 1**")
     st.write(f"**Entrada del paciente:** {st.session_state['topo_entrada_paciente']}")
     st.write(f"**Posicionamiento:** {st.session_state['topo_posicionamiento']}")
     st.write(f"**Posición del tubo:** {st.session_state['topo_posicion_tubo']}")
     st.write(f"**Posición de brazos / extremidades:** {st.session_state['topo_posicion_brazos']}")
-    st.write(f"**Protocolo:** {st.session_state['topo_region']}")
+    st.write(f"**Región:** {st.session_state['topo_region']}")
     st.write(f"**Inicio:** {st.session_state['topo_inicio']}")
     st.write(f"**Término:** {st.session_state['topo_termino']}")
-    nombre_img_1 = obtener_nombre_imagen_rx("topo")
-    st.write(f"**Imagen RX asociada:** {nombre_img_1 if nombre_img_1 else 'No disponible para esta combinación'}")
 
     if st.session_state["topo_agregar_segundo"] == "SI":
         st.write("")
@@ -1546,12 +1139,9 @@ elif seccion == "Topograma":
         st.write(f"**Posicionamiento:** {st.session_state['topo2_posicionamiento']}")
         st.write(f"**Posición del tubo:** {st.session_state['topo2_posicion_tubo']}")
         st.write(f"**Posición de brazos / extremidades:** {st.session_state['topo2_posicion_brazos']}")
-        st.write(f"**Protocolo:** {st.session_state['topo2_region']}")
+        st.write(f"**Región:** {st.session_state['topo2_region']}")
         st.write(f"**Inicio:** {st.session_state['topo2_inicio']}")
         st.write(f"**Término:** {st.session_state['topo2_termino']}")
-        nombre_img_2 = obtener_nombre_imagen_rx("topo2")
-        st.write(f"**Imagen RX asociada:** {nombre_img_2 if nombre_img_2 else 'No disponible para esta combinación'}")
-
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif seccion == "Adquisición":
