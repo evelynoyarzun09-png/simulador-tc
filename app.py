@@ -942,29 +942,36 @@ elif seccion == "Topograma":
     # TOPOGRAMA 1
     # -------------------------
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-
-    img_col1, img_col2 = st.columns([1, 1], vertical_alignment="top")
-
-    with img_col1:
-        sub1_a, sub1_b, sub1_c = st.columns([1, 8, 1])
-        with sub1_b:
-            placeholder_img_topo_1 = st.empty()
-
-    with img_col2:
-        sub2_a, sub2_b, sub2_c = st.columns([1, 8, 1])
-        with sub2_b:
-            placeholder_rx_topo_1 = st.empty()
-
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Topograma 1</div>', unsafe_allow_html=True)
 
-    form_col1, form_col2, form_col3 = st.columns(3)
+    topograma1_completo = topograma_completo("topo")
+    topograma1_rx_campos = rx_campos_completos("topo")
+    topograma1_rx_disponible = combinacion_rx_disponible("topo")
 
-    with form_col1:
+    layout_izq, layout_der = st.columns([1.05, 1.0], vertical_alignment="top")
+
+    with layout_izq:
+        st.markdown(
+            """
+            <div style="
+                border:1px solid #7a7a7a;
+                border-radius:14px;
+                overflow:hidden;
+                background-color:#565656;
+                margin-bottom:0.8rem;
+            ">
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown('<div style="padding:0.8rem 1rem 0.2rem 1rem; font-weight:700; color:white;">Configuración del topograma</div>', unsafe_allow_html=True)
+
+        st.markdown('<div style="padding:0 1rem 0.7rem 1rem;">', unsafe_allow_html=True)
         persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
         persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    with form_col2:
+        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.7rem 1rem 0.7rem 1rem;">', unsafe_allow_html=True)
         persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
         persistent_selectbox(
             "Posición de brazos / extremidades",
@@ -972,31 +979,53 @@ elif seccion == "Topograma":
              "FLEXIÓN EXTREMIDAD INFERIOR DERECHA", "FLEXIÓN EXTREMIDAD INFERIOR IZQUIERDA"],
             "topo_posicion_brazos"
         )
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    with form_col3:
+        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.7rem 1rem 1rem 1rem;">', unsafe_allow_html=True)
         persistent_selectbox("Protocolo", TOPO_PROTOCOLOS, "topo_region")
         persistent_text_input("Inicio topograma", "topo_inicio")
         persistent_text_input("Término topograma", "topo_termino")
+        st.markdown('</div></div>', unsafe_allow_html=True)
 
-    topograma1_completo = topograma_completo("topo")
-    topograma1_rx_campos = rx_campos_completos("topo")
-    topograma1_rx_disponible = combinacion_rx_disponible("topo")
-
-    imagen_equipo_topo_1 = obtener_imagen_topograma()
-    if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
-        placeholder_img_topo_1.image(str(imagen_equipo_topo_1), width=320)
-    else:
-        placeholder_img_topo_1.info("No se encontró la imagen de posicionamiento del topograma 1.")
-
-    if st.session_state.get("topo_rx_iniciado", False):
-        imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
-        if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
-            placeholder_rx_topo_1.image(str(imagen_rx_topo_1), width=300)
+    with layout_der:
+        imagen_equipo_topo_1 = obtener_imagen_topograma()
+        if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
+            st.image(str(imagen_equipo_topo_1), use_container_width=True)
         else:
-            placeholder_rx_topo_1.markdown(
+            st.info("No se encontró la imagen de posicionamiento del topograma 1.")
+
+        st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+
+        if st.session_state.get("topo_rx_iniciado", False):
+            imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
+            if imagen_rx_topo_1 is not None and imagen_rx_topo_1.exists():
+                st.image(str(imagen_rx_topo_1), use_container_width=True)
+            else:
+                st.markdown(
+                    """
+                    <div style="
+                        min-height:280px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:1px solid #7a7a7a;
+                        border-radius:14px;
+                        background-color:#4a4a4a;
+                        color:white;
+                        font-weight:600;
+                        text-align:center;
+                        padding:1rem;
+                    ">
+                        No se encontró el archivo de imagen para esta combinación
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(
                 """
                 <div style="
-                    min-height:220px;
+                    min-height:280px;
                     display:flex;
                     align-items:center;
                     justify-content:center;
@@ -1008,37 +1037,16 @@ elif seccion == "Topograma":
                     text-align:center;
                     padding:1rem;
                 ">
-                    No se encontró el archivo de imagen para esta combinación
+                    La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
-    else:
-        placeholder_rx_topo_1.markdown(
-            """
-            <div style="
-                min-height:220px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                border:1px solid #7a7a7a;
-                border-radius:14px;
-                background-color:#4a4a4a;
-                color:white;
-                font-weight:600;
-                text-align:center;
-                padding:1rem;
-            ">
-                La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
     if topograma1_rx_campos and not topograma1_rx_disponible:
         st.warning("La combinación seleccionada no tiene imagen asociada en tu planilla, por eso Iniciar RX permanece desactivado.")
 
-    btn1, btn2, btn3 = st.columns([2, 2, 2])
+    btn1, btn2, btn3 = st.columns([1.3, 2.4, 1.3])
     with btn2:
         if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not (topograma1_rx_campos and topograma1_rx_disponible)):
             st.session_state["topo_rx_iniciado"] = True
@@ -1057,18 +1065,15 @@ elif seccion == "Topograma":
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-
-    st.write("**Topograma 1**")
-    st.write(f"**Entrada del paciente:** {st.session_state['topo_entrada_paciente']}")
-    st.write(f"**Posicionamiento:** {st.session_state['topo_posicionamiento']}")
+    st.write(f"**Entrada paciente:** {st.session_state['topo_entrada_paciente']}")
     st.write(f"**Posición del tubo:** {st.session_state['topo_posicion_tubo']}")
+    st.write(f"**Posicionamiento:** {st.session_state['topo_posicionamiento']}")
     st.write(f"**Posición de brazos / extremidades:** {st.session_state['topo_posicion_brazos']}")
     st.write(f"**Protocolo:** {st.session_state['topo_region']}")
     st.write(f"**Inicio:** {st.session_state['topo_inicio']}")
     st.write(f"**Término:** {st.session_state['topo_termino']}")
     nombre_img_1 = obtener_nombre_imagen_rx("topo")
     st.write(f"**Imagen RX asociada:** {nombre_img_1 if nombre_img_1 else 'No disponible para esta combinación'}")
-
 
     st.markdown('</div>', unsafe_allow_html=True)
 
