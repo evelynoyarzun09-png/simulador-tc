@@ -190,18 +190,18 @@ if not st.session_state.autenticado:
         font-size: 2.5rem;
         font-weight: 700;
         color: #20cfcf;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.35rem;
     }
     .login-subtitulo {
         text-align: center;
         color: white;
-        font-size: 1.05rem;
+        font-size: 0.62rem;
         margin-bottom: 1.2rem;
     }
     div[data-baseweb="input"] > div {
         background-color: #d0d5dd !important;
         color: #111111 !important;
-        border-radius: 12px !important;
+        border-radius: 8px !important;
     }
     input {
         color: #111111 !important;
@@ -210,10 +210,11 @@ if not st.session_state.autenticado:
     div.stButton > button {
         background-color: #b8bec7 !important;
         color: #1f1f1f !important;
-        border-radius: 12px !important;
+        border-radius: 8px !important;
         border: 1px solid #9ca3ad !important;
         font-weight: 600 !important;
-        min-height: 46px !important;
+    font-size: 0.7rem !important;
+        min-height: 30px !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -239,12 +240,23 @@ if not st.session_state.autenticado:
 st.markdown("""
 <style>
 .stApp { background-color: #505050; }
-.block-container { padding-top: 1.2rem; padding-bottom: 2rem; }
+.block-container { padding-top: 0.5rem; padding-bottom: 0.8rem; max-width: 1100px; }
+
+/* Escala general más compacta */
+html, body, [class*="css"]  {
+    font-size: 10px !important;
+}
+h1 { font-size: 1.8rem !important; }
+h2 { font-size: 1.45rem !important; }
+h3 { font-size: 1.2rem !important; }
+p, label, .stMarkdown, .stText, div, span {
+    line-height: 1.15 !important;
+}
 h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; text-transform: uppercase !important; }
 
 .portada-titulo {
     text-align: center;
-    font-size: 2.6rem;
+    font-size: 1.45rem;
     font-weight: 700;
     color: #20cfcf;
     margin-top: 0.5rem;
@@ -253,8 +265,8 @@ h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important
 .portada-subtitulo {
     text-align: center;
     color: white;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
+    font-size: 0.62rem;
+    margin-bottom: 0.4rem;
 }
 .portada-fondo {
     background-color: black;
@@ -264,10 +276,11 @@ h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important
 div.stButton > button {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
-    border-radius: 12px !important;
+    border-radius: 8px !important;
     border: 1px solid #9ca3ad !important;
     font-weight: 600 !important;
-    min-height: 46px !important;
+    font-size: 0.7rem !important;
+    min-height: 30px !important;
 }
 div.stButton > button:disabled {
     background-color: #8a8f97 !important;
@@ -277,39 +290,39 @@ div.stButton > button:disabled {
 }
 .bloque-resumen {
     background-color: #616161;
-    padding: 1rem 1.2rem;
-    border-radius: 12px;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
     border: 1px solid #7a7a7a;
 }
 .bloque-seccion {
     background-color: #616161;
-    padding: 1rem 1rem 0.8rem 1rem;
-    border-radius: 14px;
+    padding: 0.45rem 0.5rem 0.35rem 0.5rem;
+    border-radius: 9px;
     border: 1px solid #7a7a7a;
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
 }
 .bloque-a-practicar {
     background-color: #616161;
-    padding: 1.2rem;
-    border-radius: 16px;
+    padding: 0.55rem;
+    border-radius: 10px;
     border: 1px solid #7a7a7a;
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
 }
 .titulo-bloque {
-    font-size: 1.05rem;
+    font-size: 0.62rem;
     font-weight: 700;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.35rem;
     color: white;
 }
 .bloque-a-practicar img,
-.bloque-seccion img { border-radius: 14px; }
+.bloque-seccion img { border-radius: 9px; }
 
-[data-testid="stMetricValue"] { font-size: 1.35rem !important; }
+[data-testid="stMetricValue"] { font-size: 0.8rem !important; }
 [data-testid="stMetricLabel"] { color: white !important; }
 
 div[data-baseweb="select"] > div {
     background-color: #b8bec7 !important;
-    border-radius: 12px !important;
+    border-radius: 8px !important;
     color: #000000 !important;
 }
 div[data-baseweb="select"] div,
@@ -350,7 +363,7 @@ div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
     background-color: #b8bec7 !important;
     color: #1f1f1f !important;
-    border-radius: 12px !important;
+    border-radius: 8px !important;
 }
 input, textarea {
     color: #1f1f1f !important;
@@ -367,19 +380,19 @@ input[type="date"] {
 
 /* Compacto para topograma */
 .topo-compacto .titulo-bloque {
-    font-size: 0.95rem !important;
-    margin-bottom: 0.45rem !important;
+    font-size: 0.62rem !important;
+    margin-bottom: 0.2rem !important;
 }
 .topo-compacto hr {
-    margin: 0.45rem 0 0.65rem 0 !important;
+    margin: 0.15rem 0 0.25rem 0 !important;
 }
 .topo-compacto .stSelectbox label,
 .topo-compacto .stTextInput label {
-    font-size: 0.82rem !important;
+    font-size: 0.55rem !important;
 }
 .topo-compacto [data-baseweb="select"] > div,
 .topo-compacto [data-baseweb="input"] > div {
-    min-height: 2.7rem !important;
+    min-height: 1.8rem !important;
 }
 .topo-compacto img {
     border-radius: 14px !important;
@@ -977,20 +990,20 @@ elif seccion == "Topograma":
                 border-radius:14px;
                 overflow:hidden;
                 background-color:#565656;
-                margin-bottom:0.6rem;
+                margin-bottom:0.25rem;
             ">
             """,
             unsafe_allow_html=True
         )
 
-        st.markdown('<div style="padding:0.65rem 0.9rem 0.15rem 0.9rem; font-weight:700; color:white;">Configuración del topograma</div>', unsafe_allow_html=True)
+        st.markdown('<div style="padding:0.25rem 0.45rem 0.05rem 0.45rem; font-weight:700; color:white;">Configuración del topograma</div>', unsafe_allow_html=True)
 
-        st.markdown('<div style="padding:0 0.9rem 0.45rem 0.9rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="padding:0 0.45rem 0.15rem 0.45rem;">', unsafe_allow_html=True)
         persistent_selectbox("Entrada paciente", ["Seleccionar", "CABEZA PRIMERO", "PIES PRIMERO"], "topo_entrada_paciente")
         persistent_selectbox("Posición del tubo", ["Seleccionar", "Arriba", "Abajo", "Derecha", "Izquierda"], "topo_posicion_tubo")
         st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.45rem 0.9rem 0.45rem 0.9rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.15rem 0.45rem 0.15rem 0.45rem;">', unsafe_allow_html=True)
         persistent_selectbox("Posicionamiento", ["Seleccionar", "SUPINO", "PRONO", "LATERAL DERECHO", "LATERAL IZQUIERDO"], "topo_posicionamiento")
         persistent_selectbox(
             "Posición de brazos / extremidades",
@@ -1000,7 +1013,7 @@ elif seccion == "Topograma":
         )
         st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.45rem 0.9rem 0.8rem 0.9rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.15rem 0.45rem 0.25rem 0.45rem;">', unsafe_allow_html=True)
         persistent_selectbox("Protocolo", TOPO_PROTOCOLOS, "topo_region")
 
         mini1, mini2 = st.columns(2)
@@ -1019,7 +1032,7 @@ elif seccion == "Topograma":
             else:
                 st.info("No se encontró la imagen de posicionamiento del topograma 1.")
 
-        st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:3px;'></div>", unsafe_allow_html=True)
 
         c4, c5, c6 = st.columns([0.05, 0.90, 0.05])
         with c5:
@@ -1031,7 +1044,7 @@ elif seccion == "Topograma":
                     st.markdown(
                         """
                         <div style="
-                            min-height:200px;
+                            min-height:120px;
                             display:flex;
                             align-items:center;
                             justify-content:center;
@@ -1041,7 +1054,7 @@ elif seccion == "Topograma":
                             color:white;
                             font-weight:600;
                             text-align:center;
-                            padding:0.8rem;
+                            padding:0.35rem;
                         ">
                             No se encontró el archivo de imagen para esta combinación
                         </div>
@@ -1052,7 +1065,7 @@ elif seccion == "Topograma":
                 st.markdown(
                     """
                     <div style="
-                        min-height:200px;
+                        min-height:120px;
                         display:flex;
                         align-items:center;
                         justify-content:center;
@@ -1062,7 +1075,7 @@ elif seccion == "Topograma":
                         color:white;
                         font-weight:600;
                         text-align:center;
-                        padding:0.8rem;
+                        padding:0.35rem;
                     ">
                         La imagen del topograma aparecerá al presionar<br><b>Iniciar RX</b>
                     </div>
