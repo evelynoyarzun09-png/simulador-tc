@@ -460,6 +460,7 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "torax",
     "abdomen",
     "pelvis",
+     "pielotac",
     "abdomen y pelvis",
     "columna dorsal",
     "columna lumbar",
@@ -471,14 +472,12 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "muñeca",
     "mano",
     "cadera",
+    "muslo",
     "rodilla",
     "pierna",
     "tobillo",
-    "pie",
-    "pielotac",
-    "muslo",
+    "pie",   
 ]
-
 TOPO_PROTOCOLOS = PROTOCOLOS_TOPO_FALLBACK
 TOPO_RX_DIAG = {"archivo_encontrado": True, "filas_cargadas": 0, "error": ""}
 
