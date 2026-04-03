@@ -485,11 +485,14 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "antebrazo",
     "muñeca",
     "mano",
+    "mano muñeca",
     "cadera",
     "rodilla",
     "pierna",
     "tobillo",
     "pie",
+    "pie tobillo",
+    "muslo",
     "pielotac",
 ]
 
@@ -500,67 +503,115 @@ def corregir_nombre_imagen(valor):
         "abdomen_rontal": "abdomen_frontal",
         "abdomen__frontal": "abdomen_frontal",
         "abdomen_y_pelvis__frontal": "abdomen_y_pelvis_frontal",
-        "abdomenpelvis__frontal": "abdomen_pelvis_frontal",
-        "abdomenpelvis_frontal": "abdomen_pelvis_frontal",
-        "abdomenpelvis_lateral": "abdomen_pelvis_lateral",
+        "abdomenpelvis__frontal": "abdomen_y_pelvis_frontal",
+        "abdomenpelvis_frontal": "abdomen_y_pelvis_frontal",
+        "abdomenpelvis_lateral": "abdomen_y_pelvis_lateral",
         "pelvis__frontal": "pelvis_frontal",
         "mano_ateral": "mano_lateral",
         "mano_rontal": "mano_frontal",
         "torax_abdomen_pelvis_frontal": "torax_abdomen_y_pelvis_frontal",
         "torax_abdomen_pelvis_lateral": "torax_abdomen_y_pelvis_lateral",
+        "mano_muneca_frontal": "mano_muneca_frontal",
+        "mano_muneca_lateral": "mano_muneca_lateral",
+        "pie_tobillo_frontal": "pie_tobillo_frontal",
+        "pie_tobillo_lateral": "pie_tobillo_lateral",
     }
     nombre = correcciones.get(nombre, nombre)
     nombre = nombre.replace("__", "_").strip("_")
     return nombre
 
+def _buscar_fila_encabezados(ws):
+    encabezados_esperados = [
+        "entrada del paciente",
+        "posicionamiento",
+        "posicion del tubo",
+        "protolocolo",
+        "protocolo",
+        "nombre exacto de la imagen",
+    ]
+    for i, fila in enumerate(ws.iter_rows(values_only=True), start=1):
+        textos = [normalizar_texto_archivo(c) for c in fila if c is not None]
+        if (
+            "entrada_del_paciente" in textos
+            and "posicionamiento" in textos
+            and "posicion_del_tubo" in textos
+            and ("protolocolo" in textos or "protocolo" in textos)
+            and "nombre_exacto_de_la_imagen" in textos
+        ):
+            return i
+    return None
+
+def _valor_limpio(v):
+    if v is None:
+        return ""
+    return str(v).strip()
+
 def cargar_mapa_rx_topograma():
     mapa = {}
     protocolos_excel = []
+    diagnostico = {"archivo_encontrado": TOP_COMB_XLSX.exists(), "filas_cargadas": 0, "error": ""}
 
     if not TOP_COMB_XLSX.exists():
-        return mapa, protocolos_excel
+        diagnostico["error"] = "No se encontró topograma combinaciones.xlsx en la carpeta principal."
+        return mapa, protocolos_excel, diagnostico
 
     try:
         wb = openpyxl.load_workbook(TOP_COMB_XLSX, data_only=True)
         ws = wb.active
+        fila_header = _buscar_fila_encabezados(ws)
 
-        for fila in ws.iter_rows(values_only=True):
-            if not fila or len(fila) < 6:
-                continue
+        if not fila_header:
+            diagnostico["error"] = "No se encontró la fila de encabezados en el Excel."
+            return mapa, protocolos_excel, diagnostico
 
-            entrada = fila[1]
-            posicionamiento = fila[2]
-            tubo = fila[3]
-            protocolo = fila[4]
-            nombre_imagen = fila[5]
+        filas = list(ws.iter_rows(values_only=True))
+        header_vals = filas[fila_header - 1]
+        header_map = {}
+        for idx, val in enumerate(header_vals):
+            key = normalizar_texto_archivo(val)
+            if key:
+                header_map[key] = idx
+
+        idx_entrada = header_map.get("entrada_del_paciente")
+        idx_pos = header_map.get("posicionamiento")
+        idx_tubo = header_map.get("posicion_del_tubo")
+        idx_prot = header_map.get("protolocolo", header_map.get("protocolo"))
+        idx_img = header_map.get("nombre_exacto_de_la_imagen")
+
+        if None in [idx_entrada, idx_pos, idx_tubo, idx_prot, idx_img]:
+            diagnostico["error"] = "Faltan columnas obligatorias en el Excel."
+            return mapa, protocolos_excel, diagnostico
+
+        for fila in filas[fila_header:]:
+            largo = len(fila)
+            entrada = _valor_limpio(fila[idx_entrada] if idx_entrada < largo else "")
+            posicionamiento = _valor_limpio(fila[idx_pos] if idx_pos < largo else "")
+            tubo = _valor_limpio(fila[idx_tubo] if idx_tubo < largo else "")
+            protocolo = _valor_limpio(fila[idx_prot] if idx_prot < largo else "")
+            nombre_imagen = _valor_limpio(fila[idx_img] if idx_img < largo else "")
 
             if not all([entrada, posicionamiento, tubo, protocolo, nombre_imagen]):
                 continue
 
-            entrada_txt = str(entrada).strip()
-            if entrada_txt.lower() == "entrada del paciente":
-                continue
-
-            protocolo_txt = str(protocolo).strip()
-            nombre_imagen_txt = str(nombre_imagen).strip()
-
             clave = (
-                normalizar_texto_archivo(entrada_txt),
+                normalizar_texto_archivo(entrada),
                 normalizar_texto_archivo(posicionamiento),
                 normalizar_texto_archivo(tubo),
-                normalizar_texto_archivo(protocolo_txt),
+                normalizar_texto_archivo(protocolo),
             )
-            mapa[clave] = nombre_imagen_txt
+            mapa[clave] = nombre_imagen
+            diagnostico["filas_cargadas"] += 1
 
-            if protocolo_txt and protocolo_txt not in protocolos_excel:
-                protocolos_excel.append(protocolo_txt)
+            if protocolo not in protocolos_excel:
+                protocolos_excel.append(protocolo)
 
-    except Exception:
-        return {}, []
+    except Exception as e:
+        diagnostico["error"] = f"Error leyendo Excel: {e}"
+        return {}, [], diagnostico
 
-    return mapa, protocolos_excel
+    return mapa, protocolos_excel, diagnostico
 
-TOPO_RX_MAP, TOPO_PROTOCOLOS_EXCEL = cargar_mapa_rx_topograma()
+TOPO_RX_MAP, TOPO_PROTOCOLOS_EXCEL, TOPO_RX_DIAG = cargar_mapa_rx_topograma()
 
 if TOPO_PROTOCOLOS_EXCEL:
     TOPO_PROTOCOLOS = ["Seleccionar"] + TOPO_PROTOCOLOS_EXCEL
