@@ -590,6 +590,7 @@ def _base_imagen_por_protocolo(protocolo_norm):
         "pierna": "pierna",
         "tobillo": "pie_tobillo",
         "pie": "pie_tobillo",
+        "pielotac": "pielotac",
         "muslo": "muslo",
     }
     return mapa.get(protocolo_norm)
