@@ -460,7 +460,6 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "torax",
     "abdomen",
     "pelvis",
-    "pielotc",
     "abdomen y pelvis",
     "columna dorsal",
     "columna lumbar",
@@ -472,12 +471,12 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "muñeca",
     "mano",
     "cadera",
-    "muslo",
     "rodilla",
     "pierna",
     "tobillo",
     "pie",
     "pielotac",
+    "muslo",
 ]
 
 TOPO_PROTOCOLOS = PROTOCOLOS_TOPO_FALLBACK
@@ -591,6 +590,7 @@ def _base_imagen_por_protocolo(protocolo_norm):
         "pierna": "pierna",
         "tobillo": "pie_tobillo",
         "pie": "pie_tobillo",
+        "muslo": "muslo",
     }
     return mapa.get(protocolo_norm)
 
