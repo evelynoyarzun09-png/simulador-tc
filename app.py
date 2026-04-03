@@ -980,7 +980,7 @@ elif seccion == "Topograma":
     topograma1_rx_campos = rx_campos_completos("topo")
     topograma1_rx_disponible = combinacion_rx_disponible("topo")
 
-    layout_izq, layout_der = st.columns([0.95, 0.85], vertical_alignment="top")
+    layout_izq, layout_der = st.columns([1.15, 0.65], vertical_alignment="top")
 
     with layout_izq:
         st.markdown(
@@ -1025,7 +1025,7 @@ elif seccion == "Topograma":
 
     with layout_der:
         imagen_equipo_topo_1 = obtener_imagen_topograma()
-        c1, c2, c3 = st.columns([0.05, 0.90, 0.05])
+        c1, c2, c3 = st.columns([0.22, 0.56, 0.22])
         with c2:
             if imagen_equipo_topo_1 is not None and imagen_equipo_topo_1.exists():
                 st.image(str(imagen_equipo_topo_1), use_container_width=True)
@@ -1034,7 +1034,7 @@ elif seccion == "Topograma":
 
         st.markdown("<div style='height:3px;'></div>", unsafe_allow_html=True)
 
-        c4, c5, c6 = st.columns([0.05, 0.90, 0.05])
+        c4, c5, c6 = st.columns([0.22, 0.56, 0.22])
         with c5:
             if st.session_state.get("topo_rx_iniciado", False):
                 imagen_rx_topo_1 = obtener_imagen_rx_topograma("topo")
