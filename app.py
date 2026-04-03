@@ -1005,12 +1005,28 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
         return None
 
     nombre_base = str(nombre_base).strip()
+    nombre_norm = normalizar_texto_archivo(nombre_base)
+
+    candidatos = [
+        nombre_base,
+        nombre_norm,
+        nombre_base.replace("_", " "),
+        nombre_base.replace(" ", "_"),
+        nombre_norm.replace("_", " "),
+        nombre_norm.replace(" ", "_"),
+    ]
+
     extensiones = ["", ".png", ".jpg", ".jpeg", ".webp"]
 
-    for ext in extensiones:
-        ruta = BASE_DIR / f"{nombre_base}{ext}"
-        if ruta.exists():
-            return ruta
+    for candidato in candidatos:
+        for ext in extensiones:
+            ruta = BASE_DIR / f"{candidato}{ext}"
+            if ruta.exists():
+                return ruta
+
+    for archivo in BASE_DIR.iterdir():
+        if archivo.is_file() and normalizar_texto_archivo(archivo.stem) == nombre_norm:
+            return archivo
 
     return None
 
