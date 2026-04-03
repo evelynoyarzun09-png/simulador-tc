@@ -446,10 +446,8 @@ def normalizar_texto_archivo(valor):
 
 
 # -------------------------
-# COMBINACIONES RX DESDE EXCEL
+# MAPEO RX TOPOGRAMA DESDE REGLAS FIJAS
 # -------------------------
-TOP_COMB_XLSX = BASE_DIR / "topograma combinaciones.xlsx"
-
 PROTOCOLOS_TOPO_FALLBACK = [
     "Seleccionar",
     "cerebro",
@@ -462,7 +460,6 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "torax",
     "abdomen",
     "pelvis",
-    "pielotac",
     "abdomen y pelvis",
     "columna dorsal",
     "columna lumbar",
@@ -473,17 +470,17 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "antebrazo",
     "muñeca",
     "mano",
-    "mano muñeca",
     "cadera",
-    "muslo",
     "rodilla",
     "pierna",
     "tobillo",
     "pie",
-    "pie tobillo",
-    "muslo",
     "pielotac",
 ]
+
+TOPO_PROTOCOLOS = PROTOCOLOS_TOPO_FALLBACK
+TOPO_RX_DIAG = {"archivo_encontrado": True, "filas_cargadas": 0, "error": ""}
+
 
 def corregir_nombre_imagen(valor):
     nombre = normalizar_texto_archivo(valor)
@@ -491,121 +488,50 @@ def corregir_nombre_imagen(valor):
         "abdomen_ateral": "abdomen_lateral",
         "abdomen_rontal": "abdomen_frontal",
         "abdomen__frontal": "abdomen_frontal",
-        "abdomen_y_pelvis__frontal": "abdomen_y_pelvis_frontal",
         "abdomenpelvis__frontal": "abdomen_y_pelvis_frontal",
         "abdomenpelvis_frontal": "abdomen_y_pelvis_frontal",
         "abdomenpelvis_lateral": "abdomen_y_pelvis_lateral",
+        "abdomen_y_pelvis__frontal": "abdomen_y_pelvis_frontal",
         "pelvis__frontal": "pelvis_frontal",
-        "mano_ateral": "mano_lateral",
-        "mano_rontal": "mano_frontal",
+        "pelvis_pelvis__frontal": "pelvis_frontal",
         "torax_abdomen_pelvis_frontal": "torax_abdomen_y_pelvis_frontal",
         "torax_abdomen_pelvis_lateral": "torax_abdomen_y_pelvis_lateral",
+        "mano_ateral": "mano_lateral",
+        "mano_rontal": "mano_frontal",
+        "muneca_frontal": "mano_muneca_frontal",
+        "muneca_lateral": "mano_muneca_lateral",
         "mano_muneca_frontal": "mano_muneca_frontal",
         "mano_muneca_lateral": "mano_muneca_lateral",
         "pie_tobillo_frontal": "pie_tobillo_frontal",
         "pie_tobillo_lateral": "pie_tobillo_lateral",
+        "columna_dorsal_frontal": "columna_frontal",
+        "columna_dorsal_lateral": "columna_lateral",
+        "columna_lumbar_frontal": "columna_frontal",
+        "columna_lumbar_lateral": "columna_lateral",
     }
     nombre = correcciones.get(nombre, nombre)
     nombre = nombre.replace("__", "_").strip("_")
     return nombre
 
-def _buscar_fila_encabezados(ws):
-    encabezados_esperados = [
-        "entrada del paciente",
-        "posicionamiento",
-        "posicion del tubo",
-        "protolocolo",
-        "protocolo",
-        "nombre exacto de la imagen",
-    ]
-    for i, fila in enumerate(ws.iter_rows(values_only=True), start=1):
-        textos = [normalizar_texto_archivo(c) for c in fila if c is not None]
-        if (
-            "entrada_del_paciente" in textos
-            and "posicionamiento" in textos
-            and "posicion_del_tubo" in textos
-            and ("protolocolo" in textos or "protocolo" in textos)
-            and "nombre_exacto_de_la_imagen" in textos
-        ):
-            return i
+
+def determinar_vista_rx_topograma(posicionamiento, tubo):
+    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
+    tubo_norm = normalizar_texto_archivo(tubo)
+
+    if posicionamiento_norm in ["supino", "prono"]:
+        if tubo_norm in ["arriba", "abajo"]:
+            return "frontal"
+        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
+            return "lateral"
+
+    if posicionamiento_norm in ["lateral_derecho", "lateral_izquierdo"]:
+        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
+            return "frontal"
+        if tubo_norm in ["arriba", "abajo"]:
+            return "lateral"
+
     return None
 
-def _valor_limpio(v):
-    if v is None:
-        return ""
-    return str(v).strip()
-
-def cargar_mapa_rx_topograma():
-    mapa = {}
-    protocolos_excel = []
-    diagnostico = {"archivo_encontrado": TOP_COMB_XLSX.exists(), "filas_cargadas": 0, "error": ""}
-
-    if not TOP_COMB_XLSX.exists():
-        diagnostico["error"] = "No se encontró topograma combinaciones.xlsx en la carpeta principal."
-        return mapa, protocolos_excel, diagnostico
-
-    try:
-        wb = openpyxl.load_workbook(TOP_COMB_XLSX, data_only=True)
-        ws = wb.active
-        fila_header = _buscar_fila_encabezados(ws)
-
-        if not fila_header:
-            diagnostico["error"] = "No se encontró la fila de encabezados en el Excel."
-            return mapa, protocolos_excel, diagnostico
-
-        filas = list(ws.iter_rows(values_only=True))
-        header_vals = filas[fila_header - 1]
-        header_map = {}
-        for idx, val in enumerate(header_vals):
-            key = normalizar_texto_archivo(val)
-            if key:
-                header_map[key] = idx
-
-        idx_entrada = header_map.get("entrada_del_paciente")
-        idx_pos = header_map.get("posicionamiento")
-        idx_tubo = header_map.get("posicion_del_tubo")
-        idx_prot = header_map.get("protolocolo", header_map.get("protocolo"))
-        idx_img = header_map.get("nombre_exacto_de_la_imagen")
-
-        if None in [idx_entrada, idx_pos, idx_tubo, idx_prot, idx_img]:
-            diagnostico["error"] = "Faltan columnas obligatorias en el Excel."
-            return mapa, protocolos_excel, diagnostico
-
-        for fila in filas[fila_header:]:
-            largo = len(fila)
-            entrada = _valor_limpio(fila[idx_entrada] if idx_entrada < largo else "")
-            posicionamiento = _valor_limpio(fila[idx_pos] if idx_pos < largo else "")
-            tubo = _valor_limpio(fila[idx_tubo] if idx_tubo < largo else "")
-            protocolo = _valor_limpio(fila[idx_prot] if idx_prot < largo else "")
-            nombre_imagen = _valor_limpio(fila[idx_img] if idx_img < largo else "")
-
-            if not all([entrada, posicionamiento, tubo, protocolo, nombre_imagen]):
-                continue
-
-            clave = (
-                normalizar_texto_archivo(entrada),
-                normalizar_texto_archivo(posicionamiento),
-                normalizar_texto_archivo(tubo),
-                normalizar_texto_archivo(protocolo),
-            )
-            mapa[clave] = nombre_imagen
-            diagnostico["filas_cargadas"] += 1
-
-            if protocolo not in protocolos_excel:
-                protocolos_excel.append(protocolo)
-
-    except Exception as e:
-        diagnostico["error"] = f"Error leyendo Excel: {e}"
-        return {}, [], diagnostico
-
-    return mapa, protocolos_excel, diagnostico
-
-TOPO_RX_MAP, TOPO_PROTOCOLOS_EXCEL, TOPO_RX_DIAG = cargar_mapa_rx_topograma()
-
-if TOPO_PROTOCOLOS_EXCEL:
-    TOPO_PROTOCOLOS = ["Seleccionar"] + TOPO_PROTOCOLOS_EXCEL
-else:
-    TOPO_PROTOCOLOS = PROTOCOLOS_TOPO_FALLBACK
 
 def obtener_claves_rx(prefijo_estado="topo"):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
@@ -621,25 +547,12 @@ def obtener_claves_rx(prefijo_estado="topo"):
     ):
         return []
 
-    entrada_norm = normalizar_texto_archivo(entrada)
-    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
-    tubo_norm = normalizar_texto_archivo(tubo)
-    protocolo_norm = normalizar_texto_archivo(protocolo)
-
-    protocolos_a_probar = [protocolo_norm]
-    alias_protocolos = {
-        "abdomen_y_pelvis": ["abdomen_y_pelvis", "abdomen_pelvis"],
-        "torax_abdomen_y_pelvis": ["torax_abdomen_y_pelvis", "torax_abdomen_pelvis"],
-    }
-    for variante in alias_protocolos.get(protocolo_norm, []):
-        if variante not in protocolos_a_probar:
-            protocolos_a_probar.append(variante)
-
-    claves = []
-    for protocolo_var in protocolos_a_probar:
-        claves.append((entrada_norm, posicionamiento_norm, tubo_norm, protocolo_var))
-
-    return claves
+    return [(
+        normalizar_texto_archivo(entrada),
+        normalizar_texto_archivo(posicionamiento),
+        normalizar_texto_archivo(tubo),
+        normalizar_texto_archivo(protocolo),
+    )]
 
 
 def obtener_clave_rx(prefijo_estado="topo"):
@@ -647,9 +560,67 @@ def obtener_clave_rx(prefijo_estado="topo"):
     return claves[0] if claves else None
 
 
+def _base_imagen_por_protocolo(protocolo_norm):
+    mapa = {
+        "cerebro": "cabeza",
+        "cavidades_perinasales": "cabeza",
+        "maxilofacial": "cabeza",
+        "orbitas": "cabeza",
+        "oidos": "cabeza",
+        "cuello": "cuello",
+        "columna_cervical": "cuello",
+        "torax": "torax",
+        "abdomen": "abdomen",
+        "pelvis": "pelvis",
+        "cadera": "pelvis",
+        "abdomen_y_pelvis": "abdomen_y_pelvis",
+        "pielotac": "pielotac",
+        "columna_dorsal": "columna_dorsal",
+        "columna_lumbar": "columna_lumbar",
+        "torax_abdomen_y_pelvis": "torax_abdomen_y_pelvis",
+        "hombro": "hombro",
+        "brazo": "brazo",
+        "codo": "codo",
+        "antebrazo": "antebrazo",
+        "muñeca": "mano_muneca",
+        "muneca": "mano_muneca",
+        "mano": "mano",
+        "rodilla": "rodilla",
+        "pierna": "pierna",
+        "tobillo": "pie_tobillo",
+        "pie": "pie_tobillo",
+    }
+    return mapa.get(protocolo_norm)
+
+
+def obtener_nombre_imagen_rx(prefijo_estado="topo"):
+    entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
+    posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
+    tubo = st.session_state.get(f"{prefijo_estado}_posicion_tubo", "Seleccionar")
+    protocolo = st.session_state.get(f"{prefijo_estado}_region", "Seleccionar")
+
+    if not all([
+        seleccion_completa(entrada),
+        seleccion_completa(posicionamiento),
+        seleccion_completa(tubo),
+        seleccion_completa(protocolo),
+    ]):
+        return None
+
+    vista = determinar_vista_rx_topograma(posicionamiento, tubo)
+    if vista is None:
+        return None
+
+    protocolo_norm = normalizar_texto_archivo(protocolo)
+    base = _base_imagen_por_protocolo(protocolo_norm)
+    if base is None:
+        return None
+
+    return f"{base} {vista}"
+
+
 def combinacion_rx_disponible(prefijo_estado="topo"):
-    claves = obtener_claves_rx(prefijo_estado)
-    return any(clave in TOPO_RX_MAP for clave in claves)
+    return obtener_imagen_rx_topograma(prefijo_estado) is not None
 
 
 def buscar_archivo_imagen_por_nombre(nombre_base):
@@ -672,6 +643,24 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
     agregar_candidato(nombre_base)
     agregar_candidato(nombre_base.replace("_", " "))
     agregar_candidato(nombre_base.replace(" ", "_"))
+
+    alias = {
+        "abdomen_y_pelvis_frontal": ["abdomen_y_pelvis_frontal", "abdomen_pelvis_frontal", "abdomenpelvis_frontal"],
+        "abdomen_y_pelvis_lateral": ["abdomen_y_pelvis_lateral", "abdomen_pelvis_lateral", "abdomenpelvis_lateral"],
+        "torax_abdomen_y_pelvis_frontal": ["torax_abdomen_y_pelvis_frontal", "torax_abdomen_pelvis_frontal"],
+        "torax_abdomen_y_pelvis_lateral": ["torax_abdomen_y_pelvis_lateral", "torax_abdomen_pelvis_lateral"],
+        "mano_muneca_frontal": ["mano_muneca_frontal", "muneca_frontal", "mano_frontal"],
+        "mano_muneca_lateral": ["mano_muneca_lateral", "muneca_lateral", "mano_lateral"],
+        "pie_tobillo_frontal": ["pie_tobillo_frontal", "tobillo_frontal", "pie_frontal"],
+        "pie_tobillo_lateral": ["pie_tobillo_lateral", "tobillo_lateral", "pie_lateral"],
+        "columna_dorsal_frontal": ["columna_dorsal_frontal", "columna_frontal"],
+        "columna_dorsal_lateral": ["columna_dorsal_lateral", "columna_lateral"],
+        "columna_lumbar_frontal": ["columna_lumbar_frontal", "columna_frontal"],
+        "columna_lumbar_lateral": ["columna_lumbar_lateral", "columna_lateral"],
+    }
+    for candidato in list(candidatos):
+        for extra in alias.get(candidato, []):
+            agregar_candidato(extra)
 
     extensiones_validas = {".png", ".jpg", ".jpeg", ".webp"}
     archivos = [p for p in BASE_DIR.iterdir() if p.is_file() and p.suffix.lower() in extensiones_validas]
@@ -747,38 +736,9 @@ def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
 
     return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
 
+
 def obtener_imagen_topograma():
     return obtener_imagen_topograma_generico("topo", "")
-
-def obtener_imagen_topograma_2():
-    return obtener_imagen_topograma_generico("topo2", "2")
-
-
-def determinar_vista_rx_topograma(posicionamiento, tubo):
-    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
-    tubo_norm = normalizar_texto_archivo(tubo)
-
-    if posicionamiento_norm in ["supino", "prono"]:
-        if tubo_norm in ["arriba", "abajo"]:
-            return "frontal"
-        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
-            return "lateral"
-
-    if posicionamiento_norm in ["lateral_derecho", "lateral_izquierdo"]:
-        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
-            return "frontal"
-        if tubo_norm in ["arriba", "abajo"]:
-            return "lateral"
-
-    return None
-
-
-def obtener_nombre_imagen_rx(prefijo_estado="topo"):
-    claves = obtener_claves_rx(prefijo_estado)
-    for clave in claves:
-        if clave in TOPO_RX_MAP:
-            return TOPO_RX_MAP.get(clave)
-    return None
 
 
 def obtener_imagen_rx_topograma(prefijo_estado="topo"):
@@ -786,6 +746,7 @@ def obtener_imagen_rx_topograma(prefijo_estado="topo"):
     if not nombre_imagen:
         return None
     return buscar_archivo_imagen_por_nombre(nombre_imagen)
+
 
 # -------------------------
 # PÁGINAS
