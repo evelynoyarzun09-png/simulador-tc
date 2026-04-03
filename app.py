@@ -430,6 +430,14 @@ def topograma_completo(prefijo="topo"):
         texto_completo(st.session_state[f"{prefijo}_termino"]),
     ])
 
+def rx_campos_completos(prefijo="topo"):
+    return all([
+        seleccion_completa(st.session_state[f"{prefijo}_entrada_paciente"]),
+        seleccion_completa(st.session_state[f"{prefijo}_posicionamiento"]),
+        seleccion_completa(st.session_state[f"{prefijo}_posicion_tubo"]),
+        seleccion_completa(st.session_state[f"{prefijo}_region"]),
+    ])
+
 # -------------------------
 # IMAGEN DINÁMICA TOPOGRAMA
 # -------------------------
@@ -968,6 +976,7 @@ elif seccion == "Topograma":
         persistent_text_input("Término topograma", "topo_termino")
 
     topograma1_completo = topograma_completo("topo")
+    topograma1_rx_campos = rx_campos_completos("topo")
     topograma1_rx_disponible = combinacion_rx_disponible("topo")
 
     imagen_equipo_topo_1 = obtener_imagen_topograma()
@@ -1023,12 +1032,12 @@ elif seccion == "Topograma":
             unsafe_allow_html=True
         )
 
-    if topograma1_completo and not topograma1_rx_disponible:
+    if topograma1_rx_campos and not topograma1_rx_disponible:
         st.warning("La combinación seleccionada no tiene imagen asociada en tu planilla, por eso Iniciar RX permanece desactivado.")
 
     btn1, btn2, btn3 = st.columns([2, 2, 2])
     with btn2:
-        if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not (topograma1_completo and topograma1_rx_disponible)):
+        if st.button("Iniciar RX topograma 1", use_container_width=True, disabled=not (topograma1_rx_campos and topograma1_rx_disponible)):
             st.session_state["topo_rx_iniciado"] = True
             st.rerun()
 
@@ -1081,6 +1090,7 @@ elif seccion == "Topograma":
             persistent_text_input("Término topograma", "topo2_termino")
 
         topograma2_completo = topograma_completo("topo2")
+        topograma2_rx_campos = rx_campos_completos("topo2")
         topograma2_rx_disponible = combinacion_rx_disponible("topo2")
 
         imagen_equipo_topo_2 = obtener_imagen_topograma_2()
@@ -1136,12 +1146,12 @@ elif seccion == "Topograma":
                 unsafe_allow_html=True
             )
 
-        if topograma2_completo and not topograma2_rx_disponible:
+        if topograma2_rx_campos and not topograma2_rx_disponible:
             st.warning("La combinación seleccionada para el topograma 2 no tiene imagen asociada en tu planilla.")
 
         b21, b22, b23 = st.columns([2, 2, 2])
         with b22:
-            if st.button("Iniciar RX topograma 2", use_container_width=True, disabled=not (topograma2_completo and topograma2_rx_disponible)):
+            if st.button("Iniciar RX topograma 2", use_container_width=True, disabled=not (topograma2_rx_campos and topograma2_rx_disponible)):
                 st.session_state["topo2_rx_iniciado"] = True
                 st.rerun()
 
