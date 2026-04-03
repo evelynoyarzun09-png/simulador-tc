@@ -485,6 +485,26 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "pielotac",
 ]
 
+def corregir_nombre_imagen(valor):
+    nombre = normalizar_texto_archivo(valor)
+    correcciones = {
+        "abdomen_ateral": "abdomen_lateral",
+        "abdomen_rontal": "abdomen_frontal",
+        "abdomen__frontal": "abdomen_frontal",
+        "abdomen_y_pelvis__frontal": "abdomen_y_pelvis_frontal",
+        "abdomenpelvis__frontal": "abdomen_y_pelvis_frontal",
+        "abdomenpelvis_frontal": "abdomen_y_pelvis_frontal",
+        "abdomenpelvis_lateral": "abdomen_y_pelvis_lateral",
+        "pelvis__frontal": "pelvis_frontal",
+        "mano_ateral": "mano_lateral",
+        "mano_rontal": "mano_frontal",
+        "torax_abdomen_pelvis_frontal": "torax_abdomen_y_pelvis_frontal",
+        "torax_abdomen_pelvis_lateral": "torax_abdomen_y_pelvis_lateral",
+        "mano_muneca_frontal": "mano_muneca_frontal",
+        "mano_muneca_lateral": "mano_muneca_lateral",
+        "pie_tobillo_frontal": "pie_tobillo_frontal",
+        "pie_tobillo_lateral": "pie_tobillo_lateral",
+    }
     nombre = correcciones.get(nombre, nombre)
     nombre = nombre.replace("__", "_").strip("_")
     return nombre
