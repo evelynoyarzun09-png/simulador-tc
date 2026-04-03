@@ -1007,14 +1007,17 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
     nombre_base = str(nombre_base).strip()
     nombre_norm = normalizar_texto_archivo(nombre_base)
 
-    candidatos = [
+    candidatos = []
+    for candidato in [
         nombre_base,
         nombre_norm,
         nombre_base.replace("_", " "),
         nombre_base.replace(" ", "_"),
         nombre_norm.replace("_", " "),
         nombre_norm.replace(" ", "_"),
-    ]
+    ]:
+        if candidato and candidato not in candidatos:
+            candidatos.append(candidato)
 
     extensiones = ["", ".png", ".jpg", ".jpeg", ".webp"]
 
