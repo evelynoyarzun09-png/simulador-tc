@@ -53,6 +53,7 @@ DEFAULTS = {
     "topo_posicionamiento": "Seleccionar",
     "topo_posicion_tubo": "Seleccionar",
     "topo_posicion_brazos": "Seleccionar",
+    "topo_region_anatomica": "Seleccionar",
     "topo_region": "Seleccionar",
     "topo_inicio": "", 
     "topo_termino": "",
@@ -64,6 +65,7 @@ DEFAULTS = {
     "topo2_posicionamiento": "Seleccionar",
     "topo2_posicion_tubo": "Seleccionar",
     "topo2_posicion_brazos": "Seleccionar",
+    "topo2_region_anatomica": "Seleccionar",
     "topo2_region": "Seleccionar",
     "topo2_inicio": "",
     "topo2_termino": "",
@@ -114,6 +116,13 @@ def load_widget(key):
 
 def store_widget(key):
     st.session_state[key] = st.session_state[f"_{key}"]
+
+    if key == "topo_region_anatomica":
+        st.session_state["topo_region"] = "Seleccionar"
+        st.session_state["_topo_region"] = "Seleccionar"
+    if key == "topo2_region_anatomica":
+        st.session_state["topo2_region"] = "Seleccionar"
+        st.session_state["_topo2_region"] = "Seleccionar"
 
     if key.startswith("topo_"):
         st.session_state["topo_rx_iniciado"] = False
@@ -508,14 +517,15 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "orbitas",
     "oidos",
     "cuello",
-    "columna cervical",
     "torax",
     "abdomen",
     "pelvis",
-     "pielotac",
+    "pielotac",
     "abdomen y pelvis",
+    "columna cervical",
     "columna dorsal",
     "columna lumbar",
+    "sacroxis",
     "torax abdomen y pelvis",
     "hombro",
     "brazo",
@@ -528,10 +538,105 @@ PROTOCOLOS_TOPO_FALLBACK = [
     "rodilla",
     "pierna",
     "tobillo",
-    "pie",   
+    "pie",
+    "angiotac extremidad superior",
+    "angiotac cerebro",
+    "angiotac cuello",
+    "angiotac cerebro cuello",
+    "angiotac torax",
+    "angiotac abdomen",
+    "angiotac abdomen y pelvis",
+    "angiotac torax abdomen y pelvis",
+    "angiotac extremidad inferior",
 ]
 TOPO_PROTOCOLOS = PROTOCOLOS_TOPO_FALLBACK
 TOPO_RX_DIAG = {"archivo_encontrado": True, "filas_cargadas": 0, "error": ""}
+
+REGIONES_ANATOMICAS_TOPO = [
+    "Seleccionar",
+    "cabeza",
+    "cuello",
+    "torax",
+    "abdomen",
+    "pelvis",
+    "columnas",
+    "extremidad superior",
+    "extremidad inferior",
+    "angiotac",
+]
+
+MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
+    "cabeza": [
+        "Seleccionar",
+        "cerebro",
+        "cavidades perinasales",
+        "maxilofacial",
+        "orbitas",
+        "oidos",
+    ],
+    "cuello": [
+        "Seleccionar",
+        "cuello",
+    ],
+    "torax": [
+        "Seleccionar",
+        "torax",
+        "torax abdomen y pelvis",
+    ],
+    "abdomen": [
+        "Seleccionar",
+        "abdomen",
+        "abdomen y pelvis",
+        "pielotac",
+    ],
+    "pelvis": [
+        "Seleccionar",
+        "pelvis",
+    ],
+    "columnas": [
+        "Seleccionar",
+        "columna cervical",
+        "columna dorsal",
+        "columna lumbar",
+        "sacroxis",
+    ],
+    "extremidad superior": [
+        "Seleccionar",
+        "hombro",
+        "brazo",
+        "codo",
+        "antebrazo",
+        "muñeca",
+        "mano",
+    ],
+    "extremidad inferior": [
+        "Seleccionar",
+        "cadera",
+        "muslo",
+        "rodilla",
+        "pierna",
+        "tobillo",
+        "pie",
+    ],
+    "angiotac": [
+        "Seleccionar",
+        "angiotac extremidad superior",
+        "angiotac cerebro",
+        "angiotac cuello",
+        "angiotac cerebro cuello",
+        "angiotac torax",
+        "angiotac abdomen",
+        "angiotac abdomen y pelvis",
+        "angiotac torax abdomen y pelvis",
+        "angiotac extremidad inferior",
+    ],
+}
+
+def obtener_protocolos_filtrados(prefijo_estado="topo"):
+    region_anatomica = st.session_state.get(f"{prefijo_estado}_region_anatomica", "Seleccionar")
+    if region_anatomica in ["", None, "Seleccionar"]:
+        return ["Seleccionar"]
+    return MAPA_REGION_ANATOMICA_A_PROTOCOLOS.get(str(region_anatomica).lower(), ["Seleccionar"])
 
 
 def corregir_nombre_imagen(valor):
@@ -643,6 +748,16 @@ def _base_imagen_por_protocolo(protocolo_norm):
         "pie": "pie_tobillo",
         "pielotac": "pielotac",
         "muslo": "muslo",
+        "sacroxis": "pelvis",
+        "angiotac_extremidad_superior": "brazo",
+        "angiotac_cerebro": "cabeza",
+        "angiotac_cuello": "cuello",
+        "angiotac_cerebro_cuello": "cuello",
+        "angiotac_torax": "torax",
+        "angiotac_abdomen": "abdomen",
+        "angiotac_abdomen_y_pelvis": "abdomen_y_pelvis",
+        "angiotac_torax_abdomen_y_pelvis": "torax_abdomen_y_pelvis",
+        "angiotac_extremidad_inferior": "pierna",
     }
     return mapa.get(protocolo_norm)
 
@@ -850,7 +965,9 @@ def render_bloque_topograma(prefijo, titulo_visible, numero_boton):
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div style="border-top:1px solid #8a8a8a; padding:0.3rem 0.55rem 0.45rem 0.55rem;">', unsafe_allow_html=True)
-        persistent_selectbox("Protocolo", TOPO_PROTOCOLOS, f"{prefijo}_region")
+        persistent_selectbox("Región anatómica", REGIONES_ANATOMICAS_TOPO, f"{prefijo}_region_anatomica")
+        protocolos_filtrados = obtener_protocolos_filtrados(prefijo)
+        persistent_selectbox("Protocolo", protocolos_filtrados, f"{prefijo}_region")
 
         mini1, mini2 = st.columns(2)
         with mini1:
@@ -1158,6 +1275,7 @@ elif seccion == "Topograma":
     st.write(f"**Posición del tubo:** {st.session_state['topo_posicion_tubo']}")
     st.write(f"**Posicionamiento:** {st.session_state['topo_posicionamiento']}")
     st.write(f"**Posición de brazos / extremidades:** {st.session_state['topo_posicion_brazos']}")
+    st.write(f"**Región anatómica:** {st.session_state['topo_region_anatomica']}")
     st.write(f"**Protocolo:** {st.session_state['topo_region']}")
     st.write(f"**Inicio:** {st.session_state['topo_inicio']}")
     st.write(f"**Término:** {st.session_state['topo_termino']}")
@@ -1171,6 +1289,7 @@ elif seccion == "Topograma":
         st.write(f"**Posición del tubo:** {st.session_state['topo2_posicion_tubo']}")
         st.write(f"**Posicionamiento:** {st.session_state['topo2_posicionamiento']}")
         st.write(f"**Posición de brazos / extremidades:** {st.session_state['topo2_posicion_brazos']}")
+        st.write(f"**Región anatómica:** {st.session_state['topo2_region_anatomica']}")
         st.write(f"**Protocolo:** {st.session_state['topo2_region']}")
         st.write(f"**Inicio:** {st.session_state['topo2_inicio']}")
         st.write(f"**Término:** {st.session_state['topo2_termino']}")
