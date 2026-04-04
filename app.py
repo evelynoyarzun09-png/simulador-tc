@@ -24,6 +24,13 @@ elif PACIENTE_IMG_JPG.exists():
 else:
     PACIENTE_IMG = None
 
+def mostrar_imagen_actualizada(ruta, **kwargs):
+    if ruta is None:
+        return
+    ruta = Path(ruta)
+    if ruta.exists():
+        st.image(ruta.read_bytes(), **kwargs)
+
 # -------------------------
 # ESTADO INICIAL
 # -------------------------
@@ -246,7 +253,7 @@ if not st.session_state.autenticado:
     st.markdown('<div class="login-subtitulo">Ingrese la clave para acceder al simulador.</div>', unsafe_allow_html=True)
 
     if PORTADA_IMG.exists():
-        st.image(str(PORTADA_IMG), use_container_width=True)
+        mostrar_imagen_actualizada(PORTADA_IMG, use_container_width=True)
 
     st.text_input("Clave de acceso", type="password", key="clave_ingresada", on_change=verificar_clave)
 
@@ -981,7 +988,7 @@ def render_bloque_topograma(prefijo, titulo_visible, numero_boton):
         c1, c2, c3 = st.columns([0.22, 0.56, 0.22])
         with c2:
             if imagen_equipo is not None and imagen_equipo.exists():
-                st.image(str(imagen_equipo), use_container_width=True)
+                mostrar_imagen_actualizada(imagen_equipo, use_container_width=True)
             else:
                 st.info(f"No se encontró la imagen de posicionamiento del {titulo_visible.lower()}.")
 
@@ -992,7 +999,7 @@ def render_bloque_topograma(prefijo, titulo_visible, numero_boton):
             if st.session_state.get(f"{prefijo}_rx_iniciado", False):
                 imagen_rx = obtener_imagen_rx_topograma(prefijo)
                 if imagen_rx is not None and imagen_rx.exists():
-                    st.image(str(imagen_rx), use_container_width=True)
+                    mostrar_imagen_actualizada(imagen_rx, use_container_width=True)
                 else:
                     st.markdown(
                         """
@@ -1065,7 +1072,7 @@ if seccion == "Portada":
     if PORTADA_IMG.exists():
         col1, col2, col3 = st.columns([1, 3, 1])
         with col2:
-            st.image(str(PORTADA_IMG), use_container_width=True)
+            mostrar_imagen_actualizada(PORTADA_IMG, use_container_width=True)
 
     st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
@@ -1087,7 +1094,7 @@ elif seccion == "A Practicar":
     with col_img:
         st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
         if A_PRACTICAR_IMG.exists():
-            st.image(str(A_PRACTICAR_IMG), use_container_width=True)
+            mostrar_imagen_actualizada(A_PRACTICAR_IMG, use_container_width=True)
         else:
             st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
         st.markdown('</div>', unsafe_allow_html=True)
