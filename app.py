@@ -514,51 +514,8 @@ def normalizar_texto_archivo(valor):
 
 
 # -------------------------
-# MAPEO RX TOPOGRAMA DESDE REGLAS FIJAS
+# MAPEO RX TOPOGRAMA SEGÚN LISTADO VÁLIDO ENVIADO
 # -------------------------
-PROTOCOLOS_TOPO_FALLBACK = [
-    "Seleccionar",
-    "cerebro",
-    "cavidades perinasales",
-    "maxilofacial",
-    "orbitas",
-    "oidos",
-    "cuello",
-    "torax",
-    "abdomen",
-    "pelvis",
-    "pielotac",
-    "abdomen y pelvis",
-    "columna cervical",
-    "columna dorsal",
-    "columna lumbar",
-    "sacroxis",
-    "torax abdomen y pelvis",
-    "hombro",
-    "brazo",
-    "codo",
-    "antebrazo",
-    "muñeca",
-    "mano",
-    "cadera",
-    "muslo",
-    "rodilla",
-    "pierna",
-    "tobillo",
-    "pie",
-    "angiotac extremidad superior",
-    "angiotac cerebro",
-    "angiotac cuello",
-    "angiotac cerebro cuello",
-    "angiotac torax",
-    "angiotac abdomen",
-    "angiotac abdomen y pelvis",
-    "angiotac torax abdomen y pelvis",
-    "angiotac extremidad inferior",
-]
-TOPO_PROTOCOLOS = PROTOCOLOS_TOPO_FALLBACK
-TOPO_RX_DIAG = {"archivo_encontrado": True, "filas_cargadas": 0, "error": ""}
-
 REGIONES_ANATOMICAS_TOPO = [
     "Seleccionar",
     "cabeza",
@@ -569,81 +526,51 @@ REGIONES_ANATOMICAS_TOPO = [
     "columnas",
     "extremidad superior",
     "extremidad inferior",
-    "angiotac",
 ]
 
 MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
-    "cabeza": [
-        "Seleccionar",
-        "cerebro",
-        "cavidades perinasales",
-        "maxilofacial",
-        "orbitas",
-        "oidos",
-    ],
-    "cuello": [
-        "Seleccionar",
-        "cuello",
-    ],
-    "torax": [
-        "Seleccionar",
-        "torax",
-        "torax abdomen y pelvis",
-    ],
-    "abdomen": [
-        "Seleccionar",
-        "abdomen",
-        "abdomen y pelvis",
-        "pielotac",
-    ],
-    "pelvis": [
-        "Seleccionar",
-        "pelvis",
-    ],
-    "columnas": [
-        "Seleccionar",
-        "columna cervical",
-        "columna dorsal",
-        "columna lumbar",
-        "sacroxis",
-    ],
-    "extremidad superior": [
-        "Seleccionar",
-        "hombro",
-        "brazo",
-        "codo",
-        "antebrazo",
-        "muñeca",
-        "mano",
-    ],
-    "extremidad inferior": [
-        "Seleccionar",
-        "cadera",
-        "muslo",
-        "rodilla",
-        "pierna",
-        "tobillo",
-        "pie",
-    ],
-    "angiotac": [
-        "Seleccionar",
-        "angiotac extremidad superior",
-        "angiotac cerebro",
-        "angiotac cuello",
-        "angiotac cerebro cuello",
-        "angiotac torax",
-        "angiotac abdomen",
-        "angiotac abdomen y pelvis",
-        "angiotac torax abdomen y pelvis",
-        "angiotac extremidad inferior",
-    ],
+    "cabeza": ["Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial", "orbitas", "oidos"],
+    "cuello": ["Seleccionar", "cuello", "columna cervical"],
+    "torax": ["Seleccionar", "torax"],
+    "abdomen": ["Seleccionar", "abdomen", "abdomen y pelvis", "pielotac"],
+    "pelvis": ["Seleccionar", "pelvis"],
+    "columnas": ["Seleccionar", "columna dorsal", "columna lumbar"],
+    "extremidad superior": ["Seleccionar", "hombro", "brazo", "codo", "antebrazo", "muñeca", "mano"],
+    "extremidad inferior": ["Seleccionar", "cadera", "rodilla", "pierna", "tobillo", "pie"],
 }
+
+REGLAS_RX_VALIDAS = {('cabeza_primero', 'supino', 'arriba', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'abajo', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'derecha', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'izquierda', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'arriba', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'abajo', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'derecha', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'izquierda', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'arriba', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'abajo', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'derecha', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'izquierda', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'arriba', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'abajo', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'derecha', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'izquierda', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'arriba', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'abajo', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'derecha', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'supino', 'izquierda', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'arriba', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'abajo', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'derecha', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'izquierda', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'arriba', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'abajo', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'derecha', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'izquierda', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'arriba', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'abajo', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'derecha', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'izquierda', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'arriba', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'abajo', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'derecha', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'izquierda', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'arriba', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'abajo', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'prono', 'derecha', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'prono', 'izquierda', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'arriba', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'arriba', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'arriba', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'arriba', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'cerebro'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'cerebro'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'cavidades_perinasales'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'cavidades_perinasales'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'maxilofacial'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'maxilofacial'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'orbitas'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'orbitas'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'oidos'): 'cabeza_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'oidos'): 'cabeza_frontal', ('cabeza_primero', 'supino', 'arriba', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'supino', 'abajo', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'supino', 'derecha', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'supino', 'izquierda', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'prono', 'arriba', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'prono', 'abajo', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'prono', 'derecha', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'prono', 'izquierda', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'cuello'): 'cuello_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'cuello'): 'cuello_frontal', ('cabeza_primero', 'supino', 'arriba', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'supino', 'abajo', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'supino', 'derecha', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'supino', 'izquierda', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'prono', 'arriba', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'prono', 'abajo', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'prono', 'derecha', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'prono', 'izquierda', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'columna_cervical'): 'cuello_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'columna_cervical'): 'cuello_frontal', ('cabeza_primero', 'supino', 'arriba', 'torax'): 'torax_frontal', ('cabeza_primero', 'supino', 'abajo', 'torax'): 'torax_frontal', ('cabeza_primero', 'supino', 'derecha', 'torax'): 'torax_lateral', ('cabeza_primero', 'supino', 'izquierda', 'torax'): 'torax_lateral', ('cabeza_primero', 'prono', 'arriba', 'torax'): 'torax_frontal', ('cabeza_primero', 'prono', 'abajo', 'torax'): 'torax_frontal', ('cabeza_primero', 'prono', 'derecha', 'torax'): 'torax_lateral', ('cabeza_primero', 'prono', 'izquierda', 'torax'): 'torax_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'torax'): 'torax_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'torax'): 'torax_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'torax'): 'torax_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'torax'): 'torax_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'torax'): 'torax_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'torax'): 'torax_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'torax'): 'torax_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'torax'): 'torax_frontal', ('pies_primero', 'supino', 'arriba', 'torax'): 'torax_frontal', ('pies_primero', 'supino', 'abajo', 'torax'): 'torax_frontal', ('pies_primero', 'supino', 'derecha', 'torax'): 'torax_lateral', ('pies_primero', 'supino', 'izquierda', 'torax'): 'torax_lateral', ('pies_primero', 'prono', 'arriba', 'torax'): 'torax_frontal', ('pies_primero', 'prono', 'abajo', 'torax'): 'torax_frontal', ('pies_primero', 'prono', 'derecha', 'torax'): 'torax_lateral', ('pies_primero', 'prono', 'izquierda', 'torax'): 'torax_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'torax'): 'torax_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'torax'): 'torax_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'torax'): 'torax_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'torax'): 'torax_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'torax'): 'torax_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'torax'): 'torax_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'torax'): 'torax_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'torax'): 'torax_frontal', ('cabeza_primero', 'supino', 'arriba', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'supino', 'abajo', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'supino', 'derecha', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'supino', 'izquierda', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'prono', 'arriba', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'prono', 'abajo', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'prono', 'derecha', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'prono', 'izquierda', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'abdomen'): 'abdomen_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'supino', 'arriba', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'supino', 'abajo', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'supino', 'derecha', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'supino', 'izquierda', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'prono', 'arriba', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'prono', 'abajo', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'prono', 'derecha', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'prono', 'izquierda', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'abdomen'): 'abdomen_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'abdomen'): 'abdomen_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'abdomen'): 'abdomen_frontal', ('cabeza_primero', 'supino', 'arriba', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'supino', 'abajo', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'supino', 'derecha', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'supino', 'izquierda', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'prono', 'arriba', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'prono', 'abajo', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'prono', 'derecha', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'prono', 'izquierda', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'pelvis'): 'pelvis_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'arriba', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'supino', 'abajo', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'supino', 'derecha', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'supino', 'izquierda', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'prono', 'arriba', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'prono', 'abajo', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'prono', 'derecha', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'prono', 'izquierda', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'pelvis'): 'pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'pelvis'): 'pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'pelvis'): 'pelvis_frontal', ('cabeza_primero', 'supino', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'supino', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'supino', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'supino', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'prono', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'prono', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'prono', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'prono', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'supino', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'prono', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'prono', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'prono', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'prono', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'abdomen_y_pelvis'): 'abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'arriba', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'supino', 'abajo', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'supino', 'derecha', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'supino', 'izquierda', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'prono', 'arriba', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'prono', 'abajo', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'prono', 'derecha', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'prono', 'izquierda', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'pielotac'): 'pielotac_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'pielotac'): 'pielotac_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'supino', 'arriba', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'supino', 'abajo', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'supino', 'derecha', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'supino', 'izquierda', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'prono', 'arriba', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'prono', 'abajo', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'prono', 'derecha', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'prono', 'izquierda', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'pielotac'): 'pielotac_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'pielotac'): 'pielotac_frontal', ('cabeza_primero', 'supino', 'arriba', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'supino', 'abajo', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'supino', 'derecha', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'supino', 'izquierda', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'prono', 'arriba', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'prono', 'abajo', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'prono', 'derecha', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'prono', 'izquierda', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'columna_dorsal'): 'columna_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'supino', 'arriba', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'supino', 'abajo', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'supino', 'derecha', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'supino', 'izquierda', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'prono', 'arriba', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'prono', 'abajo', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'prono', 'derecha', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'prono', 'izquierda', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'columna_dorsal'): 'columna_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'columna_dorsal'): 'columna_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'columna_dorsal'): 'columna_frontal', ('cabeza_primero', 'supino', 'arriba', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'supino', 'abajo', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'supino', 'derecha', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'supino', 'izquierda', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'prono', 'arriba', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'prono', 'abajo', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'prono', 'derecha', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'prono', 'izquierda', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'columna_lumbar'): 'columna_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'supino', 'arriba', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'supino', 'abajo', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'supino', 'derecha', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'supino', 'izquierda', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'prono', 'arriba', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'prono', 'abajo', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'prono', 'derecha', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'prono', 'izquierda', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'columna_lumbar'): 'columna_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'columna_lumbar'): 'columna_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'columna_lumbar'): 'columna_frontal', ('cabeza_primero', 'supino', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'supino', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'supino', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'supino', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'prono', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'prono', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'prono', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'prono', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'supino', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'supino', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'prono', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'prono', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'prono', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'prono', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'torax_abdomen_y_pelvis'): 'torax_abdomen_y_pelvis_frontal', ('cabeza_primero', 'supino', 'arriba', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'supino', 'abajo', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'supino', 'derecha', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'supino', 'izquierda', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'prono', 'arriba', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'prono', 'abajo', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'prono', 'derecha', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'prono', 'izquierda', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'hombro'): 'hombro_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'hombro'): 'hombro_frontal', ('cabeza_primero', 'supino', 'arriba', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'supino', 'abajo', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'supino', 'derecha', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'supino', 'izquierda', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'prono', 'arriba', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'prono', 'abajo', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'prono', 'derecha', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'prono', 'izquierda', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'brazo'): 'brazo_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'brazo'): 'brazo_frontal', ('cabeza_primero', 'supino', 'arriba', 'codo'): 'codo_frontal', ('cabeza_primero', 'supino', 'abajo', 'codo'): 'codo_frontal', ('cabeza_primero', 'supino', 'derecha', 'codo'): 'codo_lateral', ('cabeza_primero', 'supino', 'izquierda', 'codo'): 'codo_lateral', ('cabeza_primero', 'prono', 'arriba', 'codo'): 'codo_frontal', ('cabeza_primero', 'prono', 'abajo', 'codo'): 'codo_frontal', ('cabeza_primero', 'prono', 'derecha', 'codo'): 'codo_lateral', ('cabeza_primero', 'prono', 'izquierda', 'codo'): 'codo_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'codo'): 'codo_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'codo'): 'codo_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'codo'): 'codo_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'codo'): 'codo_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'codo'): 'codo_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'codo'): 'codo_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'codo'): 'codo_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'codo'): 'codo_frontal', ('cabeza_primero', 'supino', 'arriba', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'supino', 'abajo', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'supino', 'derecha', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'supino', 'izquierda', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'prono', 'arriba', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'prono', 'abajo', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'prono', 'derecha', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'prono', 'izquierda', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'antebrazo'): 'antebrazo_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'antebrazo'): 'antebrazo_frontal', ('cabeza_primero', 'supino', 'arriba', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'supino', 'abajo', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'supino', 'derecha', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'supino', 'izquierda', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'prono', 'arriba', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'prono', 'abajo', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'prono', 'derecha', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'prono', 'izquierda', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'muneca'): 'mano_muneca_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'muneca'): 'mano_muneca_frontal', ('cabeza_primero', 'supino', 'arriba', 'mano'): 'mano_frontal', ('cabeza_primero', 'supino', 'abajo', 'mano'): 'mano_frontal', ('cabeza_primero', 'supino', 'derecha', 'mano'): 'mano_lateral', ('cabeza_primero', 'supino', 'izquierda', 'mano'): 'mano_lateral', ('cabeza_primero', 'prono', 'arriba', 'mano'): 'mano_frontal', ('cabeza_primero', 'prono', 'abajo', 'mano'): 'mano_frontal', ('cabeza_primero', 'prono', 'derecha', 'mano'): 'mano_lateral', ('cabeza_primero', 'prono', 'izquierda', 'mano'): 'mano_lateral', ('cabeza_primero', 'lateral_derecho', 'arriba', 'mano'): 'mano_lateral', ('cabeza_primero', 'lateral_derecho', 'abajo', 'mano'): 'mano_lateral', ('cabeza_primero', 'lateral_derecho', 'derecha', 'mano'): 'mano_frontal', ('cabeza_primero', 'lateral_derecho', 'izquierda', 'mano'): 'mano_frontal', ('cabeza_primero', 'lateral_izquierdo', 'arriba', 'mano'): 'mano_lateral', ('cabeza_primero', 'lateral_izquierdo', 'abajo', 'mano'): 'mano_lateral', ('cabeza_primero', 'lateral_izquierdo', 'derecha', 'mano'): 'mano_frontal', ('cabeza_primero', 'lateral_izquierdo', 'izquierda', 'mano'): 'mano_frontal', ('pies_primero', 'supino', 'arriba', 'cadera'): 'pelvis_frontal', ('pies_primero', 'supino', 'abajo', 'cadera'): 'pelvis_frontal', ('pies_primero', 'supino', 'derecha', 'cadera'): 'pelvis_lateral', ('pies_primero', 'supino', 'izquierda', 'cadera'): 'pelvis_lateral', ('pies_primero', 'prono', 'arriba', 'cadera'): 'pelvis_frontal', ('pies_primero', 'prono', 'abajo', 'cadera'): 'pelvis_frontal', ('pies_primero', 'prono', 'derecha', 'cadera'): 'pelvis_lateral', ('pies_primero', 'prono', 'izquierda', 'cadera'): 'pelvis_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'cadera'): 'pelvis_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'cadera'): 'pelvis_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'cadera'): 'pelvis_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'cadera'): 'pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'cadera'): 'pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'cadera'): 'pelvis_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'cadera'): 'pelvis_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'cadera'): 'pelvis_frontal', ('pies_primero', 'supino', 'arriba', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'supino', 'abajo', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'supino', 'derecha', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'supino', 'izquierda', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'prono', 'arriba', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'prono', 'abajo', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'prono', 'derecha', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'prono', 'izquierda', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'rodilla'): 'rodilla_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'rodilla'): 'rodilla_frontal', ('pies_primero', 'supino', 'arriba', 'pierna'): 'pierna_frontal', ('pies_primero', 'supino', 'abajo', 'pierna'): 'pierna_frontal', ('pies_primero', 'supino', 'derecha', 'pierna'): 'pierna_lateral', ('pies_primero', 'supino', 'izquierda', 'pierna'): 'pierna_lateral', ('pies_primero', 'prono', 'arriba', 'pierna'): 'pierna_frontal', ('pies_primero', 'prono', 'abajo', 'pierna'): 'pierna_frontal', ('pies_primero', 'prono', 'derecha', 'pierna'): 'pierna_lateral', ('pies_primero', 'prono', 'izquierda', 'pierna'): 'pierna_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'pierna'): 'pierna_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'pierna'): 'pierna_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'pierna'): 'pierna_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'pierna'): 'pierna_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'pierna'): 'pierna_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'pierna'): 'pierna_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'pierna'): 'pierna_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'pierna'): 'pierna_frontal', ('pies_primero', 'supino', 'arriba', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'supino', 'abajo', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'supino', 'derecha', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'supino', 'izquierda', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'prono', 'arriba', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'prono', 'abajo', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'prono', 'derecha', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'prono', 'izquierda', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'tobillo'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'tobillo'): 'pie_tobillo_frontal', ('pies_primero', 'supino', 'arriba', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'supino', 'abajo', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'supino', 'derecha', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'supino', 'izquierda', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'prono', 'arriba', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'prono', 'abajo', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'prono', 'derecha', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'prono', 'izquierda', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_derecho', 'arriba', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_derecho', 'abajo', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_derecho', 'derecha', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'lateral_derecho', 'izquierda', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'lateral_izquierdo', 'arriba', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_izquierdo', 'abajo', 'pie'): 'pie_tobillo_lateral', ('pies_primero', 'lateral_izquierdo', 'derecha', 'pie'): 'pie_tobillo_frontal', ('pies_primero', 'lateral_izquierdo', 'izquierda', 'pie'): 'pie_tobillo_frontal'}
+
+TOPO_PROTOCOLOS = ["Seleccionar"] + sorted({clave[3].replace("_", " ") for clave in REGLAS_RX_VALIDAS.keys()})
+TOPO_RX_DIAG = {"archivo_encontrado": True, "filas_cargadas": len(REGLAS_RX_VALIDAS), "error": ""}
 
 def obtener_protocolos_filtrados(prefijo_estado="topo"):
     region_anatomica = st.session_state.get(f"{prefijo_estado}_region_anatomica", "Seleccionar")
+    entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
+
     if region_anatomica in ["", None, "Seleccionar"]:
         return ["Seleccionar"]
-    return MAPA_REGION_ANATOMICA_A_PROTOCOLOS.get(str(region_anatomica).lower(), ["Seleccionar"])
+
+    protocolos_base = MAPA_REGION_ANATOMICA_A_PROTOCOLOS.get(str(region_anatomica).lower(), ["Seleccionar"])
+
+    if entrada in ["", None, "Seleccionar"]:
+        return protocolos_base
+
+    entrada_norm = normalizar_texto_archivo(entrada)
+    protocolos_validos = ["Seleccionar"]
+
+    for protocolo in protocolos_base:
+        if protocolo == "Seleccionar":
+            continue
+        protocolo_norm = normalizar_texto_archivo(protocolo)
+        existe = any(
+            clave[0] == entrada_norm and clave[3] == protocolo_norm
+            for clave in REGLAS_RX_VALIDAS.keys()
+        )
+        if existe:
+            protocolos_validos.append(protocolo)
+
+    return protocolos_validos
 
 
 def corregir_nombre_imagen(valor):
@@ -678,25 +605,6 @@ def corregir_nombre_imagen(valor):
     return nombre
 
 
-def determinar_vista_rx_topograma(posicionamiento, tubo):
-    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
-    tubo_norm = normalizar_texto_archivo(tubo)
-
-    if posicionamiento_norm in ["supino", "prono"]:
-        if tubo_norm in ["arriba", "abajo"]:
-            return "frontal"
-        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
-            return "lateral"
-
-    if posicionamiento_norm in ["lateral_derecho", "lateral_izquierdo"]:
-        if tubo_norm in ["derecha", "derecho", "izquierda", "izquierdo"]:
-            return "frontal"
-        if tubo_norm in ["arriba", "abajo"]:
-            return "lateral"
-
-    return None
-
-
 def obtener_claves_rx(prefijo_estado="topo"):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
     posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
@@ -724,79 +632,20 @@ def obtener_clave_rx(prefijo_estado="topo"):
     return claves[0] if claves else None
 
 
-def _base_imagen_por_protocolo(protocolo_norm):
-    mapa = {
-        "cerebro": "cabeza",
-        "cavidades_perinasales": "cabeza",
-        "maxilofacial": "cabeza",
-        "orbitas": "cabeza",
-        "oidos": "cabeza",
-        "cuello": "cuello",
-        "columna_cervical": "cuello",
-        "torax": "torax",
-        "abdomen": "abdomen",
-        "pelvis": "pelvis",
-        "cadera": "pelvis",
-        "abdomen_y_pelvis": "abdomen_y_pelvis",
-        "pielotac": "pielotac",
-        "columna_dorsal": "columna_dorsal",
-        "columna_lumbar": "columna_lumbar",
-        "torax_abdomen_y_pelvis": "torax_abdomen_y_pelvis",
-        "hombro": "hombro",
-        "brazo": "brazo",
-        "codo": "codo",
-        "antebrazo": "antebrazo",
-        "muñeca": "mano_muneca",
-        "muneca": "mano_muneca",
-        "mano": "mano",
-        "rodilla": "rodilla",
-        "pierna": "pierna",
-        "tobillo": "pie_tobillo",
-        "pie": "pie_tobillo",
-        "pielotac": "pielotac",
-        "muslo": "muslo",
-        "sacroxis": "pelvis",
-        "angiotac_extremidad_superior": "brazo",
-        "angiotac_cerebro": "cabeza",
-        "angiotac_cuello": "cuello",
-        "angiotac_cerebro_cuello": "cuello",
-        "angiotac_torax": "torax",
-        "angiotac_abdomen": "abdomen",
-        "angiotac_abdomen_y_pelvis": "abdomen_y_pelvis",
-        "angiotac_torax_abdomen_y_pelvis": "torax_abdomen_y_pelvis",
-        "angiotac_extremidad_inferior": "pierna",
-    }
-    return mapa.get(protocolo_norm)
-
-
 def obtener_nombre_imagen_rx(prefijo_estado="topo"):
-    entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
-    posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
-    tubo = st.session_state.get(f"{prefijo_estado}_posicion_tubo", "Seleccionar")
-    protocolo = st.session_state.get(f"{prefijo_estado}_region", "Seleccionar")
-
-    if not all([
-        seleccion_completa(entrada),
-        seleccion_completa(posicionamiento),
-        seleccion_completa(tubo),
-        seleccion_completa(protocolo),
-    ]):
+    clave = obtener_clave_rx(prefijo_estado)
+    if not clave:
         return None
 
-    vista = determinar_vista_rx_topograma(posicionamiento, tubo)
-    if vista is None:
+    nombre = REGLAS_RX_VALIDAS.get(clave)
+    if not nombre:
         return None
 
-    protocolo_norm = normalizar_texto_archivo(protocolo)
-    base = _base_imagen_por_protocolo(protocolo_norm)
-    if base is None:
-        return None
-
-    return f"{base} {vista}"
+    return corregir_nombre_imagen(nombre)
 
 
 def combinacion_rx_disponible(prefijo_estado="topo"):
-    return obtener_imagen_rx_topograma(prefijo_estado) is not None
+    return obtener_clave_rx(prefijo_estado) in REGLAS_RX_VALIDAS
 
 
 def buscar_archivo_imagen_por_nombre(nombre_base):
@@ -829,10 +678,8 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
         "mano_muneca_lateral": ["mano_muneca_lateral", "muneca_lateral", "mano_lateral"],
         "pie_tobillo_frontal": ["pie_tobillo_frontal", "tobillo_frontal", "pie_frontal"],
         "pie_tobillo_lateral": ["pie_tobillo_lateral", "tobillo_lateral", "pie_lateral"],
-        "columna_dorsal_frontal": ["columna_dorsal_frontal", "columna_frontal"],
-        "columna_dorsal_lateral": ["columna_dorsal_lateral", "columna_lateral"],
-        "columna_lumbar_frontal": ["columna_lumbar_frontal", "columna_frontal"],
-        "columna_lumbar_lateral": ["columna_lumbar_lateral", "columna_lateral"],
+        "columna_frontal": ["columna_frontal", "columna_dorsal_frontal", "columna_lumbar_frontal"],
+        "columna_lateral": ["columna_lateral", "columna_dorsal_lateral", "columna_lumbar_lateral"],
     }
     for candidato in list(candidatos):
         for extra in alias.get(candidato, []):
