@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import date
 import hmac
 import openpyxl
+from PIL import Image, ImageDraw
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
 
@@ -87,6 +88,10 @@ DEFAULTS = {
     "adq_espesor_corte": 1.0,
     "adq_longitud": 30.0,
     "adq_modo": "Seleccionar",
+    "adq_topo1_limite_superior": 15,
+    "adq_topo1_limite_inferior": 85,
+    "adq_topo2_limite_superior": 15,
+    "adq_topo2_limite_inferior": 85,
 
     # Reconstrucción
     "recon_kernel": "Seleccionar",
@@ -186,6 +191,36 @@ def persistent_multiselect(label, options, key):
 def persistent_number_input(label, key, **kwargs):
     load_widget(key)
     st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
+
+
+
+def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferior_pct):
+    if ruta_imagen is None:
+        return None
+    ruta = Path(ruta_imagen)
+    if not ruta.exists():
+        return None
+
+    try:
+        imagen = Image.open(ruta).convert("RGB")
+        draw = ImageDraw.Draw(imagen)
+        ancho, alto = imagen.size
+
+        y_superior = int((limite_superior_pct / 100) * alto)
+        y_inferior = int((limite_inferior_pct / 100) * alto)
+
+        grosor = max(3, alto // 120)
+        margen_texto = max(8, ancho // 40)
+
+        draw.line([(0, y_superior), (ancho, y_superior)], fill=(0, 255, 255), width=grosor)
+        draw.line([(0, y_inferior), (ancho, y_inferior)], fill=(255, 180, 0), width=grosor)
+
+        draw.text((margen_texto, max(5, y_superior - 22)), "Límite superior", fill=(0, 255, 255))
+        draw.text((margen_texto, max(5, y_inferior - 22)), "Límite inferior", fill=(255, 180, 0))
+
+        return imagen
+    except Exception:
+        return None
 
 # -------------------------
 # CONTROL DE ACCESO
@@ -1221,7 +1256,8 @@ elif seccion == "Adquisición":
             volver_anterior(); st.rerun()
 
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Topogramas seleccionados</div>', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Topogramas seleccionados y límites de barrido</div>', unsafe_allow_html=True)
+    st.caption("Ajusta de forma interactiva el límite superior e inferior en cada topograma.")
 
     mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
     imagen_topo_1 = obtener_imagen_rx_topograma("topo")
@@ -1230,16 +1266,16 @@ elif seccion == "Adquisición":
     if mostrar_topo2:
         topo_col1, topo_col2 = st.columns(2)
         bloques_topo = [
-            (topo_col1, "topograma", "Topograma 1", imagen_topo_1),
-            (topo_col2, "topo2", "Topograma 2", imagen_topo_2),
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "adq_topo1_limite_superior", "adq_topo1_limite_inferior"),
+            (topo_col2, "topo2", "Topograma 2", imagen_topo_2, "adq_topo2_limite_superior", "adq_topo2_limite_inferior"),
         ]
     else:
-        margen1, topo_col1, margen2 = st.columns([1, 2.4, 1])
+        margen1, topo_col1, margen2 = st.columns([1.2, 1.6, 1.2])
         bloques_topo = [
-            (topo_col1, "topo", "Topograma 1", imagen_topo_1),
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "adq_topo1_limite_superior", "adq_topo1_limite_inferior"),
         ]
 
-    for columna_topo, prefijo_topo, titulo_topo, imagen_topo in bloques_topo:
+    for columna_topo, prefijo_topo, titulo_topo, imagen_topo, key_sup, key_inf in bloques_topo:
         with columna_topo:
             st.markdown(
                 f"""
@@ -1248,7 +1284,28 @@ elif seccion == "Adquisición":
                 unsafe_allow_html=True
             )
             if imagen_topo is not None and imagen_topo.exists():
-                mostrar_imagen_actualizada(imagen_topo, use_container_width=True)
+                limite_superior = st.slider(
+                    "Límite superior",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_sup, 15)),
+                    key=key_sup,
+                )
+                limite_inferior = st.slider(
+                    "Límite inferior",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_inf, 85)),
+                    key=key_inf,
+                )
+
+                if limite_superior >= limite_inferior:
+                    st.warning("El límite superior debe quedar por encima del inferior.")
+                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
+                if imagen_con_limites is not None:
+                    st.image(imagen_con_limites, width=260)
+                else:
+                    mostrar_imagen_actualizada(imagen_topo, width=260)
             else:
                 st.markdown(
                     """
@@ -1314,6 +1371,9 @@ elif seccion == "Adquisición":
     st.write(f"**Espesor de corte:** {st.session_state['adq_espesor_corte']} mm")
     st.write(f"**Longitud:** {st.session_state['adq_longitud']} cm")
     st.write(f"**Modo:** {st.session_state['adq_modo']}")
+    st.write(f"**Topograma 1:** límite superior {st.session_state['adq_topo1_limite_superior']}% · límite inferior {st.session_state['adq_topo1_limite_inferior']}%")
+    if mostrar_topo2:
+        st.write(f"**Topograma 2:** límite superior {st.session_state['adq_topo2_limite_superior']}% · límite inferior {st.session_state['adq_topo2_limite_inferior']}%")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
