@@ -1220,6 +1220,68 @@ elif seccion == "Adquisición":
         if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Topogramas seleccionados</div>', unsafe_allow_html=True)
+
+    mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
+    imagen_topo_1 = obtener_imagen_rx_topograma("topo")
+    imagen_topo_2 = obtener_imagen_rx_topograma("topo2") if mostrar_topo2 else None
+
+    if mostrar_topo2:
+        topo_col1, topo_col2 = st.columns(2)
+        bloques_topo = [
+            (topo_col1, "topograma", "Topograma 1", imagen_topo_1),
+            (topo_col2, "topo2", "Topograma 2", imagen_topo_2),
+        ]
+    else:
+        margen1, topo_col1, margen2 = st.columns([1, 2.4, 1])
+        bloques_topo = [
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1),
+        ]
+
+    for columna_topo, prefijo_topo, titulo_topo, imagen_topo in bloques_topo:
+        with columna_topo:
+            st.markdown(
+                f"""
+                <div style="font-weight:700; color:white; margin-bottom:0.35rem; text-align:center;">{titulo_topo}</div>
+                """,
+                unsafe_allow_html=True
+            )
+            if imagen_topo is not None and imagen_topo.exists():
+                mostrar_imagen_actualizada(imagen_topo, use_container_width=True)
+            else:
+                st.markdown(
+                    """
+                    <div style="
+                        min-height:160px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:1px solid #7a7a7a;
+                        border-radius:14px;
+                        background-color:#4a4a4a;
+                        color:white;
+                        font-weight:600;
+                        text-align:center;
+                        padding:0.45rem;
+                    ">
+                        No se encontró la imagen del topograma seleccionado
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.caption(
+                f"{st.session_state.get(f'{prefijo_topo}_region', 'Seleccionar')} · "
+                f"{st.session_state.get(f'{prefijo_topo}_posicionamiento', 'Seleccionar')} · "
+                f"tubo {str(st.session_state.get(f'{prefijo_topo}_posicion_tubo', 'Seleccionar')).lower()}"
+            )
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Parámetros de adquisición</div>', unsafe_allow_html=True)
+
     col1, col2 = st.columns(2)
     with col1:
         persistent_selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], "adq_kvp")
@@ -1232,6 +1294,8 @@ elif seccion == "Adquisición":
         persistent_number_input("Espesor de corte (mm)", "adq_espesor_corte", min_value=0.1, step=0.1)
         persistent_number_input("Longitud de barrido (cm)", "adq_longitud", min_value=1.0)
         persistent_selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], "adq_modo")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     adquisicion_completa = all([
         seleccion_completa(st.session_state["adq_kvp"]),
