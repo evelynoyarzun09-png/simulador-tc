@@ -6,11 +6,11 @@ import openpyxl
 from PIL import Image, ImageDraw
 
 try:
-    from streamlit_image_coordinates import streamlit_image_coordinates
-    IMAGE_COORDS_AVAILABLE = True
+    from streamlit_drawable_canvas import st_canvas
+    DRAWABLE_CANVAS_AVAILABLE = True
 except ImportError:
-    streamlit_image_coordinates = None
-    IMAGE_COORDS_AVAILABLE = False
+    st_canvas = None
+    DRAWABLE_CANVAS_AVAILABLE = False
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
 
@@ -203,71 +203,132 @@ def persistent_number_input(label, key, **kwargs):
 
 
 
-def actualizar_limite_desde_click(y_click, alto_imagen, key_sup, key_inf, key_selector):
-    if y_click is None or alto_imagen <= 0:
+def crear_objeto_limite_rect(y_centro, ancho, color_hex, alto_barra=8):
+    return {
+        "type": "rect",
+        "left": 0,
+        "top": max(0, float(y_centro) - alto_barra / 2),
+        "width": float(ancho),
+        "height": float(alto_barra),
+        "fill": color_hex,
+        "stroke": color_hex,
+        "strokeWidth": 1,
+        "selectable": True,
+        "evented": True,
+        "hasControls": True,
+        "lockMovementX": True,
+        "lockScalingX": True,
+        "lockScalingY": True,
+        "lockRotation": True,
+        "name": color_hex,
+    }
+
+
+def extraer_y_centro_objeto(objeto, alto_default=8):
+    top = float(objeto.get("top", 0))
+    height = float(objeto.get("height", alto_default) or alto_default)
+    scale_y = float(objeto.get("scaleY", 1) or 1)
+    return top + (height * scale_y) / 2
+
+
+def actualizar_limites_desde_canvas(json_data, alto_imagen, key_sup, key_inf):
+    if not json_data or "objects" not in json_data:
         return
 
-    porcentaje = int(round((y_click / alto_imagen) * 100))
-    porcentaje = max(0, min(100, porcentaje))
-    objetivo = st.session_state.get(key_selector, "Límite superior")
+    y_sup = None
+    y_inf = None
 
-    if objetivo == "Límite superior":
-        porcentaje = min(porcentaje, int(st.session_state.get(key_inf, 85)) - 1)
-        st.session_state[key_sup] = max(0, porcentaje)
-    else:
-        porcentaje = max(porcentaje, int(st.session_state.get(key_sup, 15)) + 1)
-        st.session_state[key_inf] = min(100, porcentaje)
+    for obj in json_data.get("objects", []):
+        stroke = str(obj.get("stroke", "")).lower()
+        fill = str(obj.get("fill", "")).lower()
+        y_centro = extraer_y_centro_objeto(obj)
+
+        if "00ffff" in stroke or "00ffff" in fill or "0, 255, 255" in fill:
+            y_sup = y_centro
+        elif "ffb400" in stroke or "ffb400" in fill or "255, 180, 0" in fill:
+            y_inf = y_centro
+
+    if y_sup is None or y_inf is None or alto_imagen <= 0:
+        return
+
+    pct_sup = int(round((y_sup / alto_imagen) * 100))
+    pct_inf = int(round((y_inf / alto_imagen) * 100))
+
+    pct_sup = max(0, min(99, pct_sup))
+    pct_inf = max(1, min(100, pct_inf))
+
+    if pct_sup >= pct_inf:
+        medio = (pct_sup + pct_inf) / 2
+        pct_sup = max(0, int(medio) - 1)
+        pct_inf = min(100, int(medio) + 1)
+
+    st.session_state[key_sup] = pct_sup
+    st.session_state[key_inf] = pct_inf
 
 
-def render_topograma_interactivo(imagen_topo, key_sup, key_inf, key_selector, click_key_base, width=260):
+def render_topograma_interactivo(imagen_topo, key_sup, key_inf, canvas_key_base, width=260):
     if imagen_topo is None or not Path(imagen_topo).exists():
         return
+
+    if not DRAWABLE_CANVAS_AVAILABLE:
+        st.error("Para arrastrar los límites directamente sobre la imagen necesitas agregar 'streamlit-drawable-canvas' al requirements.txt.")
+        imagen_con_limites = crear_topograma_con_limites(
+            imagen_topo,
+            int(st.session_state.get(key_sup, 15)),
+            int(st.session_state.get(key_inf, 85))
+        )
+        if imagen_con_limites is not None:
+            st.image(imagen_con_limites, width=width)
+        else:
+            mostrar_imagen_actualizada(imagen_topo, width=width)
+        return
+
+    imagen = Image.open(imagen_topo).convert("RGB")
+    ancho_original, alto_original = imagen.size
+
+    if ancho_original <= 0 or alto_original <= 0:
+        mostrar_imagen_actualizada(imagen_topo, width=width)
+        return
+
+    factor = width / ancho_original
+    alto_canvas = max(80, int(alto_original * factor))
+    imagen_redimensionada = imagen.resize((width, alto_canvas))
+
+    y_sup = int((int(st.session_state.get(key_sup, 15)) / 100) * alto_canvas)
+    y_inf = int((int(st.session_state.get(key_inf, 85)) / 100) * alto_canvas)
+
+    dibujo_inicial = {
+        "version": "4.4.0",
+        "objects": [
+            crear_objeto_limite_rect(y_sup, width, "#00FFFF"),
+            crear_objeto_limite_rect(y_inf, width, "#FFB400"),
+        ],
+    }
+
+    st.caption("Arrastra cada barra directamente sobre la imagen.")
+
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 255, 255, 0)",
+        stroke_width=1,
+        stroke_color="#000000",
+        background_image=imagen_redimensionada,
+        update_streamlit=True,
+        height=alto_canvas,
+        width=width,
+        drawing_mode="transform",
+        initial_drawing=dibujo_inicial,
+        display_toolbar=False,
+        key=f"canvas_{canvas_key_base}",
+    )
+
+    if canvas_result and canvas_result.json_data:
+        actualizar_limites_desde_canvas(canvas_result.json_data, alto_canvas, key_sup, key_inf)
 
     limite_superior = int(st.session_state.get(key_sup, 15))
     limite_inferior = int(st.session_state.get(key_inf, 85))
 
-    if limite_superior >= limite_inferior:
-        limite_superior = max(0, min(limite_superior, limite_inferior - 1))
-        st.session_state[key_sup] = limite_superior
+    st.caption(f"Superior: {limite_superior}% · Inferior: {limite_inferior}%")
 
-    imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
-    if imagen_con_limites is None:
-        mostrar_imagen_actualizada(imagen_topo, width=width)
-        return
-
-    if IMAGE_COORDS_AVAILABLE:
-        st.caption("Haz clic directamente en la imagen para mover el límite seleccionado.")
-        click_data = streamlit_image_coordinates(imagen_con_limites, width=width, key=f"{click_key_base}_coords")
-        if click_data:
-            click_time = click_data.get("time")
-            last_time_key = f"{click_key_base}_last_time"
-            if click_time and st.session_state.get(last_time_key) != click_time:
-                st.session_state[last_time_key] = click_time
-                actualizar_limite_desde_click(
-                    click_data.get("y"),
-                    imagen_con_limites.size[1],
-                    key_sup,
-                    key_inf,
-                    key_selector,
-                )
-                st.rerun()
-    else:
-        st.info("Para mover los límites directamente con el mouse en GitHub/Streamlit, agrega 'streamlit-image-coordinates' a tu requirements.txt. Mientras tanto, aquí se mantienen los deslizadores.")
-        st.image(imagen_con_limites, width=width)
-        st.slider(
-            "Límite superior",
-            min_value=0,
-            max_value=100,
-            value=limite_superior,
-            key=key_sup,
-        )
-        st.slider(
-            "Límite inferior",
-            min_value=0,
-            max_value=100,
-            value=limite_inferior,
-            key=key_inf,
-        )
 
 def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferior_pct):
     if ruta_imagen is None:
@@ -1359,24 +1420,11 @@ elif seccion == "Adquisición":
                 unsafe_allow_html=True
             )
             if imagen_topo is not None and imagen_topo.exists():
-                selector_key = f"{prefijo_topo}_selector_limite"
-                if selector_key not in st.session_state:
-                    st.session_state[selector_key] = "Límite superior"
-
-                st.radio(
-                    "Mover con el mouse",
-                    ["Límite superior", "Límite inferior"],
-                    key=selector_key,
-                    horizontal=True,
-                    label_visibility="visible",
-                )
-
                 render_topograma_interactivo(
                     imagen_topo=imagen_topo,
                     key_sup=key_sup,
                     key_inf=key_inf,
-                    key_selector=selector_key,
-                    click_key_base=f"{prefijo_topo}_mouse",
+                    canvas_key_base=f"{prefijo_topo}_mouse",
                     width=260,
                 )
 
