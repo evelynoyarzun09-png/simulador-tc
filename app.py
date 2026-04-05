@@ -531,11 +531,11 @@ REGIONES_ANATOMICAS_TOPO = [
 
 MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
     "cabeza": ["Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial", "orbitas", "oidos"],
-    "cuello": ["Seleccionar", "cuello", "columna cervical"],
+    "cuello": ["Seleccionar", "cuello"],
     "torax": ["Seleccionar", "torax"],
     "abdomen": ["Seleccionar", "abdomen", "abdomen y pelvis", "pielotac"],
     "pelvis": ["Seleccionar", "pelvis"],
-    "columnas": ["Seleccionar", "columna dorsal", "columna lumbar"],
+    "columnas": ["Seleccionar", "columna cervical", "columna dorsal", "columna lumbar"],
     "extremidad superior": ["Seleccionar", "hombro", "brazo", "codo", "antebrazo", "muñeca", "mano"],
     "extremidad inferior": ["Seleccionar", "cadera", "rodilla", "pierna", "tobillo", "pie"],
     "angiotac": [
