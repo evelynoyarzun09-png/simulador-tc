@@ -360,23 +360,22 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                 draw();
             }});
 
-            canvas.addEventListener('pointerdown', (event) => {{
+            function startDragging(event) {{
                 if (!hasROI) return;
                 const pos = getPointerPos(event);
                 const dx = pos.x - roi.x;
                 const dy = pos.y - roi.y;
                 const distancia = Math.sqrt(dx * dx + dy * dy);
-                if (distancia <= roi.r + 14) {{
+                if (distancia <= roi.r + 18) {{
                     dragging = true;
                     dragOffsetX = pos.x - roi.x;
                     dragOffsetY = pos.y - roi.y;
-                    canvas.setPointerCapture(event.pointerId);
                     canvas.style.cursor = 'grabbing';
                     event.preventDefault();
                 }}
-            }});
+            }}
 
-            canvas.addEventListener('pointermove', (event) => {{
+            function moveDragging(event) {{
                 if (!dragging || !hasROI) return;
                 const pos = getPointerPos(event);
                 roi.x = pos.x - dragOffsetX;
@@ -384,19 +383,30 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                 clampROI();
                 draw();
                 event.preventDefault();
-            }});
-
-            function stopDragging(event) {{
-                dragging = false;
-                canvas.style.cursor = hasROI ? 'grab' : 'default';
-                if (event && event.pointerId !== undefined) {{
-                    try {{ canvas.releasePointerCapture(event.pointerId); }} catch (e) {{}}
-                }}
             }}
 
-            canvas.addEventListener('pointerup', stopDragging);
-            canvas.addEventListener('pointercancel', stopDragging);
-            canvas.addEventListener('pointerleave', (event) => {{ if (dragging) stopDragging(event); }});
+            function stopDragging() {{
+                dragging = false;
+                canvas.style.cursor = hasROI ? 'grab' : 'default';
+            }}
+
+            canvas.addEventListener('mousedown', startDragging);
+            document.addEventListener('mousemove', moveDragging);
+            document.addEventListener('mouseup', stopDragging);
+
+            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
+            document.addEventListener('touchmove', moveDragging, {{ passive: false }});
+            document.addEventListener('touchend', stopDragging);
+            document.addEventListener('touchcancel', stopDragging);
+
+            canvas.addEventListener('click', (event) => {{
+                if (!hasROI || dragging) return;
+                const pos = getPointerPos(event);
+                roi.x = pos.x;
+                roi.y = pos.y;
+                clampROI();
+                draw();
+            }});
 
             img.onload = () => {{
                 roi.x = img.width / 2;
