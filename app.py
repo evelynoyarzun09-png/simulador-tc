@@ -524,9 +524,40 @@ def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_l
                 }}
             }}
 
-            function getMouseY(event) {{
+            function getPointerY(event) {{
                 const rect = canvas.getBoundingClientRect();
-                return (event.clientY - rect.top) / scale;
+                const touch = event.touches && event.touches[0]
+                    ? event.touches[0]
+                    : event.changedTouches && event.changedTouches[0]
+                        ? event.changedTouches[0]
+                        : null;
+                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
+                return (clientY - rect.top) / scale;
+            }}
+
+            function clampLine(y) {{
+                return Math.max(0, Math.min(img.height, y));
+            }}
+
+            function startDragging(event) {{
+                if (!hasLine) return;
+                const y = getPointerY(event);
+                if (Math.abs(y - lineY) <= 28) {{
+                    dragging = true;
+                    event.preventDefault();
+                }}
+            }}
+
+            function moveDragging(event) {{
+                if (!dragging || !hasLine) return;
+                const y = getPointerY(event);
+                lineY = clampLine(y);
+                draw();
+                event.preventDefault();
+            }}
+
+            function stopDragging() {{
+                dragging = false;
             }}
 
             addBtn.addEventListener('click', () => {{
@@ -537,25 +568,22 @@ def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_l
 
             clearBtn.addEventListener('click', () => {{
                 hasLine = false;
+                dragging = false;
                 draw();
             }});
 
-            canvas.addEventListener('mousedown', (event) => {{
-                if (!hasLine) return;
-                const y = getMouseY(event);
-                if (Math.abs(y - lineY) <= 18) {{
-                    dragging = true;
-                }}
-            }});
+            canvas.addEventListener('mousedown', startDragging);
+            window.addEventListener('mousemove', moveDragging);
+            window.addEventListener('mouseup', stopDragging);
 
-            window.addEventListener('mouseup', () => {{
-                dragging = false;
-            }});
+            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
+            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
+            window.addEventListener('touchend', stopDragging);
+            window.addEventListener('touchcancel', stopDragging);
 
-            canvas.addEventListener('mousemove', (event) => {{
-                if (!dragging || !hasLine) return;
-                const y = getMouseY(event);
-                lineY = Math.max(0, Math.min(img.height, y));
+            canvas.addEventListener('click', (event) => {{
+                if (!hasLine || dragging) return;
+                lineY = clampLine(getPointerY(event));
                 draw();
             }});
 
