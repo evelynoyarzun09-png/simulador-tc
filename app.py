@@ -3,8 +3,6 @@ from pathlib import Path
 from datetime import date
 import hmac
 import openpyxl
-import base64
-import streamlit.components.v1 as components
 from PIL import Image, ImageDraw
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
@@ -26,15 +24,6 @@ elif PACIENTE_IMG_JPG.exists():
     PACIENTE_IMG = PACIENTE_IMG_JPG
 else:
     PACIENTE_IMG = None
-
-TC_COMPONENT_DIR = BASE_DIR / "tc_topogram_dragger" / "frontend" / "build"
-if TC_COMPONENT_DIR.exists():
-    tc_topogram_dragger = components.declare_component(
-        "tc_topogram_dragger",
-        path=str(TC_COMPONENT_DIR),
-    )
-else:
-    tc_topogram_dragger = None
 
 def mostrar_imagen_actualizada(ruta, **kwargs):
     if ruta is None:
@@ -232,83 +221,6 @@ def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferio
         return imagen
     except Exception:
         return None
-
-
-def ruta_a_data_url(ruta_imagen):
-    if ruta_imagen is None:
-        return None
-    ruta = Path(ruta_imagen)
-    if not ruta.exists():
-        return None
-
-    extension = ruta.suffix.lower()
-    mime = {
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".webp": "image/webp",
-    }.get(extension, "image/png")
-
-    contenido = base64.b64encode(ruta.read_bytes()).decode("utf-8")
-    return f"data:{mime};base64,{contenido}"
-
-
-def render_topograma_drag_directo(ruta_imagen, titulo, key_base, etiqueta_contexto, ancho=260):
-    if ruta_imagen is None or not Path(ruta_imagen).exists():
-        st.markdown(
-            """
-            <div style="
-                min-height:160px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                border:1px solid #7a7a7a;
-                border-radius:14px;
-                background-color:#4a4a4a;
-                color:white;
-                font-weight:600;
-                text-align:center;
-                padding:0.45rem;
-            ">
-                No se encontró la imagen del topograma seleccionado
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        return
-
-    if tc_topogram_dragger is None:
-        st.error("No se encontró la carpeta del componente interactivo: tc_topogram_dragger/frontend/build")
-        return
-
-    key_sup = f"{key_base}_limite_superior"
-    key_inf = f"{key_base}_limite_inferior"
-
-    valor = tc_topogram_dragger(
-        image_data=ruta_a_data_url(ruta_imagen),
-        upper_percent=float(st.session_state.get(key_sup, 15)),
-        lower_percent=float(st.session_state.get(key_inf, 85)),
-        width=ancho,
-        label_upper="Límite superior",
-        label_lower="Límite inferior",
-        title=titulo,
-        context_label=etiqueta_contexto,
-        default={
-            "upper": float(st.session_state.get(key_sup, 15)),
-            "lower": float(st.session_state.get(key_inf, 85)),
-        },
-        key=f"drag_{key_base}",
-    )
-
-    if isinstance(valor, dict):
-        superior = float(valor.get("upper", st.session_state.get(key_sup, 15)))
-        inferior = float(valor.get("lower", st.session_state.get(key_inf, 85)))
-        superior = max(0.0, min(superior, 98.0))
-        inferior = max(2.0, min(inferior, 100.0))
-        if superior > inferior - 2:
-            superior = max(0.0, inferior - 2)
-        st.session_state[key_sup] = round(superior, 1)
-        st.session_state[key_inf] = round(inferior, 1)
 
 # -------------------------
 # CONTROL DE ACCESO
@@ -1371,22 +1283,56 @@ elif seccion == "Adquisición":
                 """,
                 unsafe_allow_html=True
             )
+            if imagen_topo is not None and imagen_topo.exists():
+                limite_superior = st.slider(
+                    "Límite superior",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_sup, 15)),
+                    key=key_sup,
+                )
+                limite_inferior = st.slider(
+                    "Límite inferior",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_inf, 85)),
+                    key=key_inf,
+                )
 
-            contexto_topo = (
+                if limite_superior >= limite_inferior:
+                    st.warning("El límite superior debe quedar por encima del inferior.")
+                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
+                if imagen_con_limites is not None:
+                    st.image(imagen_con_limites, width=260)
+                else:
+                    mostrar_imagen_actualizada(imagen_topo, width=260)
+            else:
+                st.markdown(
+                    """
+                    <div style="
+                        min-height:160px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:1px solid #7a7a7a;
+                        border-radius:14px;
+                        background-color:#4a4a4a;
+                        color:white;
+                        font-weight:600;
+                        text-align:center;
+                        padding:0.45rem;
+                    ">
+                        No se encontró la imagen del topograma seleccionado
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.caption(
                 f"{st.session_state.get(f'{prefijo_topo}_region', 'Seleccionar')} · "
                 f"{st.session_state.get(f'{prefijo_topo}_posicionamiento', 'Seleccionar')} · "
                 f"tubo {str(st.session_state.get(f'{prefijo_topo}_posicion_tubo', 'Seleccionar')).lower()}"
             )
-
-            render_topograma_drag_directo(
-                ruta_imagen=imagen_topo,
-                titulo=titulo_topo,
-                key_base="adq_topo1" if prefijo_topo == "topo" else "adq_topo2",
-                etiqueta_contexto=contexto_topo,
-                ancho=260,
-            )
-
-            st.caption(contexto_topo)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
