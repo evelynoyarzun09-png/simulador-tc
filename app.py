@@ -204,6 +204,33 @@ def persistent_number_input(label, key, **kwargs):
     load_widget(key)
     st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
 
+def calcular_cobertura_desde_matriz(matriz_texto):
+    matriz = str(matriz_texto).strip()
+    if matriz in ["", "Seleccionar", "None"]:
+        return ""
+
+    matriz_normalizada = (
+        matriz.lower()
+        .replace("×", "x")
+        .replace(" ", "")
+        .replace(",", ".")
+    )
+
+    if "x" not in matriz_normalizada:
+        return ""
+
+    try:
+        n_texto, espesor_texto = matriz_normalizada.split("x", 1)
+        n = float(n_texto)
+        espesor = float(espesor_texto)
+        cobertura = n * espesor
+
+        if abs(cobertura - round(cobertura)) < 1e-9:
+            return str(int(round(cobertura)))
+        return f"{cobertura:.3f}".rstrip("0").rstrip(".").replace(".", ",")
+    except Exception:
+        return ""
+
 
 
 def ajustar_imagen_a_lienzo_uniforme(imagen, tamano_lienzo=(420, 420), color_fondo=(32, 32, 32)):
