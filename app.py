@@ -2709,7 +2709,8 @@ def render_bloque_adquisicion(numero=1):
             ["Seleccionar", "Small 200", "Head 350", "Large 500"],
             f"{pref}_sfov"
         )
-        st.text_input("Cobertura (mm)", value=st.session_state.get(f"{pref}_colimacion", ""), key=f"display_{pref}_colimacion", disabled=True)
+        st.session_state[f"display_{pref}_colimacion"] = st.session_state.get(f"{pref}_colimacion", "")
+        st.text_input("Cobertura (mm)", key=f"display_{pref}_colimacion", disabled=True)
         persistent_text_input("Inicio de adquisición", f"{pref}_inicio_adquisicion")
         persistent_text_input("Fin de adquisición", f"{pref}_fin_adquisicion")
 
