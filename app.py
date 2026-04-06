@@ -2027,6 +2027,68 @@ def buscar_archivo_imagen_por_nombre(nombre_base):
     return None
 
 
+def valor_numerico_desde_texto(valor):
+    try:
+        texto = str(valor).strip().replace(",", ".")
+        return float(texto)
+    except Exception:
+        return None
+
+
+def obtener_nombre_imagen_reconstruccion():
+    protocolo = st.session_state.get("topo_region", "Seleccionar")
+    fase = st.session_state.get("recon_fase", "Seleccionar")
+    kernel = st.session_state.get("recon_kernel", "Seleccionar")
+    nivel = valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana", ""))
+    ancho = valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana", ""))
+
+    if not all([
+        seleccion_completa(protocolo),
+        seleccion_completa(fase),
+        seleccion_completa(kernel),
+        nivel is not None,
+        ancho is not None,
+    ]):
+        return None
+
+    protocolo_norm = corregir_nombre_imagen(protocolo)
+    fase_norm = corregir_nombre_imagen(fase)
+    kernel_norm = corregir_nombre_imagen(kernel)
+
+    reglas = [
+        {
+            "protocolo": "cerebro",
+            "fase": "sin_contraste",
+            "kernels": {"standar_30f", "suave_20f"},
+            "nivel_min": 40,
+            "nivel_max": 60,
+            "ancho_min": 100,
+            "ancho_max": 140,
+            "imagen": "cerebro_sin_contraste_blanda",
+        },
+    ]
+
+    for regla in reglas:
+        if (
+            protocolo_norm == regla["protocolo"]
+            and fase_norm == regla["fase"]
+            and kernel_norm in regla["kernels"]
+            and regla["nivel_min"] <= nivel <= regla["nivel_max"]
+            and regla["ancho_min"] <= ancho <= regla["ancho_max"]
+        ):
+            return regla["imagen"]
+
+    return None
+
+
+def obtener_archivo_imagen_reconstruccion():
+    nombre = obtener_nombre_imagen_reconstruccion()
+    if not nombre:
+        return None
+    return buscar_archivo_imagen_por_nombre(nombre)
+
+
+
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
     posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
@@ -3131,6 +3193,29 @@ elif seccion == "Adquisición":
 
 elif seccion == "Reconstrucción":
     st.header("Reconstrucción")
+
+    imagen_recon = obtener_archivo_imagen_reconstruccion()
+    if imagen_recon is not None:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
+        try:
+            st.image(imagen_recon.read_bytes(), width=420)
+        except Exception:
+            mostrar_imagen_actualizada(imagen_recon, width=420)
+        st.markdown('</div>', unsafe_allow_html=True)
+    elif (
+        st.session_state.get("topo_region") == "cerebro"
+        and st.session_state.get("recon_fase") == "Sin contraste"
+        and st.session_state.get("recon_kernel") in ["Standar 30f", "Suave 20f"]
+        and valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana")) is not None
+        and valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana")) is not None
+        and 40 <= valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana")) <= 60
+        and 100 <= valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana")) <= 140
+    ):
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
+        st.info("Se activó la regla de imagen, pero no se encontró el archivo 'cerebro_sin contraste_blanda' en la carpeta de la app.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
