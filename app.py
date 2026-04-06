@@ -2052,14 +2052,14 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         data_uri = f"data:{mime};base64,{encoded}"
 
         html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:560px;margin:0 auto;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
                 <div style="color:white;font-weight:700;">MATRIZ DE RECONSTRUCCIÓN</div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <button id="add-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
                     <button id="clear-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
                     <label style="color:white;font-size:14px;">Tamaño matriz</label>
-                    <input id="size-{key_suffix}" type="range" min="18" max="220" value="70" step="1" />
+                    <input id="size-{key_suffix}" type="range" min="18" max="100" value="40" step="1" style="width:130px;"/>
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente dentro de la imagen.</div>
@@ -2086,10 +2086,22 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             let box = {{ x: 0, y: 0, size: 70 }};
 
             function getCssSize() {{
-                const maxWidth = 560;
-                const width = Math.min((canvas.parentElement?.clientWidth || 560), maxWidth);
+                const maxWidth = 360;
+                const width = Math.min((canvas.parentElement?.clientWidth || maxWidth), maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
+            }}
+
+            function syncSliderMax() {{
+                const maxSquare = Math.max(18, Math.floor(Math.min(cssWidth, cssHeight)));
+                sizeInput.max = String(maxSquare);
+                if (parseInt(sizeInput.value, 10) > maxSquare) {{
+                    sizeInput.value = String(maxSquare);
+                }}
+                if (hasBox) {{
+                    box.size = parseInt(sizeInput.value, 10);
+                    clampBox();
+                }}
             }}
 
             function resizeCanvas() {{
@@ -2104,6 +2116,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 canvas.width = Math.round(cssWidth * dpr);
                 canvas.height = Math.round(cssHeight * dpr);
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                syncSliderMax();
                 draw();
             }}
 
@@ -2222,7 +2235,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         </script>
         """
 
-        components.html(html_code, height=650)
+        components.html(html_code, height=520)
     except Exception as e:
         st.warning(f"No fue posible cargar la matriz de reconstrucción interactiva: {e}")
 
@@ -3390,13 +3403,6 @@ elif seccion == "Reconstrucción":
     if imagen_recon is not None:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-        cimg1, cimg2, cimg3 = st.columns([1.2, 1.6, 1.2])
-        with cimg2:
-            try:
-                st.image(imagen_recon.read_bytes(), width=280)
-            except Exception:
-                mostrar_imagen_actualizada(imagen_recon, width=280)
-        st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
         render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix="recon_preview")
         st.markdown('</div>', unsafe_allow_html=True)
     elif (
