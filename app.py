@@ -275,7 +275,24 @@ if not st.session_state.autenticado:
     <style>
     .stApp { background-color: #111111; }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 820px; }
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; text-transform: uppercase !important; }
+    h1, h2, h3, h4, h5, h6, .stMarkdown, .stText {
+    color: white !important;
+    text-transform: uppercase !important;
+}
+
+label,
+[data-testid="stWidgetLabel"],
+[data-testid="stWidgetLabel"] *,
+.stTextInput label,
+.stTextArea label,
+.stNumberInput label,
+.stDateInput label,
+.stSelectbox label,
+.stMultiSelect label,
+.stSlider label {
+    color: white !important;
+    text-transform: uppercase !important;
+}
     .login-box {
         background-color: #000000;
         padding: 2rem;
@@ -438,6 +455,11 @@ div[role="listbox"],
 div[role="option"],
 div[role="option"] * {
     text-transform: lowercase !important;
+}
+
+[data-baseweb="select"] + div [data-testid="stWidgetLabel"],
+[data-baseweb="select"] + div [data-testid="stWidgetLabel"] * {
+    text-transform: uppercase !important;
 }
 div[role="listbox"] {
     background-color: #c7ccd4 !important;
