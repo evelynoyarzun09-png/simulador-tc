@@ -2034,6 +2034,198 @@ def valor_numerico_desde_texto(valor):
     except Exception:
         return None
 
+def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="recon_matrix"):
+    try:
+        if isinstance(imagen_fuente, Path):
+            ruta = imagen_fuente
+        else:
+            ruta = Path(imagen_fuente)
+
+        if not ruta.exists():
+            st.info("No se encontró la imagen de reconstrucción.")
+            return
+
+        image_bytes = ruta.read_bytes()
+        sufijo = ruta.suffix.lower()
+        mime = "image/png" if sufijo == ".png" else "image/jpeg"
+        encoded = base64.b64encode(image_bytes).decode("utf-8")
+        data_uri = f"data:{mime};base64,{encoded}"
+
+        html_code = f"""
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+                <div style="color:white;font-weight:700;">MATRIZ DE RECONSTRUCCIÓN</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button id="add-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
+                    <button id="clear-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
+                    <label style="color:white;font-size:14px;">Tamaño matriz</label>
+                    <input id="size-{key_suffix}" type="range" min="18" max="220" value="70" step="1" />
+                </div>
+            </div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente dentro de la imagen.</div>
+            <div style="display:flex;justify-content:center;">
+                <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;"></canvas>
+            </div>
+        </div>
+
+        <script>
+        (() => {{
+            const canvas = document.getElementById('canvas-{key_suffix}');
+            const ctx = canvas.getContext('2d');
+            const addBtn = document.getElementById('add-matriz-{key_suffix}');
+            const clearBtn = document.getElementById('clear-matriz-{key_suffix}');
+            const sizeInput = document.getElementById('size-{key_suffix}');
+            const img = new Image();
+
+            let hasBox = false;
+            let dragging = false;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
+            let cssWidth = 0;
+            let cssHeight = 0;
+            let box = {{ x: 0, y: 0, size: 70 }};
+
+            function getCssSize() {{
+                const maxWidth = 560;
+                const width = Math.min((canvas.parentElement?.clientWidth || 560), maxWidth);
+                const height = width * (img.height / img.width);
+                return {{ width, height }};
+            }}
+
+            function resizeCanvas() {{
+                if (!img.width) return;
+                const dpr = window.devicePixelRatio || 1;
+                const size = getCssSize();
+                cssWidth = size.width;
+                cssHeight = size.height;
+
+                canvas.style.width = cssWidth + 'px';
+                canvas.style.height = cssHeight + 'px';
+                canvas.width = Math.round(cssWidth * dpr);
+                canvas.height = Math.round(cssHeight * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                draw();
+            }}
+
+            function draw() {{
+                if (!img.width) return;
+                ctx.clearRect(0, 0, cssWidth, cssHeight);
+                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
+                if (hasBox) {{
+                    const half = box.size / 2;
+                    ctx.strokeStyle = 'red';
+                    ctx.lineWidth = 1.4;
+                    ctx.strokeRect(box.x - half, box.y - half, box.size, box.size);
+                }}
+            }}
+
+            function getPointerPos(event) {{
+                const rect = canvas.getBoundingClientRect();
+                const touch = event.touches && event.touches[0]
+                    ? event.touches[0]
+                    : (event.changedTouches && event.changedTouches[0] ? event.changedTouches[0] : null);
+                const clientX = touch ? touch.clientX : (typeof event.clientX === 'number' ? event.clientX : rect.left);
+                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
+                return {{ x: clientX - rect.left, y: clientY - rect.top }};
+            }}
+
+            function clampBox() {{
+                const half = box.size / 2;
+                box.x = Math.max(half, Math.min(cssWidth - half, box.x));
+                box.y = Math.max(half, Math.min(cssHeight - half, box.y));
+            }}
+
+            function pointHitsBox(pos) {{
+                const half = box.size / 2;
+                return pos.x >= (box.x - half - 10) && pos.x <= (box.x + half + 10) && pos.y >= (box.y - half - 10) && pos.y <= (box.y + half + 10);
+            }}
+
+            addBtn.addEventListener('click', (event) => {{
+                event.preventDefault();
+                hasBox = true;
+                box.size = parseInt(sizeInput.value, 10);
+                box.x = cssWidth / 2;
+                box.y = cssHeight / 2;
+                clampBox();
+                draw();
+            }});
+
+            clearBtn.addEventListener('click', (event) => {{
+                event.preventDefault();
+                hasBox = false;
+                dragging = false;
+                canvas.style.cursor = 'grab';
+                draw();
+            }});
+
+            sizeInput.addEventListener('input', () => {{
+                box.size = parseInt(sizeInput.value, 10);
+                clampBox();
+                draw();
+            }});
+
+            function startDragging(event) {{
+                if (!hasBox) return;
+                const pos = getPointerPos(event);
+                if (pointHitsBox(pos)) {{
+                    dragging = true;
+                    dragOffsetX = pos.x - box.x;
+                    dragOffsetY = pos.y - box.y;
+                    canvas.style.cursor = 'grabbing';
+                    event.preventDefault();
+                }}
+            }}
+
+            function moveDragging(event) {{
+                if (!dragging || !hasBox) return;
+                const pos = getPointerPos(event);
+                box.x = pos.x - dragOffsetX;
+                box.y = pos.y - dragOffsetY;
+                clampBox();
+                draw();
+                event.preventDefault();
+            }}
+
+            function stopDragging() {{
+                dragging = false;
+                canvas.style.cursor = hasBox ? 'grab' : 'default';
+            }}
+
+            canvas.addEventListener('mousedown', startDragging);
+            window.addEventListener('mousemove', moveDragging);
+            window.addEventListener('mouseup', stopDragging);
+
+            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
+            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
+            window.addEventListener('touchend', stopDragging);
+            window.addEventListener('touchcancel', stopDragging);
+
+            canvas.addEventListener('click', (event) => {{
+                if (!hasBox || dragging) return;
+                const pos = getPointerPos(event);
+                box.x = pos.x;
+                box.y = pos.y;
+                clampBox();
+                draw();
+            }});
+
+            img.onload = () => {{
+                resizeCanvas();
+                box.x = cssWidth / 2;
+                box.y = cssHeight / 2;
+                draw();
+                window.addEventListener('resize', resizeCanvas);
+            }};
+
+            img.src = '{data_uri}';
+        }})();
+        </script>
+        """
+
+        components.html(html_code, height=650)
+    except Exception as e:
+        st.warning(f"No fue posible cargar la matriz de reconstrucción interactiva: {e}")
+
 
 def obtener_nombre_imagen_reconstruccion():
     protocolo = st.session_state.get("topo_region", "Seleccionar")
@@ -3198,10 +3390,14 @@ elif seccion == "Reconstrucción":
     if imagen_recon is not None:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-        try:
-            st.image(imagen_recon.read_bytes(), width=420)
-        except Exception:
-            mostrar_imagen_actualizada(imagen_recon, width=420)
+        cimg1, cimg2, cimg3 = st.columns([1.2, 1.6, 1.2])
+        with cimg2:
+            try:
+                st.image(imagen_recon.read_bytes(), width=280)
+            except Exception:
+                mostrar_imagen_actualizada(imagen_recon, width=280)
+        st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+        render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix="recon_preview")
         st.markdown('</div>', unsafe_allow_html=True)
     elif (
         st.session_state.get("topo_region") == "cerebro"
