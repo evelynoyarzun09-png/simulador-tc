@@ -2217,6 +2217,10 @@ ADQ_DEFAULTS_BASE = {
     "mas_manual": 100,
     "pitch": "Seleccionar",
     "sfov": "Seleccionar",
+    "topo1_limite_superior": 15,
+    "topo1_limite_inferior": 85,
+    "topo2_limite_superior": 15,
+    "topo2_limite_inferior": 85,
 }
 
 def adq_prefijo(numero):
@@ -2244,11 +2248,121 @@ def reiniciar_adquisicion(numero):
     if roi_key in st.session_state:
         del st.session_state[roi_key]
 
+
+def render_topogramas_adquisicion(numero=1):
+    pref = adq_prefijo(numero)
+    mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
+    imagen_topo_1 = obtener_imagen_rx_topograma("topo")
+    imagen_topo_2 = obtener_imagen_rx_topograma("topo2") if mostrar_topo2 else None
+
+    if numero == 1:
+        key_sup_1 = "adq_topo1_limite_superior"
+        key_inf_1 = "adq_topo1_limite_inferior"
+        key_sup_2 = "adq_topo2_limite_superior"
+        key_inf_2 = "adq_topo2_limite_inferior"
+    else:
+        key_sup_1 = f"{pref}_topo1_limite_superior"
+        key_inf_1 = f"{pref}_topo1_limite_inferior"
+        key_sup_2 = f"{pref}_topo2_limite_superior"
+        key_inf_2 = f"{pref}_topo2_limite_inferior"
+
+    st.markdown('<div class="titulo-bloque">Topogramas seleccionados y límites de barrido</div>', unsafe_allow_html=True)
+    st.caption("Ajusta de forma interactiva el límite superior e inferior en cada topograma.")
+
+    if mostrar_topo2:
+        topo_col1, topo_col2 = st.columns(2)
+        bloques_topo = [
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, key_sup_1, key_inf_1),
+            (topo_col2, "topo2", "Topograma 2", imagen_topo_2, key_sup_2, key_inf_2),
+        ]
+    else:
+        margen1, topo_col1, margen2 = st.columns([1.2, 1.6, 1.2])
+        bloques_topo = [
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, key_sup_1, key_inf_1),
+        ]
+
+    delay_bolus_activo = st.session_state.get(f"{pref}_delay") in ["Bolus tracking", "Bolus test"]
+
+    for columna_topo, prefijo_topo, titulo_topo, imagen_topo, key_sup, key_inf in bloques_topo:
+        with columna_topo:
+            st.markdown(
+                f"""
+                <div style="font-weight:700; color:white; margin-bottom:0.35rem; text-align:center;">{titulo_topo}</div>
+                """,
+                unsafe_allow_html=True
+            )
+            if imagen_topo is not None and imagen_topo.exists():
+                limite_superior = st.slider(
+                    "Inicio",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_sup, 15)),
+                    key=key_sup,
+                )
+                limite_inferior = st.slider(
+                    "Fin",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_inf, 85)),
+                    key=key_inf,
+                )
+
+                if limite_superior >= limite_inferior:
+                    st.warning("El límite superior debe quedar por encima del inferior.")
+                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
+                if imagen_con_limites is not None:
+                    if delay_bolus_activo:
+                        render_linea_corte_bolus_interactiva_html(imagen_con_limites, key_suffix=f"{pref}_{prefijo_topo}_bolus")
+                    else:
+                        st.image(imagen_con_limites, width=260)
+                else:
+                    try:
+                        imagen_base = ajustar_imagen_a_lienzo_uniforme(Image.open(imagen_topo).convert("RGB"))
+                        if delay_bolus_activo:
+                            render_linea_corte_bolus_interactiva_html(imagen_base, key_suffix=f"{pref}_{prefijo_topo}_bolus")
+                        else:
+                            st.image(imagen_base, width=260)
+                    except Exception:
+                        if delay_bolus_activo and imagen_topo is not None and imagen_topo.exists():
+                            render_linea_corte_bolus_interactiva_html(imagen_topo, key_suffix=f"{pref}_{prefijo_topo}_bolus")
+                        else:
+                            mostrar_imagen_actualizada(imagen_topo, width=260)
+            else:
+                st.markdown(
+                    """
+                    <div style="
+                        min-height:160px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:1px solid #7a7a7a;
+                        border-radius:14px;
+                        background-color:#4a4a4a;
+                        color:white;
+                        font-weight:600;
+                        text-align:center;
+                        padding:0.45rem;
+                    ">
+                        No se encontró la imagen del topograma seleccionado
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.caption(
+                f"{st.session_state.get(f'{prefijo_topo}_region', 'Seleccionar')} · "
+                f"{st.session_state.get(f'{prefijo_topo}_posicionamiento', 'Seleccionar')} · "
+                f"tubo {str(st.session_state.get(f'{prefijo_topo}_posicion_tubo', 'Seleccionar')).lower()}"
+            )
+
 def render_bloque_adquisicion(numero=1):
     pref = adq_prefijo(numero)
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    titulo = "Parámetros de adquisición" if numero == 1 else f"Adquisición {numero}"
+    titulo = "Adquisición 1" if numero == 1 else f"Adquisición {numero}"
     st.markdown(f'<div class="titulo-bloque">{titulo}</div>', unsafe_allow_html=True)
+    render_topogramas_adquisicion(numero)
+    st.markdown("<div style='height:0.45rem;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Parámetros de adquisición</div>', unsafe_allow_html=True)
 
     opciones_delay = [
         "Seleccionar", "Bolus tracking", "Bolus test", "0 sg", "5 sg", "10 sg", "15 sg", "20 sg",
@@ -2709,104 +2823,6 @@ elif seccion == "Adquisición":
         if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Topogramas seleccionados y límites de barrido</div>', unsafe_allow_html=True)
-    st.caption("Ajusta de forma interactiva el límite superior e inferior en cada topograma.")
-
-    mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
-    imagen_topo_1 = obtener_imagen_rx_topograma("topo")
-    imagen_topo_2 = obtener_imagen_rx_topograma("topo2") if mostrar_topo2 else None
-
-    if mostrar_topo2:
-        topo_col1, topo_col2 = st.columns(2)
-        bloques_topo = [
-            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "adq_topo1_limite_superior", "adq_topo1_limite_inferior"),
-            (topo_col2, "topo2", "Topograma 2", imagen_topo_2, "adq_topo2_limite_superior", "adq_topo2_limite_inferior"),
-        ]
-    else:
-        margen1, topo_col1, margen2 = st.columns([1.2, 1.6, 1.2])
-        bloques_topo = [
-            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "adq_topo1_limite_superior", "adq_topo1_limite_inferior"),
-        ]
-
-    for columna_topo, prefijo_topo, titulo_topo, imagen_topo, key_sup, key_inf in bloques_topo:
-        with columna_topo:
-            st.markdown(
-                f"""
-                <div style="font-weight:700; color:white; margin-bottom:0.35rem; text-align:center;">{titulo_topo}</div>
-                """,
-                unsafe_allow_html=True
-            )
-            if imagen_topo is not None and imagen_topo.exists():
-                limite_superior = st.slider(
-                    "Inicio",
-                    min_value=0,
-                    max_value=100,
-                    value=int(st.session_state.get(key_sup, 15)),
-                    key=key_sup,
-                )
-                limite_inferior = st.slider(
-                    "Fin",
-                    min_value=0,
-                    max_value=100,
-                    value=int(st.session_state.get(key_inf, 85)),
-                    key=key_inf,
-                )
-
-                if limite_superior >= limite_inferior:
-                    st.warning("El límite superior debe quedar por encima del inferior.")
-                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
-                delay_bolus_activo = any(
-                    st.session_state.get(f"{adq_prefijo(n)}_delay") in ["Bolus tracking", "Bolus test"]
-                    for n in range(1, 7)
-                    if n == 1 or st.session_state.get(f"mostrar_adq{n}", False)
-                )
-                if imagen_con_limites is not None:
-                    if delay_bolus_activo:
-                        render_linea_corte_bolus_interactiva_html(imagen_con_limites, key_suffix=f"{prefijo_topo}_bolus")
-                    else:
-                        st.image(imagen_con_limites, width=260)
-                else:
-                    try:
-                        imagen_base = ajustar_imagen_a_lienzo_uniforme(Image.open(imagen_topo).convert("RGB"))
-                        if delay_bolus_activo:
-                            render_linea_corte_bolus_interactiva_html(imagen_base, key_suffix=f"{prefijo_topo}_bolus")
-                        else:
-                            st.image(imagen_base, width=260)
-                    except Exception:
-                        if delay_bolus_activo and imagen_topo is not None and imagen_topo.exists():
-                            render_linea_corte_bolus_interactiva_html(imagen_topo, key_suffix=f"{prefijo_topo}_bolus")
-                        else:
-                            mostrar_imagen_actualizada(imagen_topo, width=260)
-            else:
-                st.markdown(
-                    """
-                    <div style="
-                        min-height:160px;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        border:1px solid #7a7a7a;
-                        border-radius:14px;
-                        background-color:#4a4a4a;
-                        color:white;
-                        font-weight:600;
-                        text-align:center;
-                        padding:0.45rem;
-                    ">
-                        No se encontró la imagen del topograma seleccionado
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-            st.caption(
-                f"{st.session_state.get(f'{prefijo_topo}_region', 'Seleccionar')} · "
-                f"{st.session_state.get(f'{prefijo_topo}_posicionamiento', 'Seleccionar')} · "
-                f"tubo {str(st.session_state.get(f'{prefijo_topo}_posicion_tubo', 'Seleccionar')).lower()}"
-            )
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
     adquisiciones_completas = []
     adquisiciones_completas.append(render_bloque_adquisicion(1))
