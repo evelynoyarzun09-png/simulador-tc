@@ -385,6 +385,134 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
     except Exception as e:
         st.warning(f"No fue posible cargar la ROI interactiva: {{e}}")
 
+
+
+def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_line"):
+    try:
+        if isinstance(imagen_fuente, Image.Image):
+            from io import BytesIO
+            buffer = BytesIO()
+            imagen_fuente.save(buffer, format="PNG")
+            image_bytes = buffer.getvalue()
+            mime = "image/png"
+        else:
+            ruta = Path(imagen_fuente)
+            image_bytes = ruta.read_bytes()
+            sufijo = ruta.suffix.lower()
+            mime = "image/png" if sufijo == ".png" else "image/jpeg"
+
+        encoded = base64.b64encode(image_bytes).decode("utf-8")
+        data_uri = f"data:{mime};base64,{encoded}"
+
+        html_code = f"""
+        <div style="background:#3f3f3f;padding:14px 14px 10px 14px;border-radius:12px;border:1px solid #727272;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+                <button id="add-line-{key_suffix}" style="padding:8px 14px;border:none;border-radius:8px;background:#c8cdd4;color:#111;font-weight:700;cursor:pointer;">Agregar corte de bolus</button>
+                <button id="clear-line-{key_suffix}" style="padding:8px 14px;border:none;border-radius:8px;background:#8e949c;color:white;font-weight:700;cursor:pointer;">Borrar corte</button>
+            </div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra la línea roja verticalmente para ubicar el corte de bolus.</div>
+            <canvas id="canvas-line-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:ns-resize;"></canvas>
+        </div>
+
+        <script>
+        (() => {{
+            const canvas = document.getElementById('canvas-line-{key_suffix}');
+            const ctx = canvas.getContext('2d');
+            const addBtn = document.getElementById('add-line-{key_suffix}');
+            const clearBtn = document.getElementById('clear-line-{key_suffix}');
+            const img = new Image();
+
+            let hasLine = false;
+            let dragging = false;
+            let scale = 1;
+            let lineY = 200;
+
+            function resizeCanvas() {{
+                const maxWidth = 760;
+                const containerWidth = Math.min(canvas.parentElement.clientWidth, maxWidth);
+                scale = containerWidth / img.width;
+                canvas.width = containerWidth;
+                canvas.height = img.height * scale;
+                draw();
+            }}
+
+            function drawLabel(yPx) {{
+                const text = 'Corte de bolus';
+                ctx.font = 'bold 16px Arial';
+                const textWidth = ctx.measureText(text).width;
+                const boxX = Math.max(10, canvas.width - textWidth - 24);
+                const boxY = Math.max(8, yPx - 30);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.88)';
+                ctx.fillRect(boxX, boxY, textWidth + 14, 24);
+                ctx.fillStyle = 'white';
+                ctx.fillText(text, boxX + 7, boxY + 17);
+            }}
+
+            function draw() {{
+                if (!img.width) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                if (hasLine) {{
+                    const yPx = lineY * scale;
+                    ctx.beginPath();
+                    ctx.moveTo(0, yPx);
+                    ctx.lineTo(canvas.width, yPx);
+                    ctx.strokeStyle = 'red';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    drawLabel(yPx);
+                }}
+            }}
+
+            function getMouseY(event) {{
+                const rect = canvas.getBoundingClientRect();
+                return (event.clientY - rect.top) / scale;
+            }}
+
+            addBtn.addEventListener('click', () => {{
+                hasLine = true;
+                lineY = img.height / 2;
+                draw();
+            }});
+
+            clearBtn.addEventListener('click', () => {{
+                hasLine = false;
+                draw();
+            }});
+
+            canvas.addEventListener('mousedown', (event) => {{
+                if (!hasLine) return;
+                const y = getMouseY(event);
+                if (Math.abs(y - lineY) <= 18) {{
+                    dragging = true;
+                }}
+            }});
+
+            window.addEventListener('mouseup', () => {{
+                dragging = false;
+            }});
+
+            canvas.addEventListener('mousemove', (event) => {{
+                if (!dragging || !hasLine) return;
+                const y = getMouseY(event);
+                lineY = Math.max(0, Math.min(img.height, y));
+                draw();
+            }});
+
+            img.onload = () => {{
+                lineY = img.height / 2;
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }};
+
+            img.src = '{data_uri}';
+        }})();
+        </script>
+        """
+
+        components.html(html_code, height=560)
+    except Exception as e:
+        st.warning(f"No fue posible cargar la línea interactiva del corte de bolus: {e}")
 # -------------------------
 # CONTROL DE ACCESO
 # -------------------------
@@ -2300,14 +2428,24 @@ elif seccion == "Adquisición":
                 if limite_superior >= limite_inferior:
                     st.warning("El límite superior debe quedar por encima del inferior.")
                 imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
+                delay_bolus_activo = st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]
                 if imagen_con_limites is not None:
-                    st.image(imagen_con_limites, width=260)
+                    if delay_bolus_activo:
+                        render_linea_corte_bolus_interactiva_html(imagen_con_limites, key_suffix=f"{prefijo_topo}_bolus")
+                    else:
+                        st.image(imagen_con_limites, width=260)
                 else:
                     try:
                         imagen_base = ajustar_imagen_a_lienzo_uniforme(Image.open(imagen_topo).convert("RGB"))
-                        st.image(imagen_base, width=260)
+                        if delay_bolus_activo:
+                            render_linea_corte_bolus_interactiva_html(imagen_base, key_suffix=f"{prefijo_topo}_bolus")
+                        else:
+                            st.image(imagen_base, width=260)
                     except Exception:
-                        mostrar_imagen_actualizada(imagen_topo, width=260)
+                        if delay_bolus_activo and imagen_topo is not None and imagen_topo.exists():
+                            render_linea_corte_bolus_interactiva_html(imagen_topo, key_suffix=f"{prefijo_topo}_bolus")
+                        else:
+                            mostrar_imagen_actualizada(imagen_topo, width=260)
             else:
                 st.markdown(
                     """
