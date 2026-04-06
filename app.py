@@ -323,8 +323,21 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
 
             function getPointerPos(event) {{
                 const rect = canvas.getBoundingClientRect();
-                const clientX = event.clientX ?? (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
-                const clientY = event.clientY ?? (event.touches && event.touches[0] ? event.touches[0].clientY : 0);
+
+                if (typeof event.offsetX === 'number' && typeof event.offsetY === 'number' && event.type.startsWith('mouse')) {{
+                    return {{
+                        x: event.offsetX / scale,
+                        y: event.offsetY / scale
+                    }};
+                }}
+
+                const touch = event.touches && event.touches[0]
+                    ? event.touches[0]
+                    : (event.changedTouches && event.changedTouches[0] ? event.changedTouches[0] : null);
+
+                const clientX = touch ? touch.clientX : (typeof event.clientX === 'number' ? event.clientX : rect.left);
+                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
+
                 return {{
                     x: (clientX - rect.left) / scale,
                     y: (clientY - rect.top) / scale
@@ -368,8 +381,6 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                 const distancia = Math.sqrt(dx * dx + dy * dy);
                 if (distancia <= roi.r + 18) {{
                     dragging = true;
-                    dragOffsetX = pos.x - roi.x;
-                    dragOffsetY = pos.y - roi.y;
                     canvas.style.cursor = 'grabbing';
                     event.preventDefault();
                 }}
@@ -378,8 +389,8 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             function moveDragging(event) {{
                 if (!dragging || !hasROI) return;
                 const pos = getPointerPos(event);
-                roi.x = pos.x - dragOffsetX;
-                roi.y = pos.y - dragOffsetY;
+                roi.x = pos.x;
+                roi.y = pos.y;
                 clampROI();
                 draw();
                 event.preventDefault();
