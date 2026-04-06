@@ -2,8 +2,9 @@ import streamlit as st
 from pathlib import Path
 from datetime import date
 import hmac
-import io
 import openpyxl
+import base64
+import streamlit.components.v1 as components
 from PIL import Image, ImageDraw
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
@@ -98,10 +99,6 @@ DEFAULTS = {
     "adq_mas_manual": 100,
     "adq_pitch": "Seleccionar",
     "adq_sfov": "Seleccionar",
-    "adq_roi_x": 50,
-    "adq_roi_y": 50,
-    "adq_roi_radio": 12,
-    "adq_roi_agregado": False,
     "adq_topo1_limite_superior": 15,
     "adq_topo1_limite_inferior": 85,
     "adq_topo2_limite_superior": 15,
@@ -260,25 +257,133 @@ def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferio
     except Exception:
         return None
 
-def dibujar_roi_en_imagen(archivo_subido, x_pct, y_pct, radio_pct):
+
+def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
+    if uploaded_file is None:
+        return
+
     try:
-        imagen = Image.open(io.BytesIO(archivo_subido.getvalue())).convert("RGB")
-        draw = ImageDraw.Draw(imagen)
-        ancho, alto = imagen.size
+        image_bytes = uploaded_file.getvalue()
+        mime_type = getattr(uploaded_file, "type", None) or "image/png"
+        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+        data_uri = f"data:{mime_type};base64,{image_b64}"
 
-        centro_x = int((x_pct / 100) * ancho)
-        centro_y = int((y_pct / 100) * alto)
-        radio = max(6, int((radio_pct / 100) * min(ancho, alto)))
-        grosor = max(3, min(ancho, alto) // 120)
+        html_code = f"""
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+                <div style="color:white;font-weight:700;">ROI INTERACTIVA</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button id="add-roi-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar ROI</button>
+                    <button id="clear-roi-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar ROI</button>
+                    <label style="color:white;font-size:14px;">Tamaño ROI</label>
+                    <input id="radius-{key_suffix}" type="range" min="10" max="160" value="45" step="1" />
+                </div>
+            </div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el círculo rojo con el mouse para mover la ROI libremente.</div>
+            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;"></canvas>
+        </div>
 
-        draw.ellipse(
-            [(centro_x - radio, centro_y - radio), (centro_x + radio, centro_y + radio)],
-            outline=(255, 0, 0),
-            width=grosor,
-        )
-        return imagen
-    except Exception:
-        return None
+        <script>
+        (() => {{
+            const canvas = document.getElementById('canvas-{key_suffix}');
+            const ctx = canvas.getContext('2d');
+            const addBtn = document.getElementById('add-roi-{key_suffix}');
+            const clearBtn = document.getElementById('clear-roi-{key_suffix}');
+            const radiusInput = document.getElementById('radius-{key_suffix}');
+            const img = new Image();
+
+            let hasROI = false;
+            let dragging = false;
+            let scale = 1;
+            let roi = {{ x: 180, y: 180, r: 45 }};
+
+            function resizeCanvas() {{
+                const maxWidth = 760;
+                const containerWidth = Math.min(canvas.parentElement.clientWidth, maxWidth);
+                scale = containerWidth / img.width;
+                canvas.width = containerWidth;
+                canvas.height = img.height * scale;
+                draw();
+            }}
+
+            function draw() {{
+                if (!img.width) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                if (hasROI) {{
+                    ctx.beginPath();
+                    ctx.arc(roi.x * scale, roi.y * scale, roi.r * scale, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'red';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }}
+            }}
+
+            function getMousePos(event) {{
+                const rect = canvas.getBoundingClientRect();
+                return {{
+                    x: (event.clientX - rect.left) / scale,
+                    y: (event.clientY - rect.top) / scale
+                }};
+            }}
+
+            addBtn.addEventListener('click', () => {{
+                hasROI = true;
+                roi.r = parseInt(radiusInput.value, 10);
+                roi.x = img.width / 2;
+                roi.y = img.height / 2;
+                draw();
+            }});
+
+            clearBtn.addEventListener('click', () => {{
+                hasROI = false;
+                draw();
+            }});
+
+            radiusInput.addEventListener('input', () => {{
+                roi.r = parseInt(radiusInput.value, 10);
+                draw();
+            }});
+
+            canvas.addEventListener('mousedown', (event) => {{
+                if (!hasROI) return;
+                const pos = getMousePos(event);
+                const dx = pos.x - roi.x;
+                const dy = pos.y - roi.y;
+                if (Math.sqrt(dx * dx + dy * dy) <= roi.r + 8) {{
+                    dragging = true;
+                    canvas.style.cursor = 'grabbing';
+                }}
+            }});
+
+            window.addEventListener('mouseup', () => {{
+                dragging = false;
+                canvas.style.cursor = 'grab';
+            }});
+
+            canvas.addEventListener('mousemove', (event) => {{
+                if (!dragging || !hasROI) return;
+                const pos = getMousePos(event);
+                roi.x = Math.max(roi.r, Math.min(img.width - roi.r, pos.x));
+                roi.y = Math.max(roi.r, Math.min(img.height - roi.r, pos.y));
+                draw();
+            }});
+
+            img.onload = () => {{
+                roi.x = img.width / 2;
+                roi.y = img.height / 2;
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }};
+
+            img.src = '{data_uri}';
+        }})();
+        </script>
+        """
+
+        components.html(html_code, height=700)
+    except Exception as e:
+        st.warning(f"No fue posible cargar la ROI interactiva: {{e}}")
 
 # -------------------------
 # CONTROL DE ACCESO
@@ -2345,53 +2450,16 @@ elif seccion == "Adquisición":
         st.session_state["_adq_kv_referencia"] = "Seleccionar"
         st.session_state["_adq_mas_referencia"] = "Seleccionar"
 
-    delay_actual = st.session_state.get("adq_delay", "Seleccionar")
-    mostrar_roi = delay_actual in ["Bolus tracking", "Bolus test"]
-
-    if mostrar_roi:
-        st.markdown("<div style='height:0.35rem;'></div>", unsafe_allow_html=True)
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">ROI PARA BOLUS TEST / BOLUS TRACKING</div>', unsafe_allow_html=True)
-
+    if st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]:
+        st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='titulo-bloque'>ROI PARA BOLUS TEST / BOLUS TRACKING</div>", unsafe_allow_html=True)
         archivo_roi = st.file_uploader(
             "SUBIR IMAGEN PARA ROI",
             type=["png", "jpg", "jpeg"],
-            key="adq_roi_archivo"
+            key="adq_roi_imagen_bolus"
         )
-
         if archivo_roi is not None:
-            col_roi1, col_roi2, col_roi3 = st.columns(3)
-            with col_roi1:
-                st.slider("POSICIÓN X (%)", 0, 100, key="adq_roi_x")
-            with col_roi2:
-                st.slider("POSICIÓN Y (%)", 0, 100, key="adq_roi_y")
-            with col_roi3:
-                st.slider("TAMAÑO ROI (%)", 1, 40, key="adq_roi_radio")
-
-            cbtn1, cbtn2, cbtn3 = st.columns([1.4, 1.8, 1.4])
-            with cbtn2:
-                if st.button("Agregar ROI", use_container_width=True):
-                    st.session_state["adq_roi_agregado"] = True
-
-            imagen_roi = None
-            if st.session_state.get("adq_roi_agregado", False):
-                imagen_roi = dibujar_roi_en_imagen(
-                    archivo_roi,
-                    st.session_state.get("adq_roi_x", 50),
-                    st.session_state.get("adq_roi_y", 50),
-                    st.session_state.get("adq_roi_radio", 12),
-                )
-
-            if imagen_roi is not None:
-                st.image(imagen_roi, caption="Imagen con ROI", use_container_width=True)
-            else:
-                st.image(archivo_roi, caption="Imagen subida", use_container_width=True)
-        else:
-            st.info("Al seleccionar bolus test o bolus tracking, puedes subir una imagen desde tu computador para agregar la ROI.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.session_state["adq_roi_agregado"] = False
+            render_roi_interactiva_html(archivo_roi, key_suffix="adq_bolus")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -2432,8 +2500,6 @@ elif seccion == "Adquisición":
     st.write(f"**Fase de adquisición:** {st.session_state['adq_fase_adquisicion']}")
     st.write(f"**Instrucción de voz:** {st.session_state['adq_instruccion_voz']}")
     st.write(f"**Delay:** {st.session_state['adq_delay']}")
-    if st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]:
-        st.write(f"**ROI agregada:** {'Sí' if st.session_state.get('adq_roi_agregado', False) else 'No'}")
     st.write(f"**Tipo de exploración:** {st.session_state['adq_tipo_exploracion']}")
     st.write(f"**Espesor (mm):** {st.session_state['adq_espesor']}")
     st.write(f"**Matriz de detectores:** {st.session_state['adq_matriz_detectores']}")
