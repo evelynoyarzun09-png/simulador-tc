@@ -2538,22 +2538,28 @@ def render_calculos_exploracion(numero=1):
     st.markdown("<div style='height:0.3rem;'></div>", unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Cálculo automático</div>', unsafe_allow_html=True)
 
+    valor_largo = f"{largo_cm:.2f} cm" if largo_cm is not None else "No disponible"
+    protocolo_txt = protocolo if seleccion_completa(protocolo) else "No definido"
+    cobertura_txt = f"{cobertura_promedio * 100:.1f}%" if cobertura_promedio is not None else "No disponible"
+
+    if estado_tiempo == "no_helicoidal":
+        st.info(f"**LARGO DE ADQUISICIÓN**\n\n{valor_largo}")
+        st.caption(
+            f"Protocolo de referencia: {protocolo_txt} · Cobertura promedio entre Inicio y Fin: {cobertura_txt}"
+        )
+        return
+
     c1, c2 = st.columns(2)
     with c1:
-        valor_largo = f"{largo_cm:.2f} cm" if largo_cm is not None else "No disponible"
         st.info(f"**LARGO DE ADQUISICIÓN**\n\n{valor_largo}")
     with c2:
         if estado_tiempo == "ok":
             valor_tiempo = f"{tiempo_seg:.2f} s"
-        elif estado_tiempo == "no_helicoidal":
-            valor_tiempo = "No aplica en secuencial"
         else:
             valor_tiempo = "Completa pitch / giro / colimación"
         st.info(f"**TIEMPO DE EXPLORACIÓN**\n\n{valor_tiempo}")
-    protocolo_txt = protocolo if seleccion_completa(protocolo) else "No definido"
-    cobertura_txt = f"{cobertura_promedio * 100:.1f}%" if cobertura_promedio is not None else "No disponible"
-    colimacion_txt = f"{colimacion_total_mm:.3f} mm" if colimacion_total_mm is not None else "No disponible"
 
+    colimacion_txt = f"{colimacion_total_mm:.3f} mm" if colimacion_total_mm is not None else "No disponible"
     st.caption(
         f"Protocolo de referencia: {protocolo_txt} · Cobertura promedio entre Inicio y Fin: {cobertura_txt} · "
         f"Colimación total usada para el cálculo: {colimacion_txt}"
