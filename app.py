@@ -3,8 +3,6 @@ from pathlib import Path
 from datetime import date
 import hmac
 import openpyxl
-import base64
-import streamlit.components.v1 as components
 from PIL import Image, ImageDraw
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
@@ -257,350 +255,6 @@ def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferio
     except Exception:
         return None
 
-
-def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
-    if uploaded_file is None:
-        return
-
-    try:
-        image_bytes = uploaded_file.getvalue()
-        mime_type = getattr(uploaded_file, "type", None) or "image/png"
-        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-        data_uri = f"data:{mime_type};base64,{image_b64}"
-
-        html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-                <div style="color:white;font-weight:700;">ROI INTERACTIVA</div>
-                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <button id="add-roi-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar ROI</button>
-                    <button id="clear-roi-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar ROI</button>
-                    <label style="color:white;font-size:14px;">Tamaño ROI</label>
-                    <input id="radius-{key_suffix}" type="range" min="2" max="160" value="20" step="1" />
-                </div>
-            </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el círculo rojo con el mouse para mover la ROI libremente.</div>
-            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;"></canvas>
-        </div>
-
-        <script>
-        (() => {{
-            const canvas = document.getElementById('canvas-{key_suffix}');
-            const ctx = canvas.getContext('2d');
-            const addBtn = document.getElementById('add-roi-{key_suffix}');
-            const clearBtn = document.getElementById('clear-roi-{key_suffix}');
-            const radiusInput = document.getElementById('radius-{key_suffix}');
-            const img = new Image();
-
-            let hasROI = false;
-            let dragging = false;
-            let dragOffsetX = 0;
-            let dragOffsetY = 0;
-            let cssWidth = 0;
-            let cssHeight = 0;
-            let roi = {{ x: 0, y: 0, r: 20 }};
-
-            function getCssSize() {{
-                const maxWidth = 760;
-                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
-                const height = width * (img.height / img.width);
-                return {{ width, height }};
-            }}
-
-            function resizeCanvas() {{
-                if (!img.width) return;
-                const dpr = window.devicePixelRatio || 1;
-                const size = getCssSize();
-                cssWidth = size.width;
-                cssHeight = size.height;
-
-                canvas.style.width = cssWidth + 'px';
-                canvas.style.height = cssHeight + 'px';
-                canvas.width = Math.round(cssWidth * dpr);
-                canvas.height = Math.round(cssHeight * dpr);
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                draw();
-            }}
-
-            function draw() {{
-                if (!img.width) return;
-                ctx.clearRect(0, 0, cssWidth, cssHeight);
-                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
-                if (hasROI) {{
-                    ctx.beginPath();
-                    ctx.arc(roi.x, roi.y, roi.r, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 1.4;
-                    ctx.stroke();
-                }}
-            }}
-
-            function getPointerPos(event) {{
-                const rect = canvas.getBoundingClientRect();
-                const touch = event.touches && event.touches[0]
-                    ? event.touches[0]
-                    : (event.changedTouches && event.changedTouches[0] ? event.changedTouches[0] : null);
-
-                const clientX = touch ? touch.clientX : (typeof event.clientX === 'number' ? event.clientX : rect.left);
-                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
-
-                return {{
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                }};
-            }}
-
-            function clampROI() {{
-                roi.x = Math.max(roi.r, Math.min(cssWidth - roi.r, roi.x));
-                roi.y = Math.max(roi.r, Math.min(cssHeight - roi.r, roi.y));
-            }}
-
-            function pointHitsROI(pos) {{
-                const dx = pos.x - roi.x;
-                const dy = pos.y - roi.y;
-                return Math.sqrt(dx * dx + dy * dy) <= roi.r + 10;
-            }}
-
-            addBtn.addEventListener('click', (event) => {{
-                event.preventDefault();
-                hasROI = true;
-                roi.r = parseInt(radiusInput.value, 10);
-                roi.x = cssWidth / 2;
-                roi.y = cssHeight / 2;
-                clampROI();
-                draw();
-            }});
-
-            clearBtn.addEventListener('click', (event) => {{
-                event.preventDefault();
-                hasROI = false;
-                dragging = false;
-                canvas.style.cursor = 'grab';
-                draw();
-            }});
-
-            radiusInput.addEventListener('input', () => {{
-                roi.r = parseInt(radiusInput.value, 10);
-                clampROI();
-                draw();
-            }});
-
-            function startDragging(event) {{
-                if (!hasROI) return;
-                const pos = getPointerPos(event);
-                if (pointHitsROI(pos)) {{
-                    dragging = true;
-                    dragOffsetX = pos.x - roi.x;
-                    dragOffsetY = pos.y - roi.y;
-                    canvas.style.cursor = 'grabbing';
-                    event.preventDefault();
-                }}
-            }}
-
-            function moveDragging(event) {{
-                if (!dragging || !hasROI) return;
-                const pos = getPointerPos(event);
-                roi.x = pos.x - dragOffsetX;
-                roi.y = pos.y - dragOffsetY;
-                clampROI();
-                draw();
-                event.preventDefault();
-            }}
-
-            function stopDragging() {{
-                dragging = false;
-                canvas.style.cursor = hasROI ? 'grab' : 'default';
-            }}
-
-            canvas.addEventListener('mousedown', startDragging);
-            window.addEventListener('mousemove', moveDragging);
-            window.addEventListener('mouseup', stopDragging);
-
-            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
-            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
-            window.addEventListener('touchend', stopDragging);
-            window.addEventListener('touchcancel', stopDragging);
-
-            canvas.addEventListener('click', (event) => {{
-                if (!hasROI || dragging) return;
-                const pos = getPointerPos(event);
-                roi.x = pos.x;
-                roi.y = pos.y;
-                clampROI();
-                draw();
-            }});
-
-            img.onload = () => {{
-                resizeCanvas();
-                roi.x = cssWidth / 2;
-                roi.y = cssHeight / 2;
-                draw();
-                window.addEventListener('resize', resizeCanvas);
-            }};
-
-            img.src = '{data_uri}';
-        }})();
-        </script>
-        """
-
-        components.html(html_code, height=700)
-    except Exception as e:
-        st.warning(f"No fue posible cargar la ROI interactiva: {{e}}")
-
-def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_line"):
-    try:
-        if isinstance(imagen_fuente, Image.Image):
-            from io import BytesIO
-            buffer = BytesIO()
-            imagen_fuente.save(buffer, format="PNG")
-            image_bytes = buffer.getvalue()
-            mime = "image/png"
-        else:
-            ruta = Path(imagen_fuente)
-            image_bytes = ruta.read_bytes()
-            sufijo = ruta.suffix.lower()
-            mime = "image/png" if sufijo == ".png" else "image/jpeg"
-
-        encoded = base64.b64encode(image_bytes).decode("utf-8")
-        data_uri = f"data:{mime};base64,{encoded}"
-
-        html_code = f"""
-        <div style="background:#3f3f3f;padding:14px 14px 10px 14px;border-radius:12px;border:1px solid #727272;">
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
-                <button id="add-line-{key_suffix}" style="padding:8px 14px;border:none;border-radius:8px;background:#c8cdd4;color:#111;font-weight:700;cursor:pointer;">Agregar corte de bolus</button>
-                <button id="clear-line-{key_suffix}" style="padding:8px 14px;border:none;border-radius:8px;background:#8e949c;color:white;font-weight:700;cursor:pointer;">Borrar corte</button>
-            </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra la línea roja verticalmente para ubicar el corte de bolus.</div>
-            <canvas id="canvas-line-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:ns-resize;"></canvas>
-        </div>
-
-        <script>
-        (() => {{
-            const canvas = document.getElementById('canvas-line-{key_suffix}');
-            const ctx = canvas.getContext('2d');
-            const addBtn = document.getElementById('add-line-{key_suffix}');
-            const clearBtn = document.getElementById('clear-line-{key_suffix}');
-            const img = new Image();
-
-            let hasLine = false;
-            let dragging = false;
-            let scale = 1;
-            let lineY = 200;
-
-            function resizeCanvas() {{
-                const maxWidth = 760;
-                const containerWidth = Math.min(canvas.parentElement.clientWidth, maxWidth);
-                scale = containerWidth / img.width;
-                canvas.width = containerWidth;
-                canvas.height = img.height * scale;
-                draw();
-            }}
-
-            function drawLabel(yPx) {{
-                const text = 'Corte de bolus';
-                ctx.font = 'bold 16px Arial';
-                const textWidth = ctx.measureText(text).width;
-                const boxX = Math.max(10, canvas.width - textWidth - 24);
-                const boxY = Math.max(8, yPx - 30);
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.88)';
-                ctx.fillRect(boxX, boxY, textWidth + 14, 24);
-                ctx.fillStyle = 'white';
-                ctx.fillText(text, boxX + 7, boxY + 17);
-            }}
-
-            function draw() {{
-                if (!img.width) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                if (hasLine) {{
-                    const yPx = lineY * scale;
-                    ctx.beginPath();
-                    ctx.moveTo(0, yPx);
-                    ctx.lineTo(canvas.width, yPx);
-                    ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    drawLabel(yPx);
-                }}
-            }}
-
-            function getPointerY(event) {{
-                const rect = canvas.getBoundingClientRect();
-                const touch = event.touches && event.touches[0]
-                    ? event.touches[0]
-                    : event.changedTouches && event.changedTouches[0]
-                        ? event.changedTouches[0]
-                        : null;
-                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
-                return (clientY - rect.top) / scale;
-            }}
-
-            function clampLine(y) {{
-                return Math.max(0, Math.min(img.height, y));
-            }}
-
-            function startDragging(event) {{
-                if (!hasLine) return;
-                const y = getPointerY(event);
-                if (Math.abs(y - lineY) <= 28) {{
-                    dragging = true;
-                    event.preventDefault();
-                }}
-            }}
-
-            function moveDragging(event) {{
-                if (!dragging || !hasLine) return;
-                const y = getPointerY(event);
-                lineY = clampLine(y);
-                draw();
-                event.preventDefault();
-            }}
-
-            function stopDragging() {{
-                dragging = false;
-            }}
-
-            addBtn.addEventListener('click', () => {{
-                hasLine = true;
-                lineY = img.height / 2;
-                draw();
-            }});
-
-            clearBtn.addEventListener('click', () => {{
-                hasLine = false;
-                dragging = false;
-                draw();
-            }});
-
-            canvas.addEventListener('mousedown', startDragging);
-            window.addEventListener('mousemove', moveDragging);
-            window.addEventListener('mouseup', stopDragging);
-
-            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
-            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
-            window.addEventListener('touchend', stopDragging);
-            window.addEventListener('touchcancel', stopDragging);
-
-            canvas.addEventListener('click', (event) => {{
-                if (!hasLine || dragging) return;
-                lineY = clampLine(getPointerY(event));
-                draw();
-            }});
-
-            img.onload = () => {{
-                lineY = img.height / 2;
-                resizeCanvas();
-                window.addEventListener('resize', resizeCanvas);
-            }};
-
-            img.src = '{data_uri}';
-        }})();
-        </script>
-        """
-
-        components.html(html_code, height=560)
-    except Exception as e:
-        st.warning(f"No fue posible cargar la línea interactiva del corte de bolus: {e}")
 # -------------------------
 # CONTROL DE ACCESO
 # -------------------------
@@ -2516,24 +2170,14 @@ elif seccion == "Adquisición":
                 if limite_superior >= limite_inferior:
                     st.warning("El límite superior debe quedar por encima del inferior.")
                 imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
-                delay_bolus_activo = st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]
                 if imagen_con_limites is not None:
-                    if delay_bolus_activo:
-                        render_linea_corte_bolus_interactiva_html(imagen_con_limites, key_suffix=f"{prefijo_topo}_bolus")
-                    else:
-                        st.image(imagen_con_limites, width=260)
+                    st.image(imagen_con_limites, width=260)
                 else:
                     try:
                         imagen_base = ajustar_imagen_a_lienzo_uniforme(Image.open(imagen_topo).convert("RGB"))
-                        if delay_bolus_activo:
-                            render_linea_corte_bolus_interactiva_html(imagen_base, key_suffix=f"{prefijo_topo}_bolus")
-                        else:
-                            st.image(imagen_base, width=260)
+                        st.image(imagen_base, width=260)
                     except Exception:
-                        if delay_bolus_activo and imagen_topo is not None and imagen_topo.exists():
-                            render_linea_corte_bolus_interactiva_html(imagen_topo, key_suffix=f"{prefijo_topo}_bolus")
-                        else:
-                            mostrar_imagen_actualizada(imagen_topo, width=260)
+                        mostrar_imagen_actualizada(imagen_topo, width=260)
             else:
                 st.markdown(
                     """
@@ -2577,6 +2221,26 @@ elif seccion == "Adquisición":
     opciones_kv_referencia = ["Seleccionar", "70", "80", "100", "110", "120", "130", "140"]
     opciones_mas_referencia = ["Seleccionar", "50", "100", "150", "200", "250", "300", "350", "400", "450", "500", "550", "600"]
 
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        persistent_selectbox(
+            "Fase de adquisición",
+            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
+            "adq_fase_adquisicion"
+        )
+        persistent_selectbox(
+            "Tipo de exploración",
+            ["Seleccionar", "Helicoidal", "Secuencial"],
+            "adq_tipo_exploracion"
+        )
+        persistent_selectbox(
+            "Espesor (mm)",
+            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
+            "adq_espesor"
+        )
+        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
+
     tipo_exploracion = st.session_state.get("adq_tipo_exploracion", "Seleccionar")
     if tipo_exploracion == "Helicoidal":
         opciones_matriz = ["Seleccionar", "64 x 0,625", "32 x 1,25", "16 x 0,625"]
@@ -2589,97 +2253,66 @@ elif seccion == "Adquisición":
         st.session_state["adq_matriz_detectores"] = "Seleccionar"
         st.session_state["_adq_matriz_detectores"] = "Seleccionar"
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        persistent_selectbox(
-            "Fase de adquisición",
-            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
-            "adq_fase_adquisicion"
-        )
+    with col2:
         persistent_selectbox(
             "Instrucción de voz",
             ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
             "adq_instruccion_voz"
         )
-        persistent_selectbox("Delay", opciones_delay, "adq_delay")
-        persistent_selectbox(
-            "Tipo de exploración",
-            ["Seleccionar", "Helicoidal", "Secuencial"],
-            "adq_tipo_exploracion"
-        )
         persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
+        persistent_text_input("Colimación (mm)", "adq_colimacion")
+        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
 
-    with col2:
+    with col3:
+        persistent_selectbox("Delay", opciones_delay, "adq_delay")
         persistent_selectbox(
             "Giro del tubo",
             ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
             "adq_giro_tubo"
-        )
-        if tipo_exploracion == "Helicoidal":
-            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
-        else:
-            st.session_state["adq_pitch"] = "Seleccionar"
-            st.session_state["_adq_pitch"] = "Seleccionar"
-            st.markdown("<div style='height: 74px;'></div>", unsafe_allow_html=True)
-
-        persistent_selectbox(
-            "Modulación de corriente",
-            ["Seleccionar", "Si", "No"],
-            "adq_modulacion_corriente"
-        )
-
-        modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
-        if modulacion == "Si":
-            persistent_selectbox("kV referencia", opciones_kv_referencia, "adq_kv_referencia")
-            persistent_selectbox("mAs referencia", opciones_mas_referencia, "adq_mas_referencia")
-
-            st.session_state["adq_kv_manual"] = 120
-            st.session_state["adq_mas_manual"] = 100
-            st.session_state["_adq_kv_manual"] = 120
-            st.session_state["_adq_mas_manual"] = 100
-        elif modulacion == "No":
-            persistent_number_input("kV", "adq_kv_manual", min_value=1, max_value=200, step=1)
-            persistent_number_input("mAs", "adq_mas_manual", min_value=1, max_value=1000, step=1)
-
-            st.session_state["adq_kv_referencia"] = "Seleccionar"
-            st.session_state["adq_mas_referencia"] = "Seleccionar"
-            st.session_state["_adq_kv_referencia"] = "Seleccionar"
-            st.session_state["_adq_mas_referencia"] = "Seleccionar"
-        else:
-            st.session_state["adq_kv_referencia"] = "Seleccionar"
-            st.session_state["adq_mas_referencia"] = "Seleccionar"
-            st.session_state["_adq_kv_referencia"] = "Seleccionar"
-            st.session_state["_adq_mas_referencia"] = "Seleccionar"
-            st.markdown("<div style='height: 148px;'></div>", unsafe_allow_html=True)
-
-    with col3:
-        persistent_selectbox(
-            "Espesor (mm)",
-            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
-            "adq_espesor"
         )
         persistent_selectbox(
             "SFOV",
             ["Seleccionar", "Small 200", "Head 350", "Large 500"],
             "adq_sfov"
         )
-        persistent_text_input("Colimación (mm)", "adq_colimacion")
-        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
-        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
-        st.session_state["_adq_kv_referencia"] = "Seleccionar"
-        st.session_state["_adq_mas_referencia"] = "Seleccionar"
-
-    if st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]:
-        st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='titulo-bloque'>ROI PARA BOLUS TEST / BOLUS TRACKING</div>", unsafe_allow_html=True)
-        archivo_roi = st.file_uploader(
-            "SUBIR IMAGEN PARA ROI",
-            type=["png", "jpg", "jpeg"],
-            key="adq_roi_imagen_bolus"
+        persistent_selectbox(
+            "Modulación de corriente",
+            ["Seleccionar", "Si", "No"],
+            "adq_modulacion_corriente"
         )
-        if archivo_roi is not None:
-            render_roi_interactiva_html(archivo_roi, key_suffix="adq_bolus")
+
+    if tipo_exploracion == "Helicoidal":
+        col_pitch_izq, col_pitch_cen, col_pitch_der = st.columns([1, 1, 1])
+        with col_pitch_izq:
+            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
+    else:
+        st.session_state["adq_pitch"] = "Seleccionar"
+        st.session_state["_adq_pitch"] = "Seleccionar"
+
+    modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
+    if modulacion == "Si":
+        col_mod1, col_mod2, col_mod3 = st.columns(3)
+        with col_mod1:
+            persistent_selectbox("kV referencia", opciones_kv_referencia, "adq_kv_referencia")
+        with col_mod2:
+            persistent_selectbox("mAs referencia", opciones_mas_referencia, "adq_mas_referencia")
+
+        st.session_state["adq_kv_manual"] = 120
+        st.session_state["adq_mas_manual"] = 100
+
+    elif modulacion == "No":
+        col_mod1, col_mod2, col_mod3 = st.columns(3)
+        with col_mod1:
+            persistent_number_input("kV", "adq_kv_manual", min_value=1, max_value=200, step=1)
+        with col_mod2:
+            persistent_number_input("mAs", "adq_mas_manual", min_value=1, max_value=1000, step=1)
+
+        st.session_state["adq_kv_referencia"] = "Seleccionar"
+        st.session_state["adq_mas_referencia"] = "Seleccionar"
+
+    else:
+        st.session_state["adq_kv_referencia"] = "Seleccionar"
+        st.session_state["adq_mas_referencia"] = "Seleccionar"
 
     st.markdown('</div>', unsafe_allow_html=True)
 
