@@ -13,7 +13,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
 A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
-TOPOGRAMA_IMG = BASE_DIR / "topograma.png" 
+TOPOGRAMA_IMG = BASE_DIR / "topograma.png"
 
 PACIENTE_IMG_PNG = BASE_DIR / "paciente.png"
 PACIENTE_IMG_JPG = BASE_DIR / "paciente.jpg"
@@ -215,8 +215,8 @@ def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferio
         draw.line([(0, y_superior), (ancho, y_superior)], fill=(0, 255, 255), width=grosor)
         draw.line([(0, y_inferior), (ancho, y_inferior)], fill=(255, 180, 0), width=grosor)
 
-        draw.text((margen_texto, max(5, y_superior - 22)), "Límite superior", fill=(0, 255, 255))
-        draw.text((margen_texto, max(5, y_inferior - 22)), "Límite inferior", fill=(255, 180, 0))
+        draw.text((margen_texto, max(5, y_superior - 22)), "Inicio", fill=(0, 255, 255))
+        draw.text((margen_texto, max(5, y_inferior - 22)), "Fin", fill=(255, 180, 0))
 
         return imagen
     except Exception:
@@ -2120,14 +2120,14 @@ elif seccion == "Adquisición":
             )
             if imagen_topo is not None and imagen_topo.exists():
                 limite_superior = st.slider(
-                    "Límite superior",
+                    "Inicio",
                     min_value=0,
                     max_value=100,
                     value=int(st.session_state.get(key_sup, 15)),
                     key=key_sup,
                 )
                 limite_inferior = st.slider(
-                    "Límite inferior",
+                    "Fin",
                     min_value=0,
                     max_value=100,
                     value=int(st.session_state.get(key_inf, 85)),
