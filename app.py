@@ -3142,7 +3142,7 @@ elif seccion == "Reconstrucción":
     intensidades_safire = ["Seleccionar", "1", "2", "3", "4", "5"]
     intensidades_asir = ["Seleccionar"] + [f"{i}%" for i in range(10, 101, 10)]
     kernels_recon = ["Seleccionar", "Suave 20f", "Standar 30f", "Definidon 70f", "Ultradefinido 80f"]
-    niveles_ventana = ["Seleccionar"] + [str(i) for i in range(-1000, 1001, 50)]
+    niveles_ventana = ["Seleccionar"] + [str(i) for i in range(-1000, 1001, 10)]
     anchos_ventana = ["Seleccionar"] + [str(i) for i in range(50, 4001, 50)]
 
     def lista_mm_hasta_6():
@@ -3152,8 +3152,8 @@ elif seccion == "Reconstrucción":
             if abs(actual - round(actual)) < 1e-9:
                 valores.append(str(int(round(actual))))
             else:
-                valores.append(f"{actual:.2f}".replace('.', ','))
-            actual += 0.25
+                valores.append(f"{actual:.3f}".replace('.', ',').rstrip('0').rstrip(','))
+            actual += 0.025
         return valores
 
     opciones_mm = lista_mm_hasta_6()
