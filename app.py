@@ -280,7 +280,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el círculo rojo con el mouse para mover la ROI libremente.</div>
-            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;"></canvas>
+            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;"></canvas>
         </div>
 
         <script>
@@ -294,12 +294,14 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
 
             let hasROI = false;
             let dragging = false;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
             let scale = 1;
             let roi = {{ x: 180, y: 180, r: 45 }};
 
             function resizeCanvas() {{
                 const maxWidth = 760;
-                const containerWidth = Math.min(canvas.parentElement.clientWidth, maxWidth);
+                const containerWidth = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
                 scale = containerWidth / img.width;
                 canvas.width = containerWidth;
                 canvas.height = img.height * scale;
@@ -314,60 +316,87 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                     ctx.beginPath();
                     ctx.arc(roi.x * scale, roi.y * scale, roi.r * scale, 0, Math.PI * 2);
                     ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 1.4;
                     ctx.stroke();
                 }}
             }}
 
-            function getMousePos(event) {{
+            function getPointerPos(event) {{
                 const rect = canvas.getBoundingClientRect();
+                const clientX = event.clientX ?? (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
+                const clientY = event.clientY ?? (event.touches && event.touches[0] ? event.touches[0].clientY : 0);
                 return {{
-                    x: (event.clientX - rect.left) / scale,
-                    y: (event.clientY - rect.top) / scale
+                    x: (clientX - rect.left) / scale,
+                    y: (clientY - rect.top) / scale
                 }};
             }}
 
-            addBtn.addEventListener('click', () => {{
+            function clampROI() {{
+                roi.x = Math.max(roi.r, Math.min(img.width - roi.r, roi.x));
+                roi.y = Math.max(roi.r, Math.min(img.height - roi.r, roi.y));
+            }}
+
+            addBtn.addEventListener('click', (event) => {{
+                event.preventDefault();
                 hasROI = true;
                 roi.r = parseInt(radiusInput.value, 10);
                 roi.x = img.width / 2;
                 roi.y = img.height / 2;
+                clampROI();
                 draw();
             }});
 
-            clearBtn.addEventListener('click', () => {{
+            clearBtn.addEventListener('click', (event) => {{
+                event.preventDefault();
                 hasROI = false;
+                dragging = false;
+                canvas.style.cursor = 'grab';
                 draw();
             }});
 
             radiusInput.addEventListener('input', () => {{
                 roi.r = parseInt(radiusInput.value, 10);
+                clampROI();
                 draw();
             }});
 
-            canvas.addEventListener('mousedown', (event) => {{
+            canvas.addEventListener('pointerdown', (event) => {{
                 if (!hasROI) return;
-                const pos = getMousePos(event);
+                const pos = getPointerPos(event);
                 const dx = pos.x - roi.x;
                 const dy = pos.y - roi.y;
-                if (Math.sqrt(dx * dx + dy * dy) <= roi.r + 8) {{
+                const distancia = Math.sqrt(dx * dx + dy * dy);
+                if (distancia <= roi.r + 14) {{
                     dragging = true;
+                    dragOffsetX = pos.x - roi.x;
+                    dragOffsetY = pos.y - roi.y;
+                    canvas.setPointerCapture(event.pointerId);
                     canvas.style.cursor = 'grabbing';
+                    event.preventDefault();
                 }}
             }});
 
-            window.addEventListener('mouseup', () => {{
-                dragging = false;
-                canvas.style.cursor = 'grab';
+            canvas.addEventListener('pointermove', (event) => {{
+                if (!dragging || !hasROI) return;
+                const pos = getPointerPos(event);
+                roi.x = pos.x - dragOffsetX;
+                roi.y = pos.y - dragOffsetY;
+                clampROI();
+                draw();
+                event.preventDefault();
             }});
 
-            canvas.addEventListener('mousemove', (event) => {{
-                if (!dragging || !hasROI) return;
-                const pos = getMousePos(event);
-                roi.x = Math.max(roi.r, Math.min(img.width - roi.r, pos.x));
-                roi.y = Math.max(roi.r, Math.min(img.height - roi.r, pos.y));
-                draw();
-            }});
+            function stopDragging(event) {{
+                dragging = false;
+                canvas.style.cursor = hasROI ? 'grab' : 'default';
+                if (event && event.pointerId !== undefined) {{
+                    try {{ canvas.releasePointerCapture(event.pointerId); }} catch (e) {{}}
+                }}
+            }}
+
+            canvas.addEventListener('pointerup', stopDragging);
+            canvas.addEventListener('pointercancel', stopDragging);
+            canvas.addEventListener('pointerleave', (event) => {{ if (dragging) stopDragging(event); }});
 
             img.onload = () => {{
                 roi.x = img.width / 2;
