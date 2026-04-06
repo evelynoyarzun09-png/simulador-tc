@@ -1,2 +1,209 @@
-TopogramaLímite superiorLímite inferior
-Arrastra cada línea directamente sobre la imagen.
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://unpkg.com/streamlit-component-lib@1.4.0/dist/index.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: white;
+    }
+    .wrap {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 100%;
+      max-width: 320px;
+    }
+    .image-shell {
+      position: relative;
+      width: 100%;
+      border: 1px solid #7a7a7a;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #1f1f1f;
+      box-sizing: border-box;
+      user-select: none;
+      touch-action: none;
+    }
+    .image-shell img {
+      width: 100%;
+      display: block;
+      pointer-events: none;
+      user-drag: none;
+      -webkit-user-drag: none;
+    }
+    .line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 0;
+      cursor: ns-resize;
+      touch-action: none;
+    }
+    .line::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      top: -1px;
+      border-top: 3px dashed currentColor;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
+    }
+    .line::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: -10px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: currentColor;
+      border: 2px solid rgba(0,0,0,0.45);
+      box-sizing: border-box;
+    }
+    .line .label {
+      position: absolute;
+      left: 10px;
+      top: -18px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      white-space: nowrap;
+    }
+    .upper { color: #00f0ff; }
+    .lower { color: #ffb400; }
+    .help {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #d0d0d0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div id="shell" class="image-shell">
+        <img id="img" alt="Topograma" />
+        <div id="upperLine" class="line upper"><span id="upperLabel" class="label">Límite superior</span></div>
+        <div id="lowerLine" class="line lower"><span id="lowerLabel" class="label">Límite inferior</span></div>
+      </div>
+      <div class="help">Arrastra cada línea directamente sobre la imagen.</div>
+    </div>
+  </div>
+
+  <script>
+    const MIN_GAP = 2;
+    const shell = document.getElementById("shell");
+    const img = document.getElementById("img");
+    const upperLine = document.getElementById("upperLine");
+    const lowerLine = document.getElementById("lowerLine");
+    const upperLabel = document.getElementById("upperLabel");
+    const lowerLabel = document.getElementById("lowerLabel");
+
+    let currentArgs = {};
+    let upper = 15;
+    let lower = 85;
+    let activeLine = null;
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function setFrameHeight() {
+      const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, 40);
+      Streamlit.setFrameHeight(height + 4);
+    }
+
+    function updateLinePositions() {
+      upperLine.style.top = `${upper}%`;
+      lowerLine.style.top = `${lower}%`;
+      setFrameHeight();
+    }
+
+    function sendValue() {
+      Streamlit.setComponentValue({ upper: Number(upper.toFixed(1)), lower: Number(lower.toFixed(1)) });
+    }
+
+    function clientYToPercent(clientY) {
+      const rect = shell.getBoundingClientRect();
+      const y = clientY - rect.top;
+      return clamp((y / rect.height) * 100, 0, 100);
+    }
+
+    function startDrag(which, event) {
+      activeLine = which;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.target.setPointerCapture) {
+        event.target.setPointerCapture(event.pointerId);
+      }
+    }
+
+    function duringDrag(event) {
+      if (!activeLine) return;
+      const raw = clientYToPercent(event.clientY);
+      if (activeLine === "upper") {
+        upper = clamp(raw, 0, lower - MIN_GAP);
+      } else {
+        lower = clamp(raw, upper + MIN_GAP, 100);
+      }
+      updateLinePositions();
+      sendValue();
+    }
+
+    function endDrag() {
+      if (!activeLine) return;
+      activeLine = null;
+      sendValue();
+    }
+
+    upperLine.addEventListener("pointerdown", (e) => startDrag("upper", e));
+    lowerLine.addEventListener("pointerdown", (e) => startDrag("lower", e));
+    window.addEventListener("pointermove", duringDrag);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+
+    img.addEventListener("load", () => {
+      const maxWidth = Number(currentArgs.width || 260);
+      shell.style.maxWidth = `${maxWidth}px`;
+      shell.style.width = `${maxWidth}px`;
+      updateLinePositions();
+      setTimeout(setFrameHeight, 0);
+    });
+
+    function onRender(event) {
+      const args = event.detail.args || {};
+      currentArgs = args;
+      upper = Number(args.upper_percent ?? 15);
+      lower = Number(args.lower_percent ?? 85);
+      upperLabel.textContent = args.label_upper || "Límite superior";
+      lowerLabel.textContent = args.label_lower || "Límite inferior";
+      const maxWidth = Number(args.width || 260);
+      shell.style.maxWidth = `${maxWidth}px`;
+      shell.style.width = `${maxWidth}px`;
+      if (img.src !== args.image_data) {
+        img.src = args.image_data || "";
+      } else {
+        updateLinePositions();
+      }
+      setFrameHeight();
+    }
+
+    Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender);
+    Streamlit.setComponentReady();
+    setFrameHeight();
+  </script>
+</body>
+</html>
