@@ -3174,7 +3174,7 @@ elif seccion == "Preparación de paciente":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
+        if st.button("⬅ Volver", key="volver_reconstruccion", use_container_width=True):
             volver_anterior(); st.rerun()
 
     col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.75])
@@ -3522,7 +3522,7 @@ elif seccion == "Reconstrucción":
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
     with c2:
-        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa):
+        if st.button("Siguiente", key="siguiente_reconstruccion", use_container_width=True, disabled=not reconstruccion_completa):
             ir_a("Reformación"); st.rerun()
 
 elif seccion == "Reformación":
