@@ -2052,19 +2052,19 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         data_uri = f"data:{mime};base64,{encoded}"
 
         html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:760px;margin:0 auto;overflow:visible;">
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:560px;margin:0 auto;overflow:visible;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
                 <div style="color:white;font-weight:700;">MATRIZ DE RECONSTRUCCIÓN</div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <button id="add-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
                     <button id="clear-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
                     <label style="color:white;font-size:14px;">Tamaño matriz</label>
-                    <input id="size-{key_suffix}" type="range" min="2" max="1200" value="40" step="1" style="width:180px;"/>
+                    <input id="size-{key_suffix}" type="range" min="2" max="520" value="40" step="1" style="width:130px;"/>
                 </div>
             </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente sobre la imagen. Puede hacerse muy pequeña o más grande que la imagen.</div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente dentro de la imagen.</div>
             <div style="display:flex;justify-content:center;overflow:visible;">
-                <canvas id="canvas-{key_suffix}" style="max-width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;"></canvas>
+                <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;overflow:visible;"></canvas>
             </div>
         </div>
 
@@ -2081,61 +2081,49 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             let dragging = false;
             let dragOffsetX = 0;
             let dragOffsetY = 0;
-
-            let imageWidth = 0;
-            let imageHeight = 0;
-            let canvasCssWidth = 0;
-            let canvasCssHeight = 0;
-            let imageOffsetX = 0;
-            let imageOffsetY = 0;
-            let extraMargin = 180;
-
+            let cssWidth = 0;
+            let cssHeight = 0;
             let box = {{ x: 0, y: 0, size: 70 }};
 
-            function currentSize() {{
-                return Math.max(2, parseInt(sizeInput.value || '40', 10));
-            }}
-
-            function getImageDisplaySize() {{
-                const maxImageWidth = 360;
-                const parentWidth = canvas.parentElement?.clientWidth || maxImageWidth;
-                const width = Math.min(parentWidth, maxImageWidth);
+            function getCssSize() {{
+                const maxWidth = 360;
+                const width = Math.min((canvas.parentElement?.clientWidth || maxWidth), maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
             }}
 
-            function layoutCanvas() {{
+            function syncSliderMax() {{
+                const maxSquare = Math.max(18, Math.floor(Math.min(cssWidth, cssHeight)));
+                sizeInput.max = String(maxSquare);
+                if (parseInt(sizeInput.value, 10) > maxSquare) {{
+                    sizeInput.value = String(maxSquare);
+                }}
+                if (hasBox) {{
+                    box.size = parseInt(sizeInput.value, 10);
+                    clampBox();
+                }}
+            }}
+
+            function resizeCanvas() {{
                 if (!img.width) return;
                 const dpr = window.devicePixelRatio || 1;
-                const size = getImageDisplaySize();
-                imageWidth = size.width;
-                imageHeight = size.height;
+                const size = getCssSize();
+                cssWidth = size.width;
+                cssHeight = size.height;
 
-                const dynamicMargin = Math.max(180, Math.ceil(currentSize() / 2) + 40);
-                extraMargin = dynamicMargin;
-
-                canvasCssWidth = imageWidth + extraMargin * 2;
-                canvasCssHeight = imageHeight + extraMargin * 2;
-                imageOffsetX = extraMargin;
-                imageOffsetY = extraMargin;
-
-                canvas.style.width = canvasCssWidth + 'px';
-                canvas.style.height = canvasCssHeight + 'px';
-                canvas.width = Math.round(canvasCssWidth * dpr);
-                canvas.height = Math.round(canvasCssHeight * dpr);
+                canvas.style.width = cssWidth + 'px';
+                canvas.style.height = cssHeight + 'px';
+                canvas.width = Math.round(cssWidth * dpr);
+                canvas.height = Math.round(cssHeight * dpr);
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-                const absoluteMax = Math.max(imageWidth, imageHeight) + extraMargin * 2;
-                sizeInput.max = String(Math.max(1200, Math.ceil(absoluteMax)));
+                syncSliderMax();
+                draw();
             }}
 
             function draw() {{
                 if (!img.width) return;
-                ctx.clearRect(0, 0, canvasCssWidth, canvasCssHeight);
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, canvasCssWidth, canvasCssHeight);
-                ctx.drawImage(img, imageOffsetX, imageOffsetY, imageWidth, imageHeight);
-
+                ctx.clearRect(0, 0, cssWidth, cssHeight);
+                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
                 if (hasBox) {{
                     const half = box.size / 2;
                     ctx.strokeStyle = 'red';
@@ -2154,35 +2142,24 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 return {{ x: clientX - rect.left, y: clientY - rect.top }};
             }}
 
-            function clampCenter() {{
-                const hardMargin = Math.max(box.size, extraMargin + box.size / 2);
-                box.x = Math.max(-hardMargin, Math.min(canvasCssWidth + hardMargin, box.x));
-                box.y = Math.max(-hardMargin, Math.min(canvasCssHeight + hardMargin, box.y));
+            function clampBox() {{
+                const half = box.size / 2;
+                box.x = Math.max(half, Math.min(cssWidth - half, box.x));
+                box.y = Math.max(half, Math.min(cssHeight - half, box.y));
             }}
 
             function pointHitsBox(pos) {{
                 const half = box.size / 2;
-                return pos.x >= (box.x - half - 12) && pos.x <= (box.x + half + 12) && pos.y >= (box.y - half - 12) && pos.y <= (box.y + half + 12);
-            }}
-
-            function recalcAndRedraw(keepCenter=true) {{
-                const prevCenter = {{ x: box.x, y: box.y }};
-                layoutCanvas();
-                if (keepCenter && hasBox) {{
-                    box.x = prevCenter.x;
-                    box.y = prevCenter.y;
-                    clampCenter();
-                }}
-                draw();
+                return pos.x >= (box.x - half - 10) && pos.x <= (box.x + half + 10) && pos.y >= (box.y - half - 10) && pos.y <= (box.y + half + 10);
             }}
 
             addBtn.addEventListener('click', (event) => {{
                 event.preventDefault();
                 hasBox = true;
-                box.size = currentSize();
-                box.x = imageOffsetX + imageWidth / 2;
-                box.y = imageOffsetY + imageHeight / 2;
-                recalcAndRedraw(false);
+                box.size = parseInt(sizeInput.value, 10);
+                box.x = cssWidth / 2;
+                box.y = cssHeight / 2;
+                clampBox();
                 draw();
             }});
 
@@ -2195,8 +2172,9 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             }});
 
             sizeInput.addEventListener('input', () => {{
-                box.size = currentSize();
-                recalcAndRedraw(true);
+                box.size = parseInt(sizeInput.value, 10);
+                clampBox();
+                draw();
             }});
 
             function startDragging(event) {{
@@ -2216,7 +2194,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 const pos = getPointerPos(event);
                 box.x = pos.x - dragOffsetX;
                 box.y = pos.y - dragOffsetY;
-                clampCenter();
+                clampBox();
                 draw();
                 event.preventDefault();
             }}
@@ -2240,16 +2218,16 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 const pos = getPointerPos(event);
                 box.x = pos.x;
                 box.y = pos.y;
-                clampCenter();
+                clampBox();
                 draw();
             }});
 
             img.onload = () => {{
-                layoutCanvas();
-                box.x = imageOffsetX + imageWidth / 2;
-                box.y = imageOffsetY + imageHeight / 2;
+                resizeCanvas();
+                box.x = cssWidth / 2;
+                box.y = cssHeight / 2;
                 draw();
-                window.addEventListener('resize', () => recalcAndRedraw(true));
+                window.addEventListener('resize', resizeCanvas);
             }};
 
             img.src = '{data_uri}';
@@ -2257,9 +2235,10 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         </script>
         """
 
-        components.html(html_code, height=820)
+        components.html(html_code, height=520)
     except Exception as e:
         st.warning(f"No fue posible cargar la matriz de reconstrucción interactiva: {e}")
+
 
 def obtener_nombre_imagen_reconstruccion():
     protocolo = st.session_state.get("topo_region", "Seleccionar")
@@ -3174,7 +3153,7 @@ elif seccion == "Preparación de paciente":
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
-        if st.button("⬅ Volver", key="volver_reconstruccion", use_container_width=True):
+        if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
     col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.75])
@@ -3461,7 +3440,7 @@ elif seccion == "Reconstrucción":
     intensidades_asir = ["Seleccionar"] + [f"{i}%" for i in range(10, 101, 10)]
     kernels_recon = ["Seleccionar", "Suave 20f", "Standar 30f", "Definidon 70f", "Ultradefinido 80f"]
     niveles_ventana = ["Seleccionar"] + [str(i) for i in range(-1000, 1001, 10)]
-    anchos_ventana = ["Seleccionar"] + [str(i) for i in range(10, 3001, 10)]
+    anchos_ventana = ["Seleccionar"] + [str(i) for i in range(50, 4001, 50)]
 
     def lista_mm_hasta_6():
         valores = ["Seleccionar"]
@@ -3522,7 +3501,7 @@ elif seccion == "Reconstrucción":
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
     with c2:
-        if st.button("Siguiente", key="siguiente_reconstruccion", use_container_width=True, disabled=not reconstruccion_completa):
+        if st.button("Siguiente", use_container_width=True, disabled=not reconstruccion_completa):
             ir_a("Reformación"); st.rerun()
 
 elif seccion == "Reformación":
