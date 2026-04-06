@@ -2485,6 +2485,36 @@ def extraer_primer_numero(texto):
     except Exception:
         return None
 
+def formatear_numero_colimacion(valor):
+    if valor is None:
+        return ""
+    try:
+        valor = float(valor)
+    except Exception:
+        return ""
+
+    if valor.is_integer():
+        return str(int(valor))
+
+    texto = f"{valor:.3f}".rstrip("0").rstrip(".")
+    return texto.replace(".", ",")
+
+def calcular_colimacion_desde_matriz(valor_matriz):
+    texto_mat = str(valor_matriz).strip().lower().replace(",", ".")
+    if "x" not in texto_mat:
+        return ""
+
+    partes = re.split(r"\s*x\s*", texto_mat)
+    if len(partes) != 2:
+        return ""
+
+    try:
+        total = float(partes[0]) * float(partes[1])
+    except Exception:
+        return ""
+
+    return formatear_numero_colimacion(total)
+
 def obtener_colimacion_total_mm(numero=1):
     pref = adq_prefijo(numero)
     valor_colimacion = st.session_state.get(f"{pref}_colimacion", "")
@@ -2597,6 +2627,12 @@ def render_bloque_adquisicion(numero=1):
         if f"_{pref}_matriz_detectores" in st.session_state:
             st.session_state[f"_{pref}_matriz_detectores"] = "Seleccionar"
 
+    st.session_state[f"{pref}_colimacion"] = calcular_colimacion_desde_matriz(
+        st.session_state.get(f"{pref}_matriz_detectores", "Seleccionar")
+    )
+    if f"_{pref}_colimacion" in st.session_state:
+        st.session_state[f"_{pref}_colimacion"] = st.session_state[f"{pref}_colimacion"]
+
     col1, col2, col3 = st.columns(3)
     with col1:
         persistent_selectbox(
@@ -2675,7 +2711,7 @@ def render_bloque_adquisicion(numero=1):
             ["Seleccionar", "Small 200", "Head 350", "Large 500"],
             f"{pref}_sfov"
         )
-        persistent_text_input("Colimación (mm)", f"{pref}_colimacion")
+        st.text_input("Colimación (mm)", value=st.session_state.get(f"{pref}_colimacion", ""), key=f"display_{pref}_colimacion", disabled=True)
         persistent_text_input("Inicio de adquisición", f"{pref}_inicio_adquisicion")
         persistent_text_input("Fin de adquisición", f"{pref}_fin_adquisicion")
 
