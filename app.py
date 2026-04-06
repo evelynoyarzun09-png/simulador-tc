@@ -275,24 +275,7 @@ if not st.session_state.autenticado:
     <style>
     .stApp { background-color: #111111; }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 820px; }
-    h1, h2, h3, h4, h5, h6, .stMarkdown, .stText {
-    color: white !important;
-    text-transform: uppercase !important;
-}
-
-label,
-[data-testid="stWidgetLabel"],
-[data-testid="stWidgetLabel"] *,
-.stTextInput label,
-.stTextArea label,
-.stNumberInput label,
-.stDateInput label,
-.stSelectbox label,
-.stMultiSelect label,
-.stSlider label {
-    color: white !important;
-    text-transform: uppercase !important;
-}
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; }
     .login-box {
         background-color: #000000;
         padding: 2rem;
@@ -455,11 +438,6 @@ div[role="listbox"],
 div[role="option"],
 div[role="option"] * {
     text-transform: lowercase !important;
-}
-
-[data-baseweb="select"] + div [data-testid="stWidgetLabel"],
-[data-baseweb="select"] + div [data-testid="stWidgetLabel"] * {
-    text-transform: uppercase !important;
 }
 div[role="listbox"] {
     background-color: #c7ccd4 !important;
@@ -2036,7 +2014,7 @@ elif seccion == "Preparación de paciente":
     edad = hoy.year - fecha_nac.year - ((hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day))
 
     st.divider()
-    st.subheader("Resumen")
+    st.subheader("RESUMEN")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Paciente:** {st.session_state['prep_nombres']} {st.session_state['prep_apellidos']}")
     st.write(f"**Edad:** {edad} años")
@@ -2106,7 +2084,7 @@ elif seccion == "Topograma":
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
-    st.subheader("Resumen")
+    st.subheader("RESUMEN")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
 
     st.write("**Topograma 1**")
@@ -2259,53 +2237,53 @@ elif seccion == "Adquisición":
 
     with col1:
         persistent_selectbox(
-            "Fase de adquisición",
+            "FASE DE ADQUISICIÓN",
             ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
             "adq_fase_adquisicion"
         )
         persistent_selectbox(
-            "Instrucción de voz",
+            "INSTRUCCIÓN DE VOZ",
             ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
             "adq_instruccion_voz"
         )
-        persistent_selectbox("Delay", opciones_delay, "adq_delay")
+        persistent_selectbox("DELAY", opciones_delay, "adq_delay")
         persistent_selectbox(
-            "Tipo de exploración",
+            "TIPO DE EXPLORACIÓN",
             ["Seleccionar", "Helicoidal", "Secuencial"],
             "adq_tipo_exploracion"
         )
-        persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
+        persistent_selectbox("MATRIZ DE DETECTORES", opciones_matriz, "adq_matriz_detectores")
 
     with col2:
         persistent_selectbox(
-            "Giro del tubo",
+            "GIRO DEL TUBO",
             ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
             "adq_giro_tubo"
         )
         if tipo_exploracion == "Helicoidal":
-            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
+            persistent_selectbox("PITCH", opciones_pitch, "adq_pitch")
         else:
             st.session_state["adq_pitch"] = "Seleccionar"
             st.session_state["_adq_pitch"] = "Seleccionar"
             st.markdown("<div style='height: 76px;'></div>", unsafe_allow_html=True)
 
         persistent_selectbox(
-            "Modulación de corriente",
+            "MODULACIÓN DE CORRIENTE",
             ["Seleccionar", "Si", "No"],
             "adq_modulacion_corriente"
         )
 
         modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
         if modulacion == "Si":
-            persistent_selectbox("kV referencia", opciones_kv_referencia, "adq_kv_referencia")
-            persistent_selectbox("mAs referencia", opciones_mas_referencia, "adq_mas_referencia")
+            persistent_selectbox("KV REFERENCIA", opciones_kv_referencia, "adq_kv_referencia")
+            persistent_selectbox("MAS REFERENCIA", opciones_mas_referencia, "adq_mas_referencia")
             st.session_state["adq_kv_manual"] = 120
             st.session_state["adq_mas_manual"] = 100
             st.session_state["_adq_kv_manual"] = 120
             st.session_state["_adq_mas_manual"] = 100
         elif modulacion == "No":
-            persistent_number_input("kV", "adq_kv_manual", min_value=1, max_value=200, step=1)
-            persistent_number_input("mAs", "adq_mas_manual", min_value=1, max_value=1000, step=1)
+            persistent_number_input("KV", "adq_kv_manual", min_value=1, max_value=200, step=1)
+            persistent_number_input("MAS", "adq_mas_manual", min_value=1, max_value=1000, step=1)
             st.session_state["adq_kv_referencia"] = "Seleccionar"
             st.session_state["adq_mas_referencia"] = "Seleccionar"
             st.session_state["_adq_kv_referencia"] = "Seleccionar"
@@ -2319,18 +2297,18 @@ elif seccion == "Adquisición":
 
     with col3:
         persistent_selectbox(
-            "Espesor (mm)",
+            "ESPESOR (mm)",
             ["Seleccionar", "0,625", "1,25", "2,5", "5"],
             "adq_espesor"
         )
         persistent_selectbox(
-            "sFOV",
+            "SFOV",
             ["Seleccionar", "Small 200", "Head 350", "Large 500"],
             "adq_sfov"
         )
-        persistent_text_input("Colimación (mm)", "adq_colimacion")
-        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
-        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
+        persistent_text_input("COLIMACIÓN (mm)", "adq_colimacion")
+        persistent_text_input("INICIO DE ADQUISICIÓN", "adq_inicio_adquisicion")
+        persistent_text_input("FIN DE ADQUISICIÓN", "adq_fin_adquisicion")
 
     modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
 
@@ -2368,7 +2346,7 @@ elif seccion == "Adquisición":
     ])
 
     st.divider()
-    st.subheader("Resumen")
+    st.subheader("RESUMEN")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Fase de adquisición:** {st.session_state['adq_fase_adquisicion']}")
     st.write(f"**Instrucción de voz:** {st.session_state['adq_instruccion_voz']}")
@@ -2430,7 +2408,7 @@ elif seccion == "Reconstrucción":
     ])
 
     st.divider()
-    st.subheader("Resumen")
+    st.subheader("RESUMEN")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Kernel:** {st.session_state['recon_kernel']}")
     st.write(f"**Grosor:** {st.session_state['recon_grosor']} mm")
@@ -2468,7 +2446,7 @@ elif seccion == "Reformación":
     ])
 
     st.divider()
-    st.subheader("Resumen")
+    st.subheader("RESUMEN")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Tipo:** {', '.join(st.session_state['reform_tipo']) if st.session_state['reform_tipo'] else 'Ninguno'}")
     st.write(f"**Grosor slab:** {st.session_state['reform_grosor']} mm")
@@ -2506,7 +2484,7 @@ elif seccion == "Jeringa inyectora":
     ])
 
     st.divider()
-    st.subheader("Resumen")
+    st.subheader("RESUMEN")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
     st.write(f"**Tipo de contraste:** {st.session_state['jer_tipo_contraste']}")
     st.write(f"**Volumen de contraste:** {st.session_state['jer_volumen_contraste']} ml")
