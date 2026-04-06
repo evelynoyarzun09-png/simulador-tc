@@ -2196,6 +2196,246 @@ def render_bloque_topograma(prefijo, titulo_visible, numero_boton):
 
     st.markdown('</div>', unsafe_allow_html=True)
     return completo, rx_disponible
+
+MAX_ADQUISICIONES_EXTRA = 5
+
+ADQ_DEFAULTS_BASE = {
+    "fase_adquisicion": "Seleccionar",
+    "instruccion_voz": "Seleccionar",
+    "delay": "Seleccionar",
+    "tipo_exploracion": "Seleccionar",
+    "espesor": "Seleccionar",
+    "matriz_detectores": "Seleccionar",
+    "colimacion": "",
+    "inicio_adquisicion": "",
+    "fin_adquisicion": "",
+    "giro_tubo": "Seleccionar",
+    "modulacion_corriente": "Seleccionar",
+    "kv_referencia": "Seleccionar",
+    "mas_referencia": "Seleccionar",
+    "kv_manual": 120,
+    "mas_manual": 100,
+    "pitch": "Seleccionar",
+    "sfov": "Seleccionar",
+}
+
+def adq_prefijo(numero):
+    return "adq" if numero == 1 else f"adq{numero}"
+
+def inicializar_adquisiciones_extra():
+    for numero in range(2, 7):
+        mostrar_key = f"mostrar_adq{numero}"
+        if mostrar_key not in st.session_state:
+            st.session_state[mostrar_key] = False
+        pref = adq_prefijo(numero)
+        for sufijo, valor in ADQ_DEFAULTS_BASE.items():
+            key = f"{pref}_{sufijo}"
+            if key not in st.session_state:
+                st.session_state[key] = valor
+
+def reiniciar_adquisicion(numero):
+    pref = adq_prefijo(numero)
+    for sufijo, valor in ADQ_DEFAULTS_BASE.items():
+        key = f"{pref}_{sufijo}"
+        st.session_state[key] = valor
+        if f"_{key}" in st.session_state:
+            st.session_state[f"_{key}"] = valor
+    roi_key = f"{pref}_roi_imagen_bolus"
+    if roi_key in st.session_state:
+        del st.session_state[roi_key]
+
+def render_bloque_adquisicion(numero=1):
+    pref = adq_prefijo(numero)
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    titulo = "Parámetros de adquisición" if numero == 1 else f"Adquisición {numero}"
+    st.markdown(f'<div class="titulo-bloque">{titulo}</div>', unsafe_allow_html=True)
+
+    opciones_delay = [
+        "Seleccionar", "Bolus tracking", "Bolus test", "0 sg", "5 sg", "10 sg", "15 sg", "20 sg",
+        "25 sg", "30 sg", "35 sg", "40 sg", "45 sg", "50 sg", "55 sg", "1 min", "2 min", "3 min",
+        "4 min", "5 min", "6 min", "7 min", "8 min", "9 min", "10 min", "11 min", "12 min",
+        "13 min", "14 min", "15 min", "16 min", "17 min", "18 min", "19 min", "20 min"
+    ]
+    opciones_pitch = ["Seleccionar", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6", "0,7", "0,8", "0,9", "1", "1,1", "1,2", "1,3", "1,4", "1,5"]
+    opciones_kv_referencia = ["Seleccionar", "70", "80", "100", "110", "120", "130", "140"]
+    opciones_mas_referencia = ["Seleccionar", "50", "100", "150", "200", "250", "300", "350", "400", "450", "500", "550", "600"]
+
+    tipo_exploracion = st.session_state.get(f"{pref}_tipo_exploracion", "Seleccionar")
+    if tipo_exploracion == "Helicoidal":
+        opciones_matriz = ["Seleccionar", "64 x 0,625", "32 x 1,25", "16 x 0,625"]
+    elif tipo_exploracion == "Secuencial":
+        opciones_matriz = ["Seleccionar", "2 x 0,625", "1 x 1,25", "32 x 1,25", "64 x 0,625"]
+    else:
+        opciones_matriz = ["Seleccionar"]
+
+    if st.session_state.get(f"{pref}_matriz_detectores") not in opciones_matriz:
+        st.session_state[f"{pref}_matriz_detectores"] = "Seleccionar"
+        if f"_{pref}_matriz_detectores" in st.session_state:
+            st.session_state[f"_{pref}_matriz_detectores"] = "Seleccionar"
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        persistent_selectbox(
+            "Fase de adquisición",
+            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
+            f"{pref}_fase_adquisicion"
+        )
+        persistent_selectbox(
+            "Instrucción de voz",
+            ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
+            f"{pref}_instruccion_voz"
+        )
+        persistent_selectbox("Delay", opciones_delay, f"{pref}_delay")
+        persistent_selectbox(
+            "Tipo de exploración",
+            ["Seleccionar", "Helicoidal", "Secuencial"],
+            f"{pref}_tipo_exploracion"
+        )
+        persistent_selectbox("Matriz de detectores", opciones_matriz, f"{pref}_matriz_detectores")
+
+    with col2:
+        persistent_selectbox(
+            "Giro del tubo",
+            ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
+            f"{pref}_giro_tubo"
+        )
+
+        if tipo_exploracion == "Helicoidal":
+            persistent_selectbox("Pitch", opciones_pitch, f"{pref}_pitch")
+        else:
+            st.session_state[f"{pref}_pitch"] = "Seleccionar"
+            if f"_{pref}_pitch" in st.session_state:
+                st.session_state[f"_{pref}_pitch"] = "Seleccionar"
+            st.markdown("<div style='height: 5.2rem;'></div>", unsafe_allow_html=True)
+
+        persistent_selectbox(
+            "Modulación de corriente",
+            ["Seleccionar", "Si", "No"],
+            f"{pref}_modulacion_corriente"
+        )
+
+        modulacion = st.session_state.get(f"{pref}_modulacion_corriente", "Seleccionar")
+        if modulacion == "Si":
+            persistent_selectbox("kV referencia", opciones_kv_referencia, f"{pref}_kv_referencia")
+            persistent_selectbox("mAs referencia", opciones_mas_referencia, f"{pref}_mas_referencia")
+            st.session_state[f"{pref}_kv_manual"] = 120
+            st.session_state[f"{pref}_mas_manual"] = 100
+            for key, value in [(f"_{pref}_kv_manual", 120), (f"_{pref}_mas_manual", 100)]:
+                if key in st.session_state:
+                    st.session_state[key] = value
+        elif modulacion == "No":
+            persistent_number_input("kV", f"{pref}_kv_manual", min_value=1, max_value=200, step=1)
+            persistent_number_input("mAs", f"{pref}_mas_manual", min_value=1, max_value=1000, step=1)
+            st.session_state[f"{pref}_kv_referencia"] = "Seleccionar"
+            st.session_state[f"{pref}_mas_referencia"] = "Seleccionar"
+            for key in [f"_{pref}_kv_referencia", f"_{pref}_mas_referencia"]:
+                if key in st.session_state:
+                    st.session_state[key] = "Seleccionar"
+        else:
+            st.markdown("<div style='height: 5.2rem;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 5.2rem;'></div>", unsafe_allow_html=True)
+            st.session_state[f"{pref}_kv_referencia"] = "Seleccionar"
+            st.session_state[f"{pref}_mas_referencia"] = "Seleccionar"
+            for key in [f"_{pref}_kv_referencia", f"_{pref}_mas_referencia"]:
+                if key in st.session_state:
+                    st.session_state[key] = "Seleccionar"
+
+    with col3:
+        persistent_selectbox(
+            "Espesor (mm)",
+            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
+            f"{pref}_espesor"
+        )
+        persistent_selectbox(
+            "SFOV",
+            ["Seleccionar", "Small 200", "Head 350", "Large 500"],
+            f"{pref}_sfov"
+        )
+        persistent_text_input("Colimación (mm)", f"{pref}_colimacion")
+        persistent_text_input("Inicio de adquisición", f"{pref}_inicio_adquisicion")
+        persistent_text_input("Fin de adquisición", f"{pref}_fin_adquisicion")
+
+    if st.session_state.get(f"{pref}_delay") in ["Bolus tracking", "Bolus test"]:
+        st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='titulo-bloque'>ROI PARA BOLUS TEST / BOLUS TRACKING</div>", unsafe_allow_html=True)
+        archivo_roi = st.file_uploader(
+            "SUBIR IMAGEN PARA ROI",
+            type=["png", "jpg", "jpeg"],
+            key=f"{pref}_roi_imagen_bolus"
+        )
+        if archivo_roi is not None:
+            render_roi_interactiva_html(archivo_roi, key_suffix=f"{pref}_bolus")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    modulacion = st.session_state.get(f"{pref}_modulacion_corriente", "Seleccionar")
+    if modulacion == "Si":
+        modulacion_ok = all([
+            seleccion_completa(st.session_state[f"{pref}_kv_referencia"]),
+            seleccion_completa(st.session_state[f"{pref}_mas_referencia"]),
+        ])
+    elif modulacion == "No":
+        modulacion_ok = all([
+            st.session_state[f"{pref}_kv_manual"] is not None,
+            st.session_state[f"{pref}_mas_manual"] is not None,
+        ])
+    else:
+        modulacion_ok = False
+
+    pitch_ok = True if tipo_exploracion != "Helicoidal" else seleccion_completa(st.session_state[f"{pref}_pitch"])
+
+    adquisicion_completa = all([
+        seleccion_completa(st.session_state[f"{pref}_fase_adquisicion"]),
+        seleccion_completa(st.session_state[f"{pref}_instruccion_voz"]),
+        seleccion_completa(st.session_state[f"{pref}_delay"]),
+        seleccion_completa(st.session_state[f"{pref}_tipo_exploracion"]),
+        seleccion_completa(st.session_state[f"{pref}_espesor"]),
+        seleccion_completa(st.session_state[f"{pref}_matriz_detectores"]),
+        texto_completo(st.session_state[f"{pref}_colimacion"]),
+        texto_completo(st.session_state[f"{pref}_inicio_adquisicion"]),
+        texto_completo(st.session_state[f"{pref}_fin_adquisicion"]),
+        seleccion_completa(st.session_state[f"{pref}_giro_tubo"]),
+        seleccion_completa(st.session_state[f"{pref}_sfov"]),
+        seleccion_completa(st.session_state[f"{pref}_modulacion_corriente"]),
+        modulacion_ok,
+        pitch_ok,
+    ])
+
+    return adquisicion_completa
+
+def render_resumen_adquisicion(numero=1, mostrar_topo2=False):
+    pref = adq_prefijo(numero)
+    titulo = "Adquisición 1" if numero == 1 else f"Adquisición {numero}"
+    st.write(f"**{titulo}**")
+    st.write(f"**Fase de adquisición:** {st.session_state[f'{pref}_fase_adquisicion']}")
+    st.write(f"**Instrucción de voz:** {st.session_state[f'{pref}_instruccion_voz']}")
+    st.write(f"**Delay:** {st.session_state[f'{pref}_delay']}")
+    st.write(f"**Tipo de exploración:** {st.session_state[f'{pref}_tipo_exploracion']}")
+    st.write(f"**Espesor (mm):** {st.session_state[f'{pref}_espesor']}")
+    st.write(f"**Matriz de detectores:** {st.session_state[f'{pref}_matriz_detectores']}")
+    st.write(f"**Colimación (mm):** {st.session_state[f'{pref}_colimacion']}")
+    st.write(f"**Inicio de adquisición:** {st.session_state[f'{pref}_inicio_adquisicion']}")
+    st.write(f"**Fin de adquisición:** {st.session_state[f'{pref}_fin_adquisicion']}")
+    st.write(f"**Giro del tubo:** {st.session_state[f'{pref}_giro_tubo']}")
+    st.write(f"**SFOV:** {st.session_state[f'{pref}_sfov']}")
+    if st.session_state.get(f'{pref}_tipo_exploracion') == 'Helicoidal':
+        st.write(f"**Pitch:** {st.session_state[f'{pref}_pitch']}")
+    st.write(f"**Modulación de corriente:** {st.session_state[f'{pref}_modulacion_corriente']}")
+    modulacion = st.session_state.get(f"{pref}_modulacion_corriente", "Seleccionar")
+    if modulacion == "Si":
+        st.write(f"**kV referencia:** {st.session_state[f'{pref}_kv_referencia']}")
+        st.write(f"**mAs referencia:** {st.session_state[f'{pref}_mas_referencia']}")
+    elif modulacion == "No":
+        st.write(f"**kV:** {st.session_state[f'{pref}_kv_manual']}")
+        st.write(f"**mAs:** {st.session_state[f'{pref}_mas_manual']}")
+    if numero == 1:
+        st.write(f"**Topograma 1:** inicio {st.session_state['adq_topo1_limite_superior']}% · fin {st.session_state['adq_topo1_limite_inferior']}%")
+        if mostrar_topo2:
+            st.write(f"**Topograma 2:** inicio {st.session_state['adq_topo2_limite_superior']}% · fin {st.session_state['adq_topo2_limite_inferior']}%")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+inicializar_adquisiciones_extra()
+
 # -------------------------
 # PÁGINAS
 # -------------------------
@@ -2516,7 +2756,11 @@ elif seccion == "Adquisición":
                 if limite_superior >= limite_inferior:
                     st.warning("El límite superior debe quedar por encima del inferior.")
                 imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
-                delay_bolus_activo = st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]
+                delay_bolus_activo = any(
+                    st.session_state.get(f"{adq_prefijo(n)}_delay") in ["Bolus tracking", "Bolus test"]
+                    for n in range(1, 7)
+                    if n == 1 or st.session_state.get(f"mostrar_adq{n}", False)
+                )
                 if imagen_con_limites is not None:
                     if delay_bolus_activo:
                         render_linea_corte_bolus_interactiva_html(imagen_con_limites, key_suffix=f"{prefijo_topo}_bolus")
@@ -2564,174 +2808,39 @@ elif seccion == "Adquisición":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Parámetros de adquisición</div>', unsafe_allow_html=True)
+    adquisiciones_completas = []
+    adquisiciones_completas.append(render_bloque_adquisicion(1))
 
-    opciones_delay = [
-        "Seleccionar", "Bolus tracking", "Bolus test", "0 sg", "5 sg", "10 sg", "15 sg", "20 sg",
-        "25 sg", "30 sg", "35 sg", "40 sg", "45 sg", "50 sg", "55 sg", "1 min", "2 min", "3 min",
-        "4 min", "5 min", "6 min", "7 min", "8 min", "9 min", "10 min", "11 min", "12 min",
-        "13 min", "14 min", "15 min", "16 min", "17 min", "18 min", "19 min", "20 min"
-    ]
-    opciones_pitch = ["Seleccionar", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6", "0,7", "0,8", "0,9", "1", "1,1", "1,2", "1,3", "1,4", "1,5"]
-    opciones_kv_referencia = ["Seleccionar", "70", "80", "100", "110", "120", "130", "140"]
-    opciones_mas_referencia = ["Seleccionar", "50", "100", "150", "200", "250", "300", "350", "400", "450", "500", "550", "600"]
+    for numero in range(2, 7):
+        if st.session_state.get(f"mostrar_adq{numero}", False):
+            c1, c2, c3 = st.columns([2.5, 1.7, 2.5])
+            with c2:
+                if st.button(f"Eliminar adquisición {numero}", key=f"eliminar_adq{numero}", use_container_width=True):
+                    st.session_state[f"mostrar_adq{numero}"] = False
+                    reiniciar_adquisicion(numero)
+                    st.rerun()
+            adquisiciones_completas.append(render_bloque_adquisicion(numero))
 
-    col1, col2, col3 = st.columns(3)
-
-    tipo_exploracion = st.session_state.get("adq_tipo_exploracion", "Seleccionar")
-    if tipo_exploracion == "Helicoidal":
-        opciones_matriz = ["Seleccionar", "64 x 0,625", "32 x 1,25", "16 x 0,625"]
-    elif tipo_exploracion == "Secuencial":
-        opciones_matriz = ["Seleccionar", "2 x 0,625", "1 x 1,25", "32 x 1,25", "64 x 0,625"]
-    else:
-        opciones_matriz = ["Seleccionar"]
-
-    if st.session_state.get("adq_matriz_detectores") not in opciones_matriz:
-        st.session_state["adq_matriz_detectores"] = "Seleccionar"
-        st.session_state["_adq_matriz_detectores"] = "Seleccionar"
-
-    with col1:
-        persistent_selectbox(
-            "Fase de adquisición",
-            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
-            "adq_fase_adquisicion"
-        )
-        persistent_selectbox(
-            "Instrucción de voz",
-            ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
-            "adq_instruccion_voz"
-        )
-        persistent_selectbox("Delay", opciones_delay, "adq_delay")
-        persistent_selectbox(
-            "Tipo de exploración",
-            ["Seleccionar", "Helicoidal", "Secuencial"],
-            "adq_tipo_exploracion"
-        )
-        persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
-
-    with col2:
-        persistent_selectbox(
-            "Giro del tubo",
-            ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
-            "adq_giro_tubo"
-        )
-
-        if tipo_exploracion == "Helicoidal":
-            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
-        else:
-            st.session_state["adq_pitch"] = "Seleccionar"
-            st.markdown("<div style='height: 5.2rem;'></div>", unsafe_allow_html=True)
-
-        persistent_selectbox(
-            "Modulación de corriente",
-            ["Seleccionar", "Si", "No"],
-            "adq_modulacion_corriente"
-        )
-
-        modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
-        if modulacion == "Si":
-            persistent_selectbox("kV referencia", opciones_kv_referencia, "adq_kv_referencia")
-            persistent_selectbox("mAs referencia", opciones_mas_referencia, "adq_mas_referencia")
-            st.session_state["adq_kv_manual"] = 120
-            st.session_state["adq_mas_manual"] = 100
-        elif modulacion == "No":
-            persistent_number_input("kV", "adq_kv_manual", min_value=1, max_value=200, step=1)
-            persistent_number_input("mAs", "adq_mas_manual", min_value=1, max_value=1000, step=1)
-            st.session_state["adq_kv_referencia"] = "Seleccionar"
-            st.session_state["adq_mas_referencia"] = "Seleccionar"
-        else:
-            st.markdown("<div style='height: 5.2rem;'></div>", unsafe_allow_html=True)
-            st.markdown("<div style='height: 5.2rem;'></div>", unsafe_allow_html=True)
-            st.session_state["adq_kv_referencia"] = "Seleccionar"
-            st.session_state["adq_mas_referencia"] = "Seleccionar"
-
-    with col3:
-        persistent_selectbox(
-            "Espesor (mm)",
-            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
-            "adq_espesor"
-        )
-        persistent_selectbox(
-            "SFOV",
-            ["Seleccionar", "Small 200", "Head 350", "Large 500"],
-            "adq_sfov"
-        )
-        persistent_text_input("Colimación (mm)", "adq_colimacion")
-        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
-        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
-
-    if st.session_state.get("adq_delay") in ["Bolus tracking", "Bolus test"]:
-        st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='titulo-bloque'>ROI PARA BOLUS TEST / BOLUS TRACKING</div>", unsafe_allow_html=True)
-        archivo_roi = st.file_uploader(
-            "SUBIR IMAGEN PARA ROI",
-            type=["png", "jpg", "jpeg"],
-            key="adq_roi_imagen_bolus"
-        )
-        if archivo_roi is not None:
-            render_roi_interactiva_html(archivo_roi, key_suffix="adq_bolus")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    modulacion_ok = False
-    if modulacion == "Si":
-        modulacion_ok = all([
-            seleccion_completa(st.session_state["adq_kv_referencia"]),
-            seleccion_completa(st.session_state["adq_mas_referencia"]),
-        ])
-    elif modulacion == "No":
-        modulacion_ok = all([
-            st.session_state["adq_kv_manual"] is not None,
-            st.session_state["adq_mas_manual"] is not None,
-        ])
-
-    pitch_ok = True if tipo_exploracion != "Helicoidal" else seleccion_completa(st.session_state["adq_pitch"])
-
-    adquisicion_completa = all([
-        seleccion_completa(st.session_state["adq_fase_adquisicion"]),
-        seleccion_completa(st.session_state["adq_instruccion_voz"]),
-        seleccion_completa(st.session_state["adq_delay"]),
-        seleccion_completa(st.session_state["adq_tipo_exploracion"]),
-        seleccion_completa(st.session_state["adq_espesor"]),
-        seleccion_completa(st.session_state["adq_matriz_detectores"]),
-        texto_completo(st.session_state["adq_colimacion"]),
-        texto_completo(st.session_state["adq_inicio_adquisicion"]),
-        texto_completo(st.session_state["adq_fin_adquisicion"]),
-        seleccion_completa(st.session_state["adq_giro_tubo"]),
-        seleccion_completa(st.session_state["adq_sfov"]),
-        seleccion_completa(st.session_state["adq_modulacion_corriente"]),
-        modulacion_ok,
-        pitch_ok,
-    ])
+    visibles_extra = sum(1 for numero in range(2, 7) if st.session_state.get(f"mostrar_adq{numero}", False))
+    if visibles_extra < MAX_ADQUISICIONES_EXTRA:
+        c1, c2, c3 = st.columns([2.5, 1.7, 2.5])
+        with c2:
+            siguiente_numero = next((n for n in range(2, 7) if not st.session_state.get(f"mostrar_adq{n}", False)), None)
+            if siguiente_numero is not None:
+                if st.button("Agregar otra adquisición", key="agregar_adquisicion", use_container_width=True):
+                    st.session_state[f"mostrar_adq{siguiente_numero}"] = True
+                    st.rerun()
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-    st.write(f"**Fase de adquisición:** {st.session_state['adq_fase_adquisicion']}")
-    st.write(f"**Instrucción de voz:** {st.session_state['adq_instruccion_voz']}")
-    st.write(f"**Delay:** {st.session_state['adq_delay']}")
-    st.write(f"**Tipo de exploración:** {st.session_state['adq_tipo_exploracion']}")
-    st.write(f"**Espesor (mm):** {st.session_state['adq_espesor']}")
-    st.write(f"**Matriz de detectores:** {st.session_state['adq_matriz_detectores']}")
-    st.write(f"**Colimación (mm):** {st.session_state['adq_colimacion']}")
-    st.write(f"**Inicio de adquisición:** {st.session_state['adq_inicio_adquisicion']}")
-    st.write(f"**Fin de adquisición:** {st.session_state['adq_fin_adquisicion']}")
-    st.write(f"**Giro del tubo:** {st.session_state['adq_giro_tubo']}")
-    st.write(f"**SFOV:** {st.session_state['adq_sfov']}")
-    if tipo_exploracion == "Helicoidal":
-        st.write(f"**Pitch:** {st.session_state['adq_pitch']}")
-    st.write(f"**Modulación de corriente:** {st.session_state['adq_modulacion_corriente']}")
-    if modulacion == "Si":
-        st.write(f"**kV referencia:** {st.session_state['adq_kv_referencia']}")
-        st.write(f"**mAs referencia:** {st.session_state['adq_mas_referencia']}")
-    elif modulacion == "No":
-        st.write(f"**kV:** {st.session_state['adq_kv_manual']}")
-        st.write(f"**mAs:** {st.session_state['adq_mas_manual']}")
-    st.write(f"**Topograma 1:** inicio {st.session_state['adq_topo1_limite_superior']}% · fin {st.session_state['adq_topo1_limite_inferior']}%")
-    if mostrar_topo2:
-        st.write(f"**Topograma 2:** inicio {st.session_state['adq_topo2_limite_superior']}% · fin {st.session_state['adq_topo2_limite_inferior']}%")
+    render_resumen_adquisicion(1, mostrar_topo2=mostrar_topo2)
+    for numero in range(2, 7):
+        if st.session_state.get(f"mostrar_adq{numero}", False):
+            render_resumen_adquisicion(numero, mostrar_topo2=False)
     st.markdown('</div>', unsafe_allow_html=True)
+
+    adquisicion_completa = all(adquisiciones_completas)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
     with c1:
