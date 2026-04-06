@@ -13,7 +13,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
 A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
-TOPOGRAMA_IMG = BASE_DIR / "topograma.png"
+TOPOGRAMA_IMG = BASE_DIR / "topograma.png" 
 
 PACIENTE_IMG_PNG = BASE_DIR / "paciente.png"
 PACIENTE_IMG_JPG = BASE_DIR / "paciente.jpg"
@@ -567,7 +567,7 @@ REGIONES_ANATOMICAS_TOPO = [
 MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
     "cabeza": ["Seleccionar", "cerebro", "cavidades perinasales", "maxilofacial", "orbitas", "oidos"],
     "cuello": ["Seleccionar", "cuello"],
-    "torax": ["Seleccionar", "torax"],
+    "torax": ["Seleccionar", "torax", "torax abdomen y pelvis"],
     "abdomen": ["Seleccionar", "abdomen", "abdomen y pelvis", "pielotac"],
     "pelvis": ["Seleccionar", "pelvis"],
     "columnas": ["Seleccionar", "columna cervical", "columna dorsal", "columna lumbar"],
@@ -579,6 +579,7 @@ MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
         "angiotac extremidad superior izquierda",
         "angiotac cerebro",
         "angiotac cuello",
+        "angiotac cerebro cuello",
         "angiotac torax",
         "angiotac abdomen",
         "angiotac abdomen y pelvis",
@@ -587,7 +588,823 @@ MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
     ],
 }
 
-TOPORAMA_REGLAS_TSV = 'entrada del paciente\tposicionamiento\tposicion del tubo\tprotolocolo\tnombre exacto de la imagen\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tcerebro \tcabeza frontal\ncabeza primero\tsupino\tabajo\tcerebro \tcabeza frontal\ncabeza primero\tsupino\tderecha \tcerebro \tcabeza lateral\ncabeza primero\tsupino\tizquierda\tcerebro \tcabeza lateral\ncabeza primero\tsupino\tarriba\tcavidades perinasales\tcabeza frontal\ncabeza primero\tsupino\tabajo\tcavidades perinasales\tcabeza frontal\ncabeza primero\tsupino\tderecha \tcavidades perinasales\tcabeza lateral\ncabeza primero\tsupino\tizquierda\tcavidades perinasales\tcabeza lateral\ncabeza primero\tsupino\tarriba\tmaxilofacial\tcabeza frontal\ncabeza primero\tsupino\tabajo\tmaxilofacial\tcabeza frontal\ncabeza primero\tsupino\tderecha \tmaxilofacial\tcabeza lateral\ncabeza primero\tsupino\tizquierda\tmaxilofacial\tcabeza lateral\ncabeza primero\tsupino\tarriba\torbitas\tcabeza frontal\ncabeza primero\tsupino\tabajo\torbitas\tcabeza frontal\ncabeza primero\tsupino\tderecha \torbitas\tcabeza lateral\ncabeza primero\tsupino\tizquierda\torbitas\tcabeza lateral\ncabeza primero\tsupino\tarriba\toidos\tcabeza frontal\ncabeza primero\tsupino\tabajo\toidos\tcabeza frontal\ncabeza primero\tsupino\tderecha \toidos\tcabeza lateral\ncabeza primero\tsupino\tizquierda\toidos\tcabeza lateral\n\t\t\t\t\ncabeza primero\tprono\tarriba\tcerebro\tcabeza frontal\ncabeza primero\tprono\tabajo\tcerebro\tcabeza frontal\ncabeza primero\tprono\tderecha \tcerebro\tcabeza lateral\ncabeza primero\tprono\tizquierda\tcerebro\tcabeza lateral\ncabeza primero\tprono\tarriba\tcavidades perinasales\tcabeza frontal\ncabeza primero\tprono\tabajo\tcavidades perinasales\tcabeza frontal\ncabeza primero\tprono\tderecha \tcavidades perinasales\tcabeza lateral\ncabeza primero\tprono\tizquierda\tcavidades perinasales\tcabeza lateral\ncabeza primero\tprono\tarriba\tmaxilofacial\tcabeza frontal\ncabeza primero\tprono\tabajo\tmaxilofacial\tcabeza frontal\ncabeza primero\tprono\tderecha \tmaxilofacial\tcabeza lateral\ncabeza primero\tprono\tizquierda\tmaxilofacial\tcabeza lateral\ncabeza primero\tprono\tarriba\torbitas\tcabeza frontal\ncabeza primero\tprono\tabajo\torbitas\tcabeza frontal\ncabeza primero\tprono\tderecha \torbitas\tcabeza lateral\ncabeza primero\tprono\tizquierda\torbitas\tcabeza lateral\ncabeza primero\tprono\tarriba\toidos\tcabeza frontal\ncabeza primero\tprono\tabajo\toidos\tcabeza frontal\ncabeza primero\tprono\tderecha \toidos\tcabeza lateral\ncabeza primero\tprono\tizquierda\toidos\tcabeza lateral\n\t\t\t\t\ncabeza primero\tlateral derecho\tarriba\tcerebro\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\tcerebro\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \tcerebro\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\tcerebro\tcabeza frontal\ncabeza primero\tlateral derecho\tarriba\tcavidades perinasales\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\tcavidades perinasales\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \tcavidades perinasales\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\tcavidades perinasales\tcabeza frontal\ncabeza primero\tlateral derecho\tarriba\tmaxilofacial\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\tmaxilofacial\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \tmaxilofacial\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\tmaxilofacial\tcabeza frontal\ncabeza primero\tlateral derecho\tarriba\torbitas\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\torbitas\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \torbitas\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\torbitas\tcabeza frontal\ncabeza primero\tlateral derecho\tarriba\toidos\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\toidos\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \toidos\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\toidos\tcabeza frontal\n\t\t\t\t\ncabeza primero\tlateral izquerdo\tarriba\tcerebro\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\tcerebro\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \tcerebro\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\tcerebro\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\tcavidades perinasales\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\tcavidades perinasales\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \tcavidades perinasales\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\tcavidades perinasales\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\tmaxilofacial\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\tmaxilofacial\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \tmaxilofacial\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\tmaxilofacial\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\torbitas\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\torbitas\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \torbitas\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\torbitas\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\toidos\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\toidos\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \toidos\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\toidos\tcabeza frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tcuello\tcuello frontal\ncabeza primero\tsupino\tabajo\tcuello\tcuello frontal\ncabeza primero\tsupino\tderecha \tcuello\tcuello lateral\ncabeza primero\tsupino\tizquierda\tcuello\tcuello lateral\ncabeza primero\tprono\tarriba\tcuello\tcuello frontal\ncabeza primero\tprono\tabajo\tcuello\tcuello frontal\ncabeza primero\tprono\tderecha \tcuello\tcuello lateral\ncabeza primero\tprono\tizquierda\tcuello\tcuello lateral\ncabeza primero\tlateral derecho \tarriba\tcuello\tcuello lateral\ncabeza primero\tlateral derecho \tabajo\tcuello\tcuello lateral\ncabeza primero\tlateral derecho \tderecha \tcuello\tcuello frontal\ncabeza primero\tlateral derecho \tizquierda\tcuello\tcuello frontal\ncabeza primero\tlateral izquierdo \tarriba\tcuello\tcuello lateral\ncabeza primero\tlateral izquierdo \tabajo\tcuello\tcuello lateral\ncabeza primero\tlateral izquierdo \tderecha \tcuello\tcuello frontal\ncabeza primero\tlateral izquierdo \tizquierda\tcuello\tcuello frontal\n\t\t\t\t\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tcolumna cervical\tcuello frontal\ncabeza primero\tsupino\tabajo\tcolumna cervical\tcuello frontal\ncabeza primero\tsupino\tderecha \tcolumna cervical\tcuello lateral\ncabeza primero\tsupino\tizquierda\tcolumna cervical\tcuello lateral\ncabeza primero\tprono\tarriba\tcolumna cervical\tcuello frontal\ncabeza primero\tprono\tabajo\tcolumna cervical\tcuello frontal\ncabeza primero\tprono\tderecha \tcolumna cervical\tcuello lateral\ncabeza primero\tprono\tizquierda\tcolumna cervical\tcuello lateral\ncabeza primero\tlateral derecho \tarriba\tcolumna cervical\tcuello lateral\ncabeza primero\tlateral derecho \tabajo\tcolumna cervical\tcuello lateral\ncabeza primero\tlateral derecho \tderecha \tcolumna cervical\tcuello frontal\ncabeza primero\tlateral derecho \tizquierda\tcolumna cervical\tcuello frontal\ncabeza primero\tlateral izquierdo \tarriba\tcolumna cervical\tcuello lateral\ncabeza primero\tlateral izquierdo \tabajo\tcolumna cervical\tcuello lateral\ncabeza primero\tlateral izquierdo \tderecha \tcolumna cervical\tcuello frontal\ncabeza primero\tlateral izquierdo \tizquierda\tcolumna cervical\tcuello frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\ttorax\ttorax frontal\ncabeza primero\tsupino\tabajo\ttorax\ttorax frontal\ncabeza primero\tsupino\tderecha \ttorax\ttorax lateral\ncabeza primero\tsupino\tizquierda\ttorax\ttorax lateral\ncabeza primero\tprono\tarriba\ttorax\ttorax frontal\ncabeza primero\tprono\tabajo\ttorax\ttorax frontal\ncabeza primero\tprono\tderecha \ttorax\ttorax lateral\ncabeza primero\tprono\tizquierda\ttorax\ttorax lateral\ncabeza primero\tlateral derecho \tarriba\ttorax\ttorax lateral\ncabeza primero\tlateral derecho \tabajo\ttorax\ttorax lateral\ncabeza primero\tlateral derecho \tderecha \ttorax\ttorax frontal\ncabeza primero\tlateral derecho \tizquierda\ttorax\ttorax frontal\ncabeza primero\tlateral izquierdo \tarriba\ttorax\ttorax lateral\ncabeza primero\tlateral izquierdo \tabajo\ttorax\ttorax lateral\ncabeza primero\tlateral izquierdo \tderecha \ttorax\ttorax frontal\ncabeza primero\tlateral izquierdo \tizquierda\ttorax\ttorax frontal\n\t\t\t\t\npies primero\tsupino\tarriba\ttorax\ttorax frontal\npies primero\tsupino\tabajo\ttorax\ttorax frontal\npies primero\tsupino\tderecha \ttorax\ttorax lateral\npies primero\tsupino\tizquierda\ttorax\ttorax lateral\npies primero\tprono\tarriba\ttorax\ttorax frontal\npies primero\tprono\tabajo\ttorax\ttorax frontal\npies primero\tprono\tderecha \ttorax\ttorax lateral\npies primero\tprono\tizquierda\ttorax\ttorax lateral\npies primero\tlateral derecho \tarriba\ttorax\ttorax lateral\npies primero\tlateral derecho \tabajo\ttorax\ttorax lateral\npies primero\tlateral derecho \tderecha \ttorax\ttorax frontal\npies primero\tlateral derecho \tizquierda\ttorax\ttorax frontal\npies primero\tlateral izquierdo \tarriba\ttorax\ttorax lateral\npies primero\tlateral izquierdo \tabajo\ttorax\ttorax lateral\npies primero\tlateral izquierdo \tderecha \ttorax\ttorax frontal\npies primero\tlateral izquierdo \tizquierda\ttorax\ttorax frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tabdomen\tabdomen frontal\ncabeza primero\tsupino\tabajo\tabdomen\tabdomen frontal\ncabeza primero\tsupino\tderecha \tabdomen\tabdomen lateral\ncabeza primero\tsupino\tizquierda\tabdomen\tabdomen lateral\ncabeza primero\tprono\tarriba\tabdomen\tabdomen frontal\ncabeza primero\tprono\tabajo\tabdomen\tabdomen frontal\ncabeza primero\tprono\tderecha \tabdomen\tabdomen ateral\ncabeza primero\tprono\tizquierda\tabdomen\tabdomen lateral\ncabeza primero\tlateral derecho \tarriba\tabdomen\tabdomen lateral\ncabeza primero\tlateral derecho \tabajo\tabdomen\tabdomen lateral\ncabeza primero\tlateral derecho \tderecha \tabdomen\tabdomen frontal\ncabeza primero\tlateral derecho \tizquierda\tabdomen\tabdomen frontal\ncabeza primero\tlateral izquierdo \tarriba\tabdomen\tabdomen lateral\ncabeza primero\tlateral izquierdo \tabajo\tabdomen\tabdomen lateral\ncabeza primero\tlateral izquierdo \tderecha \tabdomen\tabdomen frontal\ncabeza primero\tlateral izquierdo \tizquierda\tabdomen\tabdomen frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tabdomen\tabdomen frontal\npies primero\tsupino\tabajo\tabdomen\tabdomen frontal\npies primero\tsupino\tderecha \tabdomen\tabdomen lateral\npies primero\tsupino\tizquierda\tabdomen\tabdomen lateral\npies primero\tprono\tarriba\tabdomen\tabdomen frontal\npies primero\tprono\tabajo\tabdomen\tabdomen  frontal\npies primero\tprono\tderecha \tabdomen\tabdomen lateral\npies primero\tprono\tizquierda\tabdomen\tabdomen ateral\npies primero\tlateral derecho \tarriba\tabdomen\tabdomen ateral\npies primero\tlateral derecho \tabajo\tabdomen\tabdomen lateral\npies primero\tlateral derecho \tderecha \tabdomen\tabdomen  frontal\npies primero\tlateral derecho \tizquierda\tabdomen\tabdomen frontal\npies primero\tlateral izquierdo \tarriba\tabdomen\tabdomen lateral\npies primero\tlateral izquierdo \tabajo\tabdomen\tabdomen lateral\npies primero\tlateral izquierdo \tderecha \tabdomen\tabdomen rontal\npies primero\tlateral izquierdo \tizquierda\tabdomen\tabdomen frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tpelvis\tpelvis  frontal\ncabeza primero\tsupino\tabajo\tpelvis\tpelvis  frontal\ncabeza primero\tsupino\tderecha \tpelvis\tpelvis lateral\ncabeza primero\tsupino\tizquierda\tpelvis\tpelvis lateral\ncabeza primero\tprono\tarriba\tpelvis\tpelvis  frontal\ncabeza primero\tprono\tabajo\tpelvis\tpelvis  frontal\ncabeza primero\tprono\tderecha \tpelvis\tpelvis lateral\ncabeza primero\tprono\tizquierda\tpelvis\tpelvis lateral\ncabeza primero\tlateral derecho \tarriba\tpelvis\tpelvis lateral\ncabeza primero\tlateral derecho \tabajo\tpelvis\tpelvis lateral\ncabeza primero\tlateral derecho \tderecha \tpelvis\tpelvis  frontal\ncabeza primero\tlateral derecho \tizquierda\tpelvis\tpelvis  frontal\ncabeza primero\tlateral izquierdo \tarriba\tpelvis\tpelvis lateral\ncabeza primero\tlateral izquierdo \tabajo\tpelvis\tpelvis lateral\ncabeza primero\tlateral izquierdo \tderecha \tpelvis\tpelvis  frontal\ncabeza primero\tlateral izquierdo \tizquierda\tpelvis\tabdomen y pelvis  frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tpelvis\tpelvis  frontal\npies primero\tsupino\tabajo\tpelvis\tpelvis  frontal\npies primero\tsupino\tderecha \tpelvis\tpelvis lateral\npies primero\tsupino\tizquierda\tpelvis\tpelvis lateral\npies primero\tprono\tarriba\tpelvis\tpelvis  frontal\npies primero\tprono\tabajo\tpelvis\tpelvis  frontal\npies primero\tprono\tderecha \tpelvis\tpelvis lateral\npies primero\tprono\tizquierda\tpelvis\tpelvis lateral\npies primero\tlateral derecho \tarriba\tpelvis\tpelvis lateral\npies primero\tlateral derecho \tabajo\tpelvis\tpelvis lateral\npies primero\tlateral derecho \tderecha \tpelvis\tpelvis  frontal\npies primero\tlateral derecho \tizquierda\tpelvis\tpelvis  frontal\npies primero\tlateral izquierdo \tarriba\tpelvis\tpelvis lateral\npies primero\tlateral izquierdo \tabajo\tpelvis\tpelvis lateral\npies primero\tlateral izquierdo \tderecha \tpelvis\tpelvis  frontal\npies primero\tlateral izquierdo \tizquierda\tpelvis\tpelvis  frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tabdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tsupino\tabajo\tabdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tsupino\tderecha \tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tsupino\tizquierda\tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tprono\tarriba\tabdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tprono\tabajo\tabdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tprono\tderecha \tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tprono\tizquierda\tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral derecho \tarriba\tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral derecho \tabajo\tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral derecho \tderecha \tabdomen y pelvis \tabdomenpelvis  frontal\ncabeza primero\tlateral derecho \tizquierda\tabdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tlateral izquierdo \tarriba\tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral izquierdo \tabajo\tabdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral izquierdo \tderecha \tabdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tlateral izquierdo \tizquierda\tabdomen y pelvis \tabdomenpelvis frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tsupino\tabajo\tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tsupino\tderecha \tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tsupino\tizquierda\tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tprono\tarriba\tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tprono\tabajo\tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tprono\tderecha \tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tprono\tizquierda\tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral derecho \tarriba\tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral derecho \tabajo\tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral derecho \tderecha \tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tlateral derecho \tizquierda\tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tlateral izquierdo \tarriba\tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral izquierdo \tabajo\tabdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral izquierdo \tderecha \tabdomen y pelvis \tabdomenpelvis frontal\npies primero\tlateral izquierdo \tizquierda\tabdomen y pelvis \tabdomenpelvis frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tpielotac\tpielotac frontal\npies primero\tsupino\tabajo\tpielotac\tpielotac frontal\npies primero\tsupino\tderecha \tpielotac\tpielotac lateral\npies primero\tsupino\tizquierda\tpielotac\tpielotac lateral\npies primero\tprono\tarriba\tpielotac\tpielotac frontal\npies primero\tprono\tabajo\tpielotac\tpielotac frontal\npies primero\tprono\tderecha \tpielotac\tpielotac lateral\npies primero\tprono\tizquierda\tpielotac\tpielotac lateral\npies primero\tlateral derecho \tarriba\tpielotac\tpielotac lateral\npies primero\tlateral derecho \tabajo\tpielotac\tpielotac lateral\npies primero\tlateral derecho \tderecha \tpielotac\tpielotac frontal\npies primero\tlateral derecho \tizquierda\tpielotac\tpielotac frontal\npies primero\tlateral izquierdo \tarriba\tpielotac\tpielotac lateral\npies primero\tlateral izquierdo \tabajo\tpielotac\tpielotac lateral\npies primero\tlateral izquierdo \tderecha \tpielotac\tpielotac frontal\npies primero\tlateral izquierdo \tizquierda\tpielotac\tpielotac frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tpielotac\tpielotac frontal\ncabeza primero\tsupino\tabajo\tpielotac\tpielotac frontal\ncabeza primero\tsupino\tderecha \tpielotac\tpielotac lateral\ncabeza primero\tsupino\tizquierda\tpielotac\tpielotac lateral\ncabeza primero\tprono\tarriba\tpielotac\tpielotac frontal\ncabeza primero\tprono\tabajo\tpielotac\tpielotac frontal\ncabeza primero\tprono\tderecha \tpielotac\tpielotac lateral\ncabeza primero\tprono\tizquierda\tpielotac\tpielotac lateral\ncabeza primero\tlateral derecho \tarriba\tpielotac\tpielotac lateral\ncabeza primero\tlateral derecho \tabajo\tpielotac\tpielotac lateral\ncabeza primero\tlateral derecho \tderecha \tpielotac\tpielotac frontal\ncabeza primero\tlateral derecho \tizquierda\tpielotac\tpielotac frontal\ncabeza primero\tlateral izquierdo \tarriba\tpielotac\tpielotac lateral\ncabeza primero\tlateral izquierdo \tabajo\tpielotac\tpielotac lateral\ncabeza primero\tlateral izquierdo \tderecha \tpielotac\tpielotac frontal\ncabeza primero\tlateral izquierdo \tizquierda\tpielotac\tpielotac frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tsupino\tabajo\tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tsupino\tderecha \tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tsupino\tizquierda\tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tprono\tarriba\tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tprono\tabajo\tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tprono\tderecha \tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tprono\tizquierda\tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tlateral derecho \tarriba\tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tlateral derecho \tabajo\tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tlateral derecho \tderecha \tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tlateral derecho \tizquierda\tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tlateral izquierdo \tarriba\tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tlateral izquierdo \tabajo\tcolumna dorsal\tcolumna dorsal lateral\ncabeza primero\tlateral izquierdo \tderecha \tcolumna dorsal\tcolumna dorsal frontal\ncabeza primero\tlateral izquierdo \tizquierda\tcolumna dorsal\tcolumna dorsal frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tcolumna dorsal\tcolumna dorsal frontal\npies primero\tsupino\tabajo\tcolumna dorsal\tcolumna dorsal frontal\npies primero\tsupino\tderecha \tcolumna dorsal\tcolumna dorsal lateral\npies primero\tsupino\tizquierda\tcolumna dorsal\tcolumna dorsal lateral\npies primero\tprono\tarriba\tcolumna dorsal\tcolumna dorsal frontal\npies primero\tprono\tabajo\tcolumna dorsal\tcolumna dorsal frontal\npies primero\tprono\tderecha \tcolumna dorsal\tcolumna dorsal lateral\npies primero\tprono\tizquierda\tcolumna dorsal\tcolumna dorsal lateral\npies primero\tlateral derecho \tarriba\tcolumna dorsal\tcolumna dorsal lateral\npies primero\tlateral derecho \tabajo\tcolumna dorsal\tcolumna dorsal lateral\npies primero\tlateral derecho \tderecha \tcolumna dorsal\tcolumna dorsal frontal\npies primero\tlateral derecho \tizquierda\tcolumna dorsal\tcolumna dorsal frontal\npies primero\tlateral izquierdo \tarriba\tcolumna dorsal\tcolumna dorsal lateral\npies primero\tlateral izquierdo \tabajo\tcolumna dorsal\tcolumna dorsal lateral\npies primero\tlateral izquierdo \tderecha \tcolumna dorsal\tcolumna dorsal frontal\npies primero\tlateral izquierdo \tizquierda\tcolumna dorsal\tcolumna dorsal frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tsupino\tabajo\tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tsupino\tderecha \tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tsupino\tizquierda\tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tprono\tarriba\tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tprono\tabajo\tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tprono\tderecha \tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tprono\tizquierda\tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tlateral derecho \tarriba\tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tlateral derecho \tabajo\tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tlateral derecho \tderecha \tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tlateral derecho \tizquierda\tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tlateral izquierdo \tarriba\tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tlateral izquierdo \tabajo\tcolumna lumbar\tcolumna lumbar lateral\ncabeza primero\tlateral izquierdo \tderecha \tcolumna lumbar\tcolumna lumbar frontal\ncabeza primero\tlateral izquierdo \tizquierda\tcolumna lumbar\tcolumna lumbar frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tcolumna lumbar\tcolumna lumbar frontal\npies primero\tsupino\tabajo\tcolumna lumbar\tcolumna lumbar frontal\npies primero\tsupino\tderecha \tcolumna lumbar\tcolumna lumbar lateral\npies primero\tsupino\tizquierda\tcolumna lumbar\tcolumna lumbar lateral\npies primero\tprono\tarriba\tcolumna lumbar\tcolumna lumbar frontal\npies primero\tprono\tabajo\tcolumna lumbar\tcolumna lumbar frontal\npies primero\tprono\tderecha \tcolumna lumbar\tcolumna lumbar lateral\npies primero\tprono\tizquierda\tcolumna lumbar\tcolumna lumbar lateral\npies primero\tlateral derecho \tarriba\tcolumna lumbar\tcolumna lumbar lateral\npies primero\tlateral derecho \tabajo\tcolumna lumbar\tcolumna lumbar lateral\npies primero\tlateral derecho \tderecha \tcolumna lumbar\tcolumna lumbar frontal\npies primero\tlateral derecho \tizquierda\tcolumna lumbar\tcolumna lumbar frontal\npies primero\tlateral izquierdo \tarriba\tcolumna lumbar\tcolumna lumbar lateral\npies primero\tlateral izquierdo \tabajo\tcolumna lumbar\tcolumna lumbar lateral\npies primero\tlateral izquierdo \tderecha \tcolumna lumbar\tcolumna lumbar frontal\npies primero\tlateral izquierdo \tizquierda\tcolumna lumbar\tcolumna lumbar frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tsupino\tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tsupino\tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tsupino\tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tprono\tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tprono\tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tprono\tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tprono\tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral derecho \tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral derecho \tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral derecho \tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tlateral derecho \tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tlateral izquierdo \tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral izquierdo \tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral izquierdo \tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tlateral izquierdo \tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\n\t\t\t\t\npies primero\tsupino\tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tsupino\tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tsupino\tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tsupino\tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tprono\tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tprono\tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tprono\tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tprono\tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral derecho \tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral derecho \tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral derecho \tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tlateral derecho \tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tlateral izquierdo \tarriba\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral izquierdo \tabajo\ttorax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral izquierdo \tderecha \ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tlateral izquierdo \tizquierda\ttorax abdomen y pelvis\ttorax abdomen pelvis frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\thombro\thombro frontal\ncabeza primero\tsupino\tabajo\thombro\thombro frontal\ncabeza primero\tsupino\tderecha \thombro\thombro lateral\ncabeza primero\tsupino\tizquierda\thombro\thombro lateral\ncabeza primero\tprono\tarriba\thombro\thombro frontal\ncabeza primero\tprono\tabajo\thombro\thombro frontal\ncabeza primero\tprono\tderecha \thombro\thombro lateral\ncabeza primero\tprono\tizquierda\thombro\thombro lateral\ncabeza primero\tlateral derecho \tarriba\thombro\thombro lateral\ncabeza primero\tlateral derecho \tabajo\thombro\thombro lateral\ncabeza primero\tlateral derecho \tderecha \thombro\thombro frontal\ncabeza primero\tlateral derecho \tizquierda\thombro\thombro frontal\ncabeza primero\tlateral izquierdo \tarriba\thombro\thombro lateral\ncabeza primero\tlateral izquierdo \tabajo\thombro\thombro lateral\ncabeza primero\tlateral izquierdo \tderecha \thombro\thombro frontal\ncabeza primero\tlateral izquierdo \tizquierda\thombro\thombro frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tbrazo\tbrazo frontal\ncabeza primero\tsupino\tabajo\tbrazo\tbrazo frontal\ncabeza primero\tsupino\tderecha \tbrazo\tbrazo lateral\ncabeza primero\tsupino\tizquierda\tbrazo\tbrazo lateral\ncabeza primero\tprono\tarriba\tbrazo\tbrazo frontal\ncabeza primero\tprono\tabajo\tbrazo\tbrazo frontal\ncabeza primero\tprono\tderecha \tbrazo\tbrazo lateral\ncabeza primero\tprono\tizquierda\tbrazo\tbrazo lateral\ncabeza primero\tlateral derecho \tarriba\tbrazo\tbrazo lateral\ncabeza primero\tlateral derecho \tabajo\tbrazo\tbrazo lateral\ncabeza primero\tlateral derecho \tderecha \tbrazo\tbrazo frontal\ncabeza primero\tlateral derecho \tizquierda\tbrazo\tbrazo frontal\ncabeza primero\tlateral izquierdo \tarriba\tbrazo\tbrazo lateral\ncabeza primero\tlateral izquierdo \tabajo\tbrazo\tbrazo lateral\ncabeza primero\tlateral izquierdo \tderecha \tbrazo\tbrazo frontal\ncabeza primero\tlateral izquierdo \tizquierda\tbrazo\tbrazo frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tcodo\tcodo frontal\ncabeza primero\tsupino\tabajo\tcodo\tcodo frontal\ncabeza primero\tsupino\tderecha \tcodo\tcodo lateral\ncabeza primero\tsupino\tizquierda\tcodo\tcodo lateral\ncabeza primero\tprono\tarriba\tcodo\tcodo frontal\ncabeza primero\tprono\tabajo\tcodo\tcodo frontal\ncabeza primero\tprono\tderecha \tcodo\tcodo lateral\ncabeza primero\tprono\tizquierda\tcodo\tcodo lateral\ncabeza primero\tlateral derecho \tarriba\tcodo\tcodo lateral\ncabeza primero\tlateral derecho \tabajo\tcodo\tcodo lateral\ncabeza primero\tlateral derecho \tderecha \tcodo\tcodo frontal\ncabeza primero\tlateral derecho \tizquierda\tcodo\tcodo frontal\ncabeza primero\tlateral izquierdo \tarriba\tcodo\tcodo lateral\ncabeza primero\tlateral izquierdo \tabajo\tcodo\tcodo lateral\ncabeza primero\tlateral izquierdo \tderecha \tcodo\tcodo frontal\ncabeza primero\tlateral izquierdo \tizquierda\tcodo\tcodo frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tantebrazo\tantebrazo frontal\ncabeza primero\tsupino\tabajo\tantebrazo\tantebrazo frontal\ncabeza primero\tsupino\tderecha \tantebrazo\tantebrazo lateral \ncabeza primero\tsupino\tizquierda\tantebrazo\tantebrazo lateral \ncabeza primero\tprono\tarriba\tantebrazo\tantebrazo frontal\ncabeza primero\tprono\tabajo\tantebrazo\tantebrazo frontal\ncabeza primero\tprono\tderecha \tantebrazo\tantebrazo lateral \ncabeza primero\tprono\tizquierda\tantebrazo\tantebrazo lateral \ncabeza primero\tlateral derecho \tarriba\tantebrazo\tantebrazo lateral \ncabeza primero\tlateral derecho \tabajo\tantebrazo\tantebrazo lateral \ncabeza primero\tlateral derecho \tderecha \tantebrazo\tantebrazo frontal\ncabeza primero\tlateral derecho \tizquierda\tantebrazo\tantebrazo frontal\ncabeza primero\tlateral izquierdo \tarriba\tantebrazo\tantebrazo lateral \ncabeza primero\tlateral izquierdo \tabajo\tantebrazo\tantebrazo lateral \ncabeza primero\tlateral izquierdo \tderecha \tantebrazo\tantebrazo frontal\ncabeza primero\tlateral izquierdo \tizquierda\tantebrazo\tantebrazo frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tmuñeca\tmuñeca frontal\ncabeza primero\tsupino\tabajo\tmuñeca\tmano muñeca frontal\ncabeza primero\tsupino\tderecha \tmuñeca\tmuñeca lateral \ncabeza primero\tsupino\tizquierda\tmuñeca\tmuñeca lateral \ncabeza primero\tprono\tarriba\tmuñeca\tmuñeca frontal\ncabeza primero\tprono\tabajo\tmuñeca\tmuñeca frontal\ncabeza primero\tprono\tderecha \tmuñeca\tmuñeca lateral \ncabeza primero\tprono\tizquierda\tmuñeca\tmuñeca lateral \ncabeza primero\tlateral derecho \tarriba\tmuñeca\tmuñeca lateral \ncabeza primero\tlateral derecho \tabajo\tmuñeca\tmuñeca lateral \ncabeza primero\tlateral derecho \tderecha \tmuñeca\tmuñeca frontal\ncabeza primero\tlateral derecho \tizquierda\tmuñeca\tmuñeca frontal\ncabeza primero\tlateral izquierdo \tarriba\tmuñeca\tmuñeca lateral \ncabeza primero\tlateral izquierdo \tabajo\tmuñeca\tmuñeca lateral \ncabeza primero\tlateral izquierdo \tderecha \tmuñeca\tmuñeca frontal\ncabeza primero\tlateral izquierdo \tizquierda\tmuñeca\tmuñeca frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tmano\tmano frontal\ncabeza primero\tsupino\tabajo\tmano\tmano frontal\ncabeza primero\tsupino\tderecha \tmano\tmano ateral \ncabeza primero\tsupino\tizquierda\tmano\tmano lateral \ncabeza primero\tprono\tarriba\tmano\tmano rontal\ncabeza primero\tprono\tabajo\tmano\tmano frontal\ncabeza primero\tprono\tderecha \tmano\tmano lateral \ncabeza primero\tprono\tizquierda\tmano\tmano ateral \ncabeza primero\tlateral derecho \tarriba\tmano\tmano ateral \ncabeza primero\tlateral derecho \tabajo\tmano\tmano lateral \ncabeza primero\tlateral derecho \tderecha \tmano\tmano frontal\ncabeza primero\tlateral derecho \tizquierda\tmano\tmano frontal\ncabeza primero\tlateral izquierdo \tarriba\tmano\tmano lateral \ncabeza primero\tlateral izquierdo \tabajo\tmano\tmano lateral \ncabeza primero\tlateral izquierdo \tderecha \tmano\tmano frontal\ncabeza primero\tlateral izquierdo \tizquierda\tmano\tmano frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tcadera\tpelvis frontal\npies primero\tsupino\tabajo\tcadera\tpelvis frontal\npies primero\tsupino\tderecha \tcadera\tpelvis lateral \npies primero\tsupino\tizquierda\tcadera\tpelvis lateral \npies primero\tprono\tarriba\tcadera\tpelvis frontal\npies primero\tprono\tabajo\tcadera\tpelvis frontal\npies primero\tprono\tderecha \tcadera\tpelvis lateral \npies primero\tprono\tizquierda\tcadera\tpelvis lateral \npies primero\tlateral derecho \tarriba\tcadera\tpelvis lateral \npies primero\tlateral derecho \tabajo\tcadera\tpelvis lateral \npies primero\tlateral derecho \tderecha \tcadera\tpelvis frontal\npies primero\tlateral derecho \tizquierda\tcadera\tpelvis frontal\npies primero\tlateral izquierdo \tarriba\tcadera\tpelvis lateral \npies primero\tlateral izquierdo \tabajo\tcadera\tpelvis lateral \npies primero\tlateral izquierdo \tderecha \tcadera\tpelvis frontal\npies primero\tlateral izquierdo \tizquierda\tcadera\tpelvis frontal\n\t\t\t\t\npies primero\tsupino\tarriba\trodilla\trodilla frontal\npies primero\tsupino\tabajo\trodilla\trodilla frontal\npies primero\tsupino\tderecha \trodilla\trodilla lateral \npies primero\tsupino\tizquierda\trodilla\trodilla lateral \npies primero\tprono\tarriba\trodilla\trodilla frontal\npies primero\tprono\tabajo\trodilla\trodilla frontal\npies primero\tprono\tderecha \trodilla\trodilla lateral \npies primero\tprono\tizquierda\trodilla\trodilla lateral \npies primero\tlateral derecho \tarriba\trodilla\trodilla lateral \npies primero\tlateral derecho \tabajo\trodilla\trodilla lateral \npies primero\tlateral derecho \tderecha \trodilla\trodilla frontal\npies primero\tlateral derecho \tizquierda\trodilla\trodilla frontal\npies primero\tlateral izquierdo \tarriba\trodilla\trodilla lateral \npies primero\tlateral izquierdo \tabajo\trodilla\trodilla lateral \npies primero\tlateral izquierdo \tderecha \trodilla\trodilla frontal\npies primero\tlateral izquierdo \tizquierda\trodilla\trodilla frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tpierna\tpierna frontal\npies primero\tsupino\tabajo\tpierna\tpierna frontal\npies primero\tsupino\tderecha \tpierna\tpierna lateral \npies primero\tsupino\tizquierda\tpierna\tpierna lateral \npies primero\tprono\tarriba\tpierna\tpierna frontal\npies primero\tprono\tabajo\tpierna\tpierna frontal\npies primero\tprono\tderecha \tpierna\tpierna lateral \npies primero\tprono\tizquierda\tpierna\tpierna lateral \npies primero\tlateral derecho \tarriba\tpierna\tpierna lateral \npies primero\tlateral derecho \tabajo\tpierna\tpierna lateral \npies primero\tlateral derecho \tderecha \tpierna\tpierna frontal\npies primero\tlateral derecho \tizquierda\tpierna\tpierna frontal\npies primero\tlateral izquierdo \tarriba\tpierna\tpierna lateral \npies primero\tlateral izquierdo \tabajo\tpierna\tpierna lateral \npies primero\tlateral izquierdo \tderecha \tpierna\tpierna frontal\npies primero\tlateral izquierdo \tizquierda\tpierna\tpierna frontal\n\t\t\t\t\npies primero\tsupino\tarriba\ttobillo\tpie tobillo frontal\npies primero\tsupino\tabajo\ttobillo\tpie tobillo frontal\npies primero\tsupino\tderecha \ttobillo\tpie tobillo lateral \npies primero\tsupino\tizquierda\ttobillo\tpie tobillo lateral \npies primero\tprono\tarriba\ttobillo\tpie tobillo frontal\npies primero\tprono\tabajo\ttobillo\tpie tobillo frontal\npies primero\tprono\tderecha \ttobillo\tpie tobillo lateral \npies primero\tprono\tizquierda\ttobillo\tpie tobillo lateral \npies primero\tlateral derecho \tarriba\ttobillo\tpie tobillo lateral \npies primero\tlateral derecho \tabajo\ttobillo\tpie tobillo lateral \npies primero\tlateral derecho \tderecha \ttobillo\tpie tobillo frontal\npies primero\tlateral derecho \tizquierda\ttobillo\tpie tobillo frontal\npies primero\tlateral izquierdo \tarriba\ttobillo\tpie tobillo lateral \npies primero\tlateral izquierdo \tabajo\ttobillo\tpie tobillo lateral \npies primero\tlateral izquierdo \tderecha \ttobillo\tpie tobillo frontal\npies primero\tlateral izquierdo \tizquierda\ttobillo\tpie tobillo frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tpie\tpie tobillo frontal\npies primero\tsupino\tabajo\tpie\tpie tobillo frontal\npies primero\tsupino\tderecha \tpie\tpie tobillo lateral \npies primero\tsupino\tizquierda\tpie\tpie tobillo lateral \npies primero\tprono\tarriba\tpie\tpie tobillo frontal\npies primero\tprono\tabajo\tpie\tpie tobillo frontal\npies primero\tprono\tderecha \tpie\tpie tobillo lateral \npies primero\tprono\tizquierda\tpie\tpie tobillo lateral \npies primero\tlateral derecho \tarriba\tpie\tpie tobillo lateral \npies primero\tlateral derecho \tabajo\tpie\tpie tobillo lateral \npies primero\tlateral derecho \tderecha \tpie\tpie tobillo frontal\npies primero\tlateral derecho \tizquierda\tpie\tpie tobillo frontal\npies primero\tlateral izquierdo \tarriba\tpie\tpie tobillo lateral \npies primero\tlateral izquierdo \tabajo\tpie\tpie tobillo lateral \npies primero\tlateral izquierdo \tderecha \tpie\tpie tobillo frontal\npies primero\tlateral izquierdo \tizquierda\tpie\tpie tobillo frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac cerebro\tcabeza frontal\ncabeza primero\tsupino\tabajo\tangiotac cerebro\tcabeza frontal\ncabeza primero\tsupino\tderecha \tangiotac cerebro\tcabeza lateral\ncabeza primero\tsupino\tizquierda\tangiotac cerebro\tcabeza lateral\ncabeza primero\tprono\tarriba\tangiotac cerebro\tcabeza frontal\ncabeza primero\tprono\tabajo\tangiotac cerebro\tcabeza frontal\ncabeza primero\tprono\tderecha \tangiotac cerebro\tcabeza lateral\ncabeza primero\tprono\tizquierda\tangiotac cerebro\tcabeza lateral\ncabeza primero\tlateral derecho\tarriba\tangiotac cerebro\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\tangiotac cerebro\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \tangiotac cerebro\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\tangiotac cerebro\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\tangiotac cerebro\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\tangiotac cerebro\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \tangiotac cerebro\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\tangiotac cerebro\tcabeza frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac cuello\tcabeza frontal\ncabeza primero\tsupino\tabajo\tangiotac cuello\tcabeza frontal\ncabeza primero\tsupino\tderecha \tangiotac cuello\tcabeza lateral\ncabeza primero\tsupino\tizquierda\tangiotac cuello\tcabeza lateral\ncabeza primero\tprono\tarriba\tangiotac cuello\tcabeza frontal\ncabeza primero\tprono\tabajo\tangiotac cuello\tcabeza frontal\ncabeza primero\tprono\tderecha \tangiotac cuello\tcabeza lateral\ncabeza primero\tprono\tizquierda\tangiotac cuello\tcabeza lateral\ncabeza primero\tlateral derecho\tarriba\tangiotac cuello\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\tangiotac cuello\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \tangiotac cuello\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\tangiotac cuello\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\tangiotac cuello\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\tangiotac cuello\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \tangiotac cuello\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\tangiotac cuello\tcabeza frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tsupino\tabajo\tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tsupino\tderecha \tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tsupino\tizquierda\tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tprono\tarriba\tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tprono\tabajo\tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tprono\tderecha \tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tprono\tizquierda\tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tlateral derecho\tarriba\tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tlateral derecho\tabajo\tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tlateral derecho\tderecha \tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tlateral derecho\tizquierda\tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tlateral izquerdo\tarriba\tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tlateral izquerdo\tabajo\tangiotac cerebro cuello\tcabeza lateral\ncabeza primero\tlateral izquerdo\tderecha \tangiotac cerebro cuello\tcabeza frontal\ncabeza primero\tlateral izquerdo\tizquierda\tangiotac cerebro cuello\tcabeza frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac torax\ttorax frontal\ncabeza primero\tsupino\tabajo\tangiotac torax\ttorax frontal\ncabeza primero\tsupino\tderecha \tangiotac torax\ttorax lateral\ncabeza primero\tsupino\tizquierda\tangiotac torax\ttorax lateral\ncabeza primero\tprono\tarriba\tangiotac torax\ttorax frontal\ncabeza primero\tprono\tabajo\tangiotac torax\ttorax frontal\ncabeza primero\tprono\tderecha \tangiotac torax\ttorax lateral\ncabeza primero\tprono\tizquierda\tangiotac torax\ttorax lateral\ncabeza primero\tlateral derecho \tarriba\tangiotac torax\ttorax lateral\ncabeza primero\tlateral derecho \tabajo\tangiotac torax\ttorax lateral\ncabeza primero\tlateral derecho \tderecha \tangiotac torax\ttorax frontal\ncabeza primero\tlateral derecho \tizquierda\tangiotac torax\ttorax frontal\ncabeza primero\tlateral izquierdo \tarriba\tangiotac torax\ttorax lateral\ncabeza primero\tlateral izquierdo \tabajo\tangiotac torax\ttorax lateral\ncabeza primero\tlateral izquierdo \tderecha \tangiotac torax\ttorax frontal\ncabeza primero\tlateral izquierdo \tizquierda\tangiotac torax\ttorax frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tangiotac torax\ttorax frontal\npies primero\tsupino\tabajo\tangiotac torax\ttorax frontal\npies primero\tsupino\tderecha \tangiotac torax\ttorax lateral\npies primero\tsupino\tizquierda\tangiotac torax\ttorax lateral\npies primero\tprono\tarriba\tangiotac torax\ttorax frontal\npies primero\tprono\tabajo\tangiotac torax\ttorax frontal\npies primero\tprono\tderecha \tangiotac torax\ttorax lateral\npies primero\tprono\tizquierda\tangiotac torax\ttorax lateral\npies primero\tlateral derecho \tarriba\tangiotac torax\ttorax lateral\npies primero\tlateral derecho \tabajo\tangiotac torax\ttorax lateral\npies primero\tlateral derecho \tderecha \tangiotac torax\ttorax frontal\npies primero\tlateral derecho \tizquierda\tangiotac torax\ttorax frontal\npies primero\tlateral izquierdo \tarriba\tangiotac torax\ttorax lateral\npies primero\tlateral izquierdo \tabajo\tangiotac torax\ttorax lateral\npies primero\tlateral izquierdo \tderecha \tangiotac torax\ttorax frontal\npies primero\tlateral izquierdo \tizquierda\tangiotac torax\ttorax frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac abdomen\tabdomen frontal\ncabeza primero\tsupino\tabajo\tangiotac abdomen\tabdomen frontal\ncabeza primero\tsupino\tderecha \tangiotac abdomen\tabdomen lateral\ncabeza primero\tsupino\tizquierda\tangiotac abdomen\tabdomen lateral\ncabeza primero\tprono\tarriba\tangiotac abdomen\tabdomen frontal\ncabeza primero\tprono\tabajo\tangiotac abdomen\tabdomen frontal\ncabeza primero\tprono\tderecha \tangiotac abdomen\tabdomen ateral\ncabeza primero\tprono\tizquierda\tangiotac abdomen\tabdomen lateral\ncabeza primero\tlateral derecho \tarriba\tangiotac abdomen\tabdomen lateral\ncabeza primero\tlateral derecho \tabajo\tangiotac abdomen\tabdomen lateral\ncabeza primero\tlateral derecho \tderecha \tangiotac abdomen\tabdomen frontal\ncabeza primero\tlateral derecho \tizquierda\tangiotac abdomen\tabdomen frontal\ncabeza primero\tlateral izquierdo \tarriba\tangiotac abdomen\tabdomen lateral\ncabeza primero\tlateral izquierdo \tabajo\tangiotac abdomen\tabdomen lateral\ncabeza primero\tlateral izquierdo \tderecha \tangiotac abdomen\tabdomen frontal\ncabeza primero\tlateral izquierdo \tizquierda\tangiotac abdomen\tabdomen frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tangiotac abdomen\tabdomen frontal\npies primero\tsupino\tabajo\tangiotac abdomen\tabdomen frontal\npies primero\tsupino\tderecha \tangiotac abdomen\tabdomen lateral\npies primero\tsupino\tizquierda\tangiotac abdomen\tabdomen lateral\npies primero\tprono\tarriba\tangiotac abdomen\tabdomen frontal\npies primero\tprono\tabajo\tangiotac abdomen\tabdomen  frontal\npies primero\tprono\tderecha \tangiotac abdomen\tabdomen lateral\npies primero\tprono\tizquierda\tangiotac abdomen\tabdomen ateral\npies primero\tlateral derecho \tarriba\tangiotac abdomen\tabdomen ateral\npies primero\tlateral derecho \tabajo\tangiotac abdomen\tabdomen lateral\npies primero\tlateral derecho \tderecha \tangiotac abdomen\tabdomen  frontal\npies primero\tlateral derecho \tizquierda\tangiotac abdomen\tabdomen frontal\npies primero\tlateral izquierdo \tarriba\tangiotac abdomen\tabdomen lateral\npies primero\tlateral izquierdo \tabajo\tangiotac abdomen\tabdomen lateral\npies primero\tlateral izquierdo \tderecha \tangiotac abdomen\tabdomen rontal\npies primero\tlateral izquierdo \tizquierda\tangiotac abdomen\tabdomen frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac abdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tsupino\tabajo\tangiotac abdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tsupino\tderecha \tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tsupino\tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tprono\tarriba\tangiotac abdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tprono\tabajo\tangiotac abdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tprono\tderecha \tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tprono\tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral derecho \tarriba\tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral derecho \tabajo\tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral derecho \tderecha \tangiotac abdomen y pelvis \tabdomenpelvis  frontal\ncabeza primero\tlateral derecho \tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tlateral izquierdo \tarriba\tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral izquierdo \tabajo\tangiotac abdomen y pelvis \tabdomenpelvis lateral\ncabeza primero\tlateral izquierdo \tderecha \tangiotac abdomen y pelvis \tabdomenpelvis frontal\ncabeza primero\tlateral izquierdo \tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tsupino\tabajo\tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tsupino\tderecha \tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tsupino\tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tprono\tarriba\tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tprono\tabajo\tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tprono\tderecha \tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tprono\tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral derecho \tarriba\tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral derecho \tabajo\tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral derecho \tderecha \tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tlateral derecho \tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tlateral izquierdo \tarriba\tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral izquierdo \tabajo\tangiotac abdomen y pelvis \tabdomenpelvis lateral\npies primero\tlateral izquierdo \tderecha \tangiotac abdomen y pelvis \tabdomenpelvis frontal\npies primero\tlateral izquierdo \tizquierda\tangiotac abdomen y pelvis \tabdomenpelvis frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tsupino\tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tsupino\tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tsupino\tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tprono\tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tprono\tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tprono\tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tprono\tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral derecho \tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral derecho \tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral derecho \tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tlateral derecho \tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tlateral izquierdo \tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral izquierdo \tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\ncabeza primero\tlateral izquierdo \tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\ncabeza primero\tlateral izquierdo \tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tsupino\tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tsupino\tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tsupino\tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tprono\tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tprono\tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tprono\tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tprono\tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral derecho \tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral derecho \tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral derecho \tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tlateral derecho \tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tlateral izquierdo \tarriba\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral izquierdo \tabajo\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis lateral\npies primero\tlateral izquierdo \tderecha \tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\npies primero\tlateral izquierdo \tizquierda\tangiotac torax abdomen y pelvis\ttorax abdomen pelvis frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tsupino\tabajo\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tsupino\tderecha \tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tsupino\tizquierda\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tprono\tarriba\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tprono\tabajo\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tprono\tderecha \tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tprono\tizquierda\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tlateral derecho \tarriba\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tlateral derecho \tabajo\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tlateral derecho \tderecha \tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tlateral derecho \tizquierda\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tlateral izquierdo \tarriba\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tlateral izquierdo \tabajo\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha lateral \ncabeza primero\tlateral izquierdo \tderecha \tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\ncabeza primero\tlateral izquierdo \tizquierda\tangiotac extremidad superior derecha\tangiotac extremidad superior derecha frontal\n\t\t\t\t\ncabeza primero\tsupino\tarriba\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo frontal\ncabeza primero\tsupino\tabajo\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo frontal\ncabeza primero\tsupino\tderecha \tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tsupino\tizquierda\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tprono\tarriba\tangiotac extremidad superior izquierda\t angiotac extremidad superior izquierdo frontal\ncabeza primero\tprono\tabajo\tangiotac extremidad superior izquierda\tfangiotac extremidad superior izquierdo frontal\ncabeza primero\tprono\tderecha \tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tprono\tizquierda\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tlateral derecho \tarriba\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tlateral derecho \tabajo\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tlateral derecho \tderecha \tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo frontal\ncabeza primero\tlateral derecho \tizquierda\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo frontal\ncabeza primero\tlateral izquierdo \tarriba\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tlateral izquierdo \tabajo\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo lateral \ncabeza primero\tlateral izquierdo \tderecha \tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo frontal\ncabeza primero\tlateral izquierdo \tizquierda\tangiotac extremidad superior izquierda\tangiotac extremidad superior izquierdo frontal\n\t\t\t\t\npies primero\tsupino\tarriba\tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tsupino\tabajo\tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tsupino\tderecha \tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tsupino\tizquierda\tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tprono\tarriba\tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tprono\tabajo\tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tprono\tderecha \tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tprono\tizquierda\tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tlateral derecho \tarriba\tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tlateral derecho \tabajo\tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tlateral derecho \tderecha \tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tlateral derecho \tizquierda\tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tlateral izquierdo \tarriba\tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tlateral izquierdo \tabajo\tangiotac extremidad inferior\tangiotac extremidad inferior lateral \npies primero\tlateral izquierdo \tderecha \tangiotac extremidad inferior\tangiotac extremidad inferior frontal\npies primero\tlateral izquierdo \tizquierda\tangiotac extremidad inferior\tangiotac extremidad inferior frontal'
+TOPORAMA_REGLAS_TSV = """entrada del paciente	posicionamiento	posicion del tubo	protolocolo	nombre exacto de la imagen
+				
+cabeza primero	supino	arriba	cerebro 	cabeza frontal
+cabeza primero	supino	abajo	cerebro 	cabeza frontal
+cabeza primero	supino	derecha 	cerebro 	cabeza lateral
+cabeza primero	supino	izquierda	cerebro 	cabeza lateral
+cabeza primero	supino	arriba	cavidades perinasales	cabeza frontal
+cabeza primero	supino	abajo	cavidades perinasales	cabeza frontal
+cabeza primero	supino	derecha 	cavidades perinasales	cabeza lateral
+cabeza primero	supino	izquierda	cavidades perinasales	cabeza lateral
+cabeza primero	supino	arriba	maxilofacial	cabeza frontal
+cabeza primero	supino	abajo	maxilofacial	cabeza frontal
+cabeza primero	supino	derecha 	maxilofacial	cabeza lateral
+cabeza primero	supino	izquierda	maxilofacial	cabeza lateral
+cabeza primero	supino	arriba	orbitas	cabeza frontal
+cabeza primero	supino	abajo	orbitas	cabeza frontal
+cabeza primero	supino	derecha 	orbitas	cabeza lateral
+cabeza primero	supino	izquierda	orbitas	cabeza lateral
+cabeza primero	supino	arriba	oidos	cabeza frontal
+cabeza primero	supino	abajo	oidos	cabeza frontal
+cabeza primero	supino	derecha 	oidos	cabeza lateral
+cabeza primero	supino	izquierda	oidos	cabeza lateral
+				
+cabeza primero	prono	arriba	cerebro	cabeza frontal
+cabeza primero	prono	abajo	cerebro	cabeza frontal
+cabeza primero	prono	derecha 	cerebro	cabeza lateral
+cabeza primero	prono	izquierda	cerebro	cabeza lateral
+cabeza primero	prono	arriba	cavidades perinasales	cabeza frontal
+cabeza primero	prono	abajo	cavidades perinasales	cabeza frontal
+cabeza primero	prono	derecha 	cavidades perinasales	cabeza lateral
+cabeza primero	prono	izquierda	cavidades perinasales	cabeza lateral
+cabeza primero	prono	arriba	maxilofacial	cabeza frontal
+cabeza primero	prono	abajo	maxilofacial	cabeza frontal
+cabeza primero	prono	derecha 	maxilofacial	cabeza lateral
+cabeza primero	prono	izquierda	maxilofacial	cabeza lateral
+cabeza primero	prono	arriba	orbitas	cabeza frontal
+cabeza primero	prono	abajo	orbitas	cabeza frontal
+cabeza primero	prono	derecha 	orbitas	cabeza lateral
+cabeza primero	prono	izquierda	orbitas	cabeza lateral
+cabeza primero	prono	arriba	oidos	cabeza frontal
+cabeza primero	prono	abajo	oidos	cabeza frontal
+cabeza primero	prono	derecha 	oidos	cabeza lateral
+cabeza primero	prono	izquierda	oidos	cabeza lateral
+				
+cabeza primero	lateral derecho	arriba	cerebro	cabeza lateral
+cabeza primero	lateral derecho	abajo	cerebro	cabeza lateral
+cabeza primero	lateral derecho	derecha 	cerebro	cabeza frontal
+cabeza primero	lateral derecho	izquierda	cerebro	cabeza frontal
+cabeza primero	lateral derecho	arriba	cavidades perinasales	cabeza lateral
+cabeza primero	lateral derecho	abajo	cavidades perinasales	cabeza lateral
+cabeza primero	lateral derecho	derecha 	cavidades perinasales	cabeza frontal
+cabeza primero	lateral derecho	izquierda	cavidades perinasales	cabeza frontal
+cabeza primero	lateral derecho	arriba	maxilofacial	cabeza lateral
+cabeza primero	lateral derecho	abajo	maxilofacial	cabeza lateral
+cabeza primero	lateral derecho	derecha 	maxilofacial	cabeza frontal
+cabeza primero	lateral derecho	izquierda	maxilofacial	cabeza frontal
+cabeza primero	lateral derecho	arriba	orbitas	cabeza lateral
+cabeza primero	lateral derecho	abajo	orbitas	cabeza lateral
+cabeza primero	lateral derecho	derecha 	orbitas	cabeza frontal
+cabeza primero	lateral derecho	izquierda	orbitas	cabeza frontal
+cabeza primero	lateral derecho	arriba	oidos	cabeza lateral
+cabeza primero	lateral derecho	abajo	oidos	cabeza lateral
+cabeza primero	lateral derecho	derecha 	oidos	cabeza frontal
+cabeza primero	lateral derecho	izquierda	oidos	cabeza frontal
+				
+cabeza primero	lateral izquerdo	arriba	cerebro	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	cerebro	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	cerebro	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	cerebro	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	cavidades perinasales	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	cavidades perinasales	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	cavidades perinasales	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	cavidades perinasales	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	maxilofacial	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	maxilofacial	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	maxilofacial	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	maxilofacial	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	orbitas	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	orbitas	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	orbitas	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	orbitas	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	oidos	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	oidos	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	oidos	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	oidos	cabeza frontal
+				
+cabeza primero	supino	arriba	cuello	cuello frontal
+cabeza primero	supino	abajo	cuello	cuello frontal
+cabeza primero	supino	derecha 	cuello	cuello lateral
+cabeza primero	supino	izquierda	cuello	cuello lateral
+cabeza primero	prono	arriba	cuello	cuello frontal
+cabeza primero	prono	abajo	cuello	cuello frontal
+cabeza primero	prono	derecha 	cuello	cuello lateral
+cabeza primero	prono	izquierda	cuello	cuello lateral
+cabeza primero	lateral derecho 	arriba	cuello	cuello lateral
+cabeza primero	lateral derecho 	abajo	cuello	cuello lateral
+cabeza primero	lateral derecho 	derecha 	cuello	cuello frontal
+cabeza primero	lateral derecho 	izquierda	cuello	cuello frontal
+cabeza primero	lateral izquierdo 	arriba	cuello	cuello lateral
+cabeza primero	lateral izquierdo 	abajo	cuello	cuello lateral
+cabeza primero	lateral izquierdo 	derecha 	cuello	cuello frontal
+cabeza primero	lateral izquierdo 	izquierda	cuello	cuello frontal
+				
+				
+cabeza primero	supino	arriba	columna cervical	cuello frontal
+cabeza primero	supino	abajo	columna cervical	cuello frontal
+cabeza primero	supino	derecha 	columna cervical	cuello lateral
+cabeza primero	supino	izquierda	columna cervical	cuello lateral
+cabeza primero	prono	arriba	columna cervical	cuello frontal
+cabeza primero	prono	abajo	columna cervical	cuello frontal
+cabeza primero	prono	derecha 	columna cervical	cuello lateral
+cabeza primero	prono	izquierda	columna cervical	cuello lateral
+cabeza primero	lateral derecho 	arriba	columna cervical	cuello lateral
+cabeza primero	lateral derecho 	abajo	columna cervical	cuello lateral
+cabeza primero	lateral derecho 	derecha 	columna cervical	cuello frontal
+cabeza primero	lateral derecho 	izquierda	columna cervical	cuello frontal
+cabeza primero	lateral izquierdo 	arriba	columna cervical	cuello lateral
+cabeza primero	lateral izquierdo 	abajo	columna cervical	cuello lateral
+cabeza primero	lateral izquierdo 	derecha 	columna cervical	cuello frontal
+cabeza primero	lateral izquierdo 	izquierda	columna cervical	cuello frontal
+				
+cabeza primero	supino	arriba	torax	torax frontal
+cabeza primero	supino	abajo	torax	torax frontal
+cabeza primero	supino	derecha 	torax	torax lateral
+cabeza primero	supino	izquierda	torax	torax lateral
+cabeza primero	prono	arriba	torax	torax frontal
+cabeza primero	prono	abajo	torax	torax frontal
+cabeza primero	prono	derecha 	torax	torax lateral
+cabeza primero	prono	izquierda	torax	torax lateral
+cabeza primero	lateral derecho 	arriba	torax	torax lateral
+cabeza primero	lateral derecho 	abajo	torax	torax lateral
+cabeza primero	lateral derecho 	derecha 	torax	torax frontal
+cabeza primero	lateral derecho 	izquierda	torax	torax frontal
+cabeza primero	lateral izquierdo 	arriba	torax	torax lateral
+cabeza primero	lateral izquierdo 	abajo	torax	torax lateral
+cabeza primero	lateral izquierdo 	derecha 	torax	torax frontal
+cabeza primero	lateral izquierdo 	izquierda	torax	torax frontal
+				
+pies primero	supino	arriba	torax	torax frontal
+pies primero	supino	abajo	torax	torax frontal
+pies primero	supino	derecha 	torax	torax lateral
+pies primero	supino	izquierda	torax	torax lateral
+pies primero	prono	arriba	torax	torax frontal
+pies primero	prono	abajo	torax	torax frontal
+pies primero	prono	derecha 	torax	torax lateral
+pies primero	prono	izquierda	torax	torax lateral
+pies primero	lateral derecho 	arriba	torax	torax lateral
+pies primero	lateral derecho 	abajo	torax	torax lateral
+pies primero	lateral derecho 	derecha 	torax	torax frontal
+pies primero	lateral derecho 	izquierda	torax	torax frontal
+pies primero	lateral izquierdo 	arriba	torax	torax lateral
+pies primero	lateral izquierdo 	abajo	torax	torax lateral
+pies primero	lateral izquierdo 	derecha 	torax	torax frontal
+pies primero	lateral izquierdo 	izquierda	torax	torax frontal
+				
+cabeza primero	supino	arriba	abdomen	abdomen frontal
+cabeza primero	supino	abajo	abdomen	abdomen frontal
+cabeza primero	supino	derecha 	abdomen	abdomen lateral
+cabeza primero	supino	izquierda	abdomen	abdomen lateral
+cabeza primero	prono	arriba	abdomen	abdomen frontal
+cabeza primero	prono	abajo	abdomen	abdomen frontal
+cabeza primero	prono	derecha 	abdomen	abdomen ateral
+cabeza primero	prono	izquierda	abdomen	abdomen lateral
+cabeza primero	lateral derecho 	arriba	abdomen	abdomen lateral
+cabeza primero	lateral derecho 	abajo	abdomen	abdomen lateral
+cabeza primero	lateral derecho 	derecha 	abdomen	abdomen frontal
+cabeza primero	lateral derecho 	izquierda	abdomen	abdomen frontal
+cabeza primero	lateral izquierdo 	arriba	abdomen	abdomen lateral
+cabeza primero	lateral izquierdo 	abajo	abdomen	abdomen lateral
+cabeza primero	lateral izquierdo 	derecha 	abdomen	abdomen frontal
+cabeza primero	lateral izquierdo 	izquierda	abdomen	abdomen frontal
+				
+pies primero	supino	arriba	abdomen	abdomen frontal
+pies primero	supino	abajo	abdomen	abdomen frontal
+pies primero	supino	derecha 	abdomen	abdomen lateral
+pies primero	supino	izquierda	abdomen	abdomen lateral
+pies primero	prono	arriba	abdomen	abdomen frontal
+pies primero	prono	abajo	abdomen	abdomen  frontal
+pies primero	prono	derecha 	abdomen	abdomen lateral
+pies primero	prono	izquierda	abdomen	abdomen ateral
+pies primero	lateral derecho 	arriba	abdomen	abdomen ateral
+pies primero	lateral derecho 	abajo	abdomen	abdomen lateral
+pies primero	lateral derecho 	derecha 	abdomen	abdomen  frontal
+pies primero	lateral derecho 	izquierda	abdomen	abdomen frontal
+pies primero	lateral izquierdo 	arriba	abdomen	abdomen lateral
+pies primero	lateral izquierdo 	abajo	abdomen	abdomen lateral
+pies primero	lateral izquierdo 	derecha 	abdomen	abdomen rontal
+pies primero	lateral izquierdo 	izquierda	abdomen	abdomen frontal
+				
+cabeza primero	supino	arriba	pelvis	pelvis  frontal
+cabeza primero	supino	abajo	pelvis	pelvis  frontal
+cabeza primero	supino	derecha 	pelvis	pelvis lateral
+cabeza primero	supino	izquierda	pelvis	pelvis lateral
+cabeza primero	prono	arriba	pelvis	pelvis  frontal
+cabeza primero	prono	abajo	pelvis	pelvis  frontal
+cabeza primero	prono	derecha 	pelvis	pelvis lateral
+cabeza primero	prono	izquierda	pelvis	pelvis lateral
+cabeza primero	lateral derecho 	arriba	pelvis	pelvis lateral
+cabeza primero	lateral derecho 	abajo	pelvis	pelvis lateral
+cabeza primero	lateral derecho 	derecha 	pelvis	pelvis  frontal
+cabeza primero	lateral derecho 	izquierda	pelvis	pelvis  frontal
+cabeza primero	lateral izquierdo 	arriba	pelvis	pelvis lateral
+cabeza primero	lateral izquierdo 	abajo	pelvis	pelvis lateral
+cabeza primero	lateral izquierdo 	derecha 	pelvis	pelvis  frontal
+cabeza primero	lateral izquierdo 	izquierda	pelvis	abdomen y pelvis  frontal
+				
+pies primero	supino	arriba	pelvis	pelvis  frontal
+pies primero	supino	abajo	pelvis	pelvis  frontal
+pies primero	supino	derecha 	pelvis	pelvis lateral
+pies primero	supino	izquierda	pelvis	pelvis lateral
+pies primero	prono	arriba	pelvis	pelvis  frontal
+pies primero	prono	abajo	pelvis	pelvis  frontal
+pies primero	prono	derecha 	pelvis	pelvis lateral
+pies primero	prono	izquierda	pelvis	pelvis lateral
+pies primero	lateral derecho 	arriba	pelvis	pelvis lateral
+pies primero	lateral derecho 	abajo	pelvis	pelvis lateral
+pies primero	lateral derecho 	derecha 	pelvis	pelvis  frontal
+pies primero	lateral derecho 	izquierda	pelvis	pelvis  frontal
+pies primero	lateral izquierdo 	arriba	pelvis	pelvis lateral
+pies primero	lateral izquierdo 	abajo	pelvis	pelvis lateral
+pies primero	lateral izquierdo 	derecha 	pelvis	pelvis  frontal
+pies primero	lateral izquierdo 	izquierda	pelvis	pelvis  frontal
+				
+cabeza primero	supino	arriba	abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	supino	abajo	abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	supino	derecha 	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	supino	izquierda	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	prono	arriba	abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	prono	abajo	abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	prono	derecha 	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	prono	izquierda	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral derecho 	arriba	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral derecho 	abajo	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral derecho 	derecha 	abdomen y pelvis 	abdomenpelvis  frontal
+cabeza primero	lateral derecho 	izquierda	abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	lateral izquierdo 	arriba	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral izquierdo 	abajo	abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral izquierdo 	derecha 	abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	lateral izquierdo 	izquierda	abdomen y pelvis 	abdomenpelvis frontal
+				
+pies primero	supino	arriba	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	supino	abajo	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	supino	derecha 	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	supino	izquierda	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	prono	arriba	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	prono	abajo	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	prono	derecha 	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	prono	izquierda	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral derecho 	arriba	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral derecho 	abajo	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral derecho 	derecha 	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	lateral derecho 	izquierda	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	lateral izquierdo 	arriba	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral izquierdo 	abajo	abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral izquierdo 	derecha 	abdomen y pelvis 	abdomenpelvis frontal
+pies primero	lateral izquierdo 	izquierda	abdomen y pelvis 	abdomenpelvis frontal
+				
+pies primero	supino	arriba	pielotac	pielotac frontal
+pies primero	supino	abajo	pielotac	pielotac frontal
+pies primero	supino	derecha 	pielotac	pielotac lateral
+pies primero	supino	izquierda	pielotac	pielotac lateral
+pies primero	prono	arriba	pielotac	pielotac frontal
+pies primero	prono	abajo	pielotac	pielotac frontal
+pies primero	prono	derecha 	pielotac	pielotac lateral
+pies primero	prono	izquierda	pielotac	pielotac lateral
+pies primero	lateral derecho 	arriba	pielotac	pielotac lateral
+pies primero	lateral derecho 	abajo	pielotac	pielotac lateral
+pies primero	lateral derecho 	derecha 	pielotac	pielotac frontal
+pies primero	lateral derecho 	izquierda	pielotac	pielotac frontal
+pies primero	lateral izquierdo 	arriba	pielotac	pielotac lateral
+pies primero	lateral izquierdo 	abajo	pielotac	pielotac lateral
+pies primero	lateral izquierdo 	derecha 	pielotac	pielotac frontal
+pies primero	lateral izquierdo 	izquierda	pielotac	pielotac frontal
+				
+cabeza primero	supino	arriba	pielotac	pielotac frontal
+cabeza primero	supino	abajo	pielotac	pielotac frontal
+cabeza primero	supino	derecha 	pielotac	pielotac lateral
+cabeza primero	supino	izquierda	pielotac	pielotac lateral
+cabeza primero	prono	arriba	pielotac	pielotac frontal
+cabeza primero	prono	abajo	pielotac	pielotac frontal
+cabeza primero	prono	derecha 	pielotac	pielotac lateral
+cabeza primero	prono	izquierda	pielotac	pielotac lateral
+cabeza primero	lateral derecho 	arriba	pielotac	pielotac lateral
+cabeza primero	lateral derecho 	abajo	pielotac	pielotac lateral
+cabeza primero	lateral derecho 	derecha 	pielotac	pielotac frontal
+cabeza primero	lateral derecho 	izquierda	pielotac	pielotac frontal
+cabeza primero	lateral izquierdo 	arriba	pielotac	pielotac lateral
+cabeza primero	lateral izquierdo 	abajo	pielotac	pielotac lateral
+cabeza primero	lateral izquierdo 	derecha 	pielotac	pielotac frontal
+cabeza primero	lateral izquierdo 	izquierda	pielotac	pielotac frontal
+				
+cabeza primero	supino	arriba	columna dorsal	columna dorsal frontal
+cabeza primero	supino	abajo	columna dorsal	columna dorsal frontal
+cabeza primero	supino	derecha 	columna dorsal	columna dorsal lateral
+cabeza primero	supino	izquierda	columna dorsal	columna dorsal lateral
+cabeza primero	prono	arriba	columna dorsal	columna dorsal frontal
+cabeza primero	prono	abajo	columna dorsal	columna dorsal frontal
+cabeza primero	prono	derecha 	columna dorsal	columna dorsal lateral
+cabeza primero	prono	izquierda	columna dorsal	columna dorsal lateral
+cabeza primero	lateral derecho 	arriba	columna dorsal	columna dorsal lateral
+cabeza primero	lateral derecho 	abajo	columna dorsal	columna dorsal lateral
+cabeza primero	lateral derecho 	derecha 	columna dorsal	columna dorsal frontal
+cabeza primero	lateral derecho 	izquierda	columna dorsal	columna dorsal frontal
+cabeza primero	lateral izquierdo 	arriba	columna dorsal	columna dorsal lateral
+cabeza primero	lateral izquierdo 	abajo	columna dorsal	columna dorsal lateral
+cabeza primero	lateral izquierdo 	derecha 	columna dorsal	columna dorsal frontal
+cabeza primero	lateral izquierdo 	izquierda	columna dorsal	columna dorsal frontal
+				
+pies primero	supino	arriba	columna dorsal	columna dorsal frontal
+pies primero	supino	abajo	columna dorsal	columna dorsal frontal
+pies primero	supino	derecha 	columna dorsal	columna dorsal lateral
+pies primero	supino	izquierda	columna dorsal	columna dorsal lateral
+pies primero	prono	arriba	columna dorsal	columna dorsal frontal
+pies primero	prono	abajo	columna dorsal	columna dorsal frontal
+pies primero	prono	derecha 	columna dorsal	columna dorsal lateral
+pies primero	prono	izquierda	columna dorsal	columna dorsal lateral
+pies primero	lateral derecho 	arriba	columna dorsal	columna dorsal lateral
+pies primero	lateral derecho 	abajo	columna dorsal	columna dorsal lateral
+pies primero	lateral derecho 	derecha 	columna dorsal	columna dorsal frontal
+pies primero	lateral derecho 	izquierda	columna dorsal	columna dorsal frontal
+pies primero	lateral izquierdo 	arriba	columna dorsal	columna dorsal lateral
+pies primero	lateral izquierdo 	abajo	columna dorsal	columna dorsal lateral
+pies primero	lateral izquierdo 	derecha 	columna dorsal	columna dorsal frontal
+pies primero	lateral izquierdo 	izquierda	columna dorsal	columna dorsal frontal
+				
+cabeza primero	supino	arriba	columna lumbar	columna lumbar frontal
+cabeza primero	supino	abajo	columna lumbar	columna lumbar frontal
+cabeza primero	supino	derecha 	columna lumbar	columna lumbar lateral
+cabeza primero	supino	izquierda	columna lumbar	columna lumbar lateral
+cabeza primero	prono	arriba	columna lumbar	columna lumbar frontal
+cabeza primero	prono	abajo	columna lumbar	columna lumbar frontal
+cabeza primero	prono	derecha 	columna lumbar	columna lumbar lateral
+cabeza primero	prono	izquierda	columna lumbar	columna lumbar lateral
+cabeza primero	lateral derecho 	arriba	columna lumbar	columna lumbar lateral
+cabeza primero	lateral derecho 	abajo	columna lumbar	columna lumbar lateral
+cabeza primero	lateral derecho 	derecha 	columna lumbar	columna lumbar frontal
+cabeza primero	lateral derecho 	izquierda	columna lumbar	columna lumbar frontal
+cabeza primero	lateral izquierdo 	arriba	columna lumbar	columna lumbar lateral
+cabeza primero	lateral izquierdo 	abajo	columna lumbar	columna lumbar lateral
+cabeza primero	lateral izquierdo 	derecha 	columna lumbar	columna lumbar frontal
+cabeza primero	lateral izquierdo 	izquierda	columna lumbar	columna lumbar frontal
+				
+pies primero	supino	arriba	columna lumbar	columna lumbar frontal
+pies primero	supino	abajo	columna lumbar	columna lumbar frontal
+pies primero	supino	derecha 	columna lumbar	columna lumbar lateral
+pies primero	supino	izquierda	columna lumbar	columna lumbar lateral
+pies primero	prono	arriba	columna lumbar	columna lumbar frontal
+pies primero	prono	abajo	columna lumbar	columna lumbar frontal
+pies primero	prono	derecha 	columna lumbar	columna lumbar lateral
+pies primero	prono	izquierda	columna lumbar	columna lumbar lateral
+pies primero	lateral derecho 	arriba	columna lumbar	columna lumbar lateral
+pies primero	lateral derecho 	abajo	columna lumbar	columna lumbar lateral
+pies primero	lateral derecho 	derecha 	columna lumbar	columna lumbar frontal
+pies primero	lateral derecho 	izquierda	columna lumbar	columna lumbar frontal
+pies primero	lateral izquierdo 	arriba	columna lumbar	columna lumbar lateral
+pies primero	lateral izquierdo 	abajo	columna lumbar	columna lumbar lateral
+pies primero	lateral izquierdo 	derecha 	columna lumbar	columna lumbar frontal
+pies primero	lateral izquierdo 	izquierda	columna lumbar	columna lumbar frontal
+				
+cabeza primero	supino	arriba	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	supino	abajo	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	supino	derecha 	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	supino	izquierda	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	prono	arriba	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	prono	abajo	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	prono	derecha 	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	prono	izquierda	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral derecho 	arriba	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral derecho 	abajo	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral derecho 	derecha 	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	lateral derecho 	izquierda	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	lateral izquierdo 	arriba	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral izquierdo 	abajo	torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral izquierdo 	derecha 	torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	lateral izquierdo 	izquierda	torax abdomen y pelvis	torax abdomen pelvis frontal
+				
+pies primero	supino	arriba	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	supino	abajo	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	supino	derecha 	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	supino	izquierda	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	prono	arriba	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	prono	abajo	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	prono	derecha 	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	prono	izquierda	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral derecho 	arriba	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral derecho 	abajo	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral derecho 	derecha 	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	lateral derecho 	izquierda	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	lateral izquierdo 	arriba	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral izquierdo 	abajo	torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral izquierdo 	derecha 	torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	lateral izquierdo 	izquierda	torax abdomen y pelvis	torax abdomen pelvis frontal
+				
+cabeza primero	supino	arriba	hombro	hombro frontal
+cabeza primero	supino	abajo	hombro	hombro frontal
+cabeza primero	supino	derecha 	hombro	hombro lateral
+cabeza primero	supino	izquierda	hombro	hombro lateral
+cabeza primero	prono	arriba	hombro	hombro frontal
+cabeza primero	prono	abajo	hombro	hombro frontal
+cabeza primero	prono	derecha 	hombro	hombro lateral
+cabeza primero	prono	izquierda	hombro	hombro lateral
+cabeza primero	lateral derecho 	arriba	hombro	hombro lateral
+cabeza primero	lateral derecho 	abajo	hombro	hombro lateral
+cabeza primero	lateral derecho 	derecha 	hombro	hombro frontal
+cabeza primero	lateral derecho 	izquierda	hombro	hombro frontal
+cabeza primero	lateral izquierdo 	arriba	hombro	hombro lateral
+cabeza primero	lateral izquierdo 	abajo	hombro	hombro lateral
+cabeza primero	lateral izquierdo 	derecha 	hombro	hombro frontal
+cabeza primero	lateral izquierdo 	izquierda	hombro	hombro frontal
+				
+cabeza primero	supino	arriba	brazo	brazo frontal
+cabeza primero	supino	abajo	brazo	brazo frontal
+cabeza primero	supino	derecha 	brazo	brazo lateral
+cabeza primero	supino	izquierda	brazo	brazo lateral
+cabeza primero	prono	arriba	brazo	brazo frontal
+cabeza primero	prono	abajo	brazo	brazo frontal
+cabeza primero	prono	derecha 	brazo	brazo lateral
+cabeza primero	prono	izquierda	brazo	brazo lateral
+cabeza primero	lateral derecho 	arriba	brazo	brazo lateral
+cabeza primero	lateral derecho 	abajo	brazo	brazo lateral
+cabeza primero	lateral derecho 	derecha 	brazo	brazo frontal
+cabeza primero	lateral derecho 	izquierda	brazo	brazo frontal
+cabeza primero	lateral izquierdo 	arriba	brazo	brazo lateral
+cabeza primero	lateral izquierdo 	abajo	brazo	brazo lateral
+cabeza primero	lateral izquierdo 	derecha 	brazo	brazo frontal
+cabeza primero	lateral izquierdo 	izquierda	brazo	brazo frontal
+				
+cabeza primero	supino	arriba	codo	codo frontal
+cabeza primero	supino	abajo	codo	codo frontal
+cabeza primero	supino	derecha 	codo	codo lateral
+cabeza primero	supino	izquierda	codo	codo lateral
+cabeza primero	prono	arriba	codo	codo frontal
+cabeza primero	prono	abajo	codo	codo frontal
+cabeza primero	prono	derecha 	codo	codo lateral
+cabeza primero	prono	izquierda	codo	codo lateral
+cabeza primero	lateral derecho 	arriba	codo	codo lateral
+cabeza primero	lateral derecho 	abajo	codo	codo lateral
+cabeza primero	lateral derecho 	derecha 	codo	codo frontal
+cabeza primero	lateral derecho 	izquierda	codo	codo frontal
+cabeza primero	lateral izquierdo 	arriba	codo	codo lateral
+cabeza primero	lateral izquierdo 	abajo	codo	codo lateral
+cabeza primero	lateral izquierdo 	derecha 	codo	codo frontal
+cabeza primero	lateral izquierdo 	izquierda	codo	codo frontal
+				
+cabeza primero	supino	arriba	antebrazo	antebrazo frontal
+cabeza primero	supino	abajo	antebrazo	antebrazo frontal
+cabeza primero	supino	derecha 	antebrazo	antebrazo lateral 
+cabeza primero	supino	izquierda	antebrazo	antebrazo lateral 
+cabeza primero	prono	arriba	antebrazo	antebrazo frontal
+cabeza primero	prono	abajo	antebrazo	antebrazo frontal
+cabeza primero	prono	derecha 	antebrazo	antebrazo lateral 
+cabeza primero	prono	izquierda	antebrazo	antebrazo lateral 
+cabeza primero	lateral derecho 	arriba	antebrazo	antebrazo lateral 
+cabeza primero	lateral derecho 	abajo	antebrazo	antebrazo lateral 
+cabeza primero	lateral derecho 	derecha 	antebrazo	antebrazo frontal
+cabeza primero	lateral derecho 	izquierda	antebrazo	antebrazo frontal
+cabeza primero	lateral izquierdo 	arriba	antebrazo	antebrazo lateral 
+cabeza primero	lateral izquierdo 	abajo	antebrazo	antebrazo lateral 
+cabeza primero	lateral izquierdo 	derecha 	antebrazo	antebrazo frontal
+cabeza primero	lateral izquierdo 	izquierda	antebrazo	antebrazo frontal
+				
+cabeza primero	supino	arriba	muñeca	muñeca frontal
+cabeza primero	supino	abajo	muñeca	mano muñeca frontal
+cabeza primero	supino	derecha 	muñeca	muñeca lateral 
+cabeza primero	supino	izquierda	muñeca	muñeca lateral 
+cabeza primero	prono	arriba	muñeca	muñeca frontal
+cabeza primero	prono	abajo	muñeca	muñeca frontal
+cabeza primero	prono	derecha 	muñeca	muñeca lateral 
+cabeza primero	prono	izquierda	muñeca	muñeca lateral 
+cabeza primero	lateral derecho 	arriba	muñeca	muñeca lateral 
+cabeza primero	lateral derecho 	abajo	muñeca	muñeca lateral 
+cabeza primero	lateral derecho 	derecha 	muñeca	muñeca frontal
+cabeza primero	lateral derecho 	izquierda	muñeca	muñeca frontal
+cabeza primero	lateral izquierdo 	arriba	muñeca	muñeca lateral 
+cabeza primero	lateral izquierdo 	abajo	muñeca	muñeca lateral 
+cabeza primero	lateral izquierdo 	derecha 	muñeca	muñeca frontal
+cabeza primero	lateral izquierdo 	izquierda	muñeca	muñeca frontal
+				
+cabeza primero	supino	arriba	mano	mano frontal
+cabeza primero	supino	abajo	mano	mano frontal
+cabeza primero	supino	derecha 	mano	mano ateral 
+cabeza primero	supino	izquierda	mano	mano lateral 
+cabeza primero	prono	arriba	mano	mano rontal
+cabeza primero	prono	abajo	mano	mano frontal
+cabeza primero	prono	derecha 	mano	mano lateral 
+cabeza primero	prono	izquierda	mano	mano ateral 
+cabeza primero	lateral derecho 	arriba	mano	mano ateral 
+cabeza primero	lateral derecho 	abajo	mano	mano lateral 
+cabeza primero	lateral derecho 	derecha 	mano	mano frontal
+cabeza primero	lateral derecho 	izquierda	mano	mano frontal
+cabeza primero	lateral izquierdo 	arriba	mano	mano lateral 
+cabeza primero	lateral izquierdo 	abajo	mano	mano lateral 
+cabeza primero	lateral izquierdo 	derecha 	mano	mano frontal
+cabeza primero	lateral izquierdo 	izquierda	mano	mano frontal
+				
+pies primero	supino	arriba	cadera	pelvis frontal
+pies primero	supino	abajo	cadera	pelvis frontal
+pies primero	supino	derecha 	cadera	pelvis lateral 
+pies primero	supino	izquierda	cadera	pelvis lateral 
+pies primero	prono	arriba	cadera	pelvis frontal
+pies primero	prono	abajo	cadera	pelvis frontal
+pies primero	prono	derecha 	cadera	pelvis lateral 
+pies primero	prono	izquierda	cadera	pelvis lateral 
+pies primero	lateral derecho 	arriba	cadera	pelvis lateral 
+pies primero	lateral derecho 	abajo	cadera	pelvis lateral 
+pies primero	lateral derecho 	derecha 	cadera	pelvis frontal
+pies primero	lateral derecho 	izquierda	cadera	pelvis frontal
+pies primero	lateral izquierdo 	arriba	cadera	pelvis lateral 
+pies primero	lateral izquierdo 	abajo	cadera	pelvis lateral 
+pies primero	lateral izquierdo 	derecha 	cadera	pelvis frontal
+pies primero	lateral izquierdo 	izquierda	cadera	pelvis frontal
+				
+pies primero	supino	arriba	rodilla	rodilla frontal
+pies primero	supino	abajo	rodilla	rodilla frontal
+pies primero	supino	derecha 	rodilla	rodilla lateral 
+pies primero	supino	izquierda	rodilla	rodilla lateral 
+pies primero	prono	arriba	rodilla	rodilla frontal
+pies primero	prono	abajo	rodilla	rodilla frontal
+pies primero	prono	derecha 	rodilla	rodilla lateral 
+pies primero	prono	izquierda	rodilla	rodilla lateral 
+pies primero	lateral derecho 	arriba	rodilla	rodilla lateral 
+pies primero	lateral derecho 	abajo	rodilla	rodilla lateral 
+pies primero	lateral derecho 	derecha 	rodilla	rodilla frontal
+pies primero	lateral derecho 	izquierda	rodilla	rodilla frontal
+pies primero	lateral izquierdo 	arriba	rodilla	rodilla lateral 
+pies primero	lateral izquierdo 	abajo	rodilla	rodilla lateral 
+pies primero	lateral izquierdo 	derecha 	rodilla	rodilla frontal
+pies primero	lateral izquierdo 	izquierda	rodilla	rodilla frontal
+				
+pies primero	supino	arriba	pierna	pierna frontal
+pies primero	supino	abajo	pierna	pierna frontal
+pies primero	supino	derecha 	pierna	pierna lateral 
+pies primero	supino	izquierda	pierna	pierna lateral 
+pies primero	prono	arriba	pierna	pierna frontal
+pies primero	prono	abajo	pierna	pierna frontal
+pies primero	prono	derecha 	pierna	pierna lateral 
+pies primero	prono	izquierda	pierna	pierna lateral 
+pies primero	lateral derecho 	arriba	pierna	pierna lateral 
+pies primero	lateral derecho 	abajo	pierna	pierna lateral 
+pies primero	lateral derecho 	derecha 	pierna	pierna frontal
+pies primero	lateral derecho 	izquierda	pierna	pierna frontal
+pies primero	lateral izquierdo 	arriba	pierna	pierna lateral 
+pies primero	lateral izquierdo 	abajo	pierna	pierna lateral 
+pies primero	lateral izquierdo 	derecha 	pierna	pierna frontal
+pies primero	lateral izquierdo 	izquierda	pierna	pierna frontal
+				
+pies primero	supino	arriba	tobillo	pie tobillo frontal
+pies primero	supino	abajo	tobillo	pie tobillo frontal
+pies primero	supino	derecha 	tobillo	pie tobillo lateral 
+pies primero	supino	izquierda	tobillo	pie tobillo lateral 
+pies primero	prono	arriba	tobillo	pie tobillo frontal
+pies primero	prono	abajo	tobillo	pie tobillo frontal
+pies primero	prono	derecha 	tobillo	pie tobillo lateral 
+pies primero	prono	izquierda	tobillo	pie tobillo lateral 
+pies primero	lateral derecho 	arriba	tobillo	pie tobillo lateral 
+pies primero	lateral derecho 	abajo	tobillo	pie tobillo lateral 
+pies primero	lateral derecho 	derecha 	tobillo	pie tobillo frontal
+pies primero	lateral derecho 	izquierda	tobillo	pie tobillo frontal
+pies primero	lateral izquierdo 	arriba	tobillo	pie tobillo lateral 
+pies primero	lateral izquierdo 	abajo	tobillo	pie tobillo lateral 
+pies primero	lateral izquierdo 	derecha 	tobillo	pie tobillo frontal
+pies primero	lateral izquierdo 	izquierda	tobillo	pie tobillo frontal
+				
+pies primero	supino	arriba	pie	pie tobillo frontal
+pies primero	supino	abajo	pie	pie tobillo frontal
+pies primero	supino	derecha 	pie	pie tobillo lateral 
+pies primero	supino	izquierda	pie	pie tobillo lateral 
+pies primero	prono	arriba	pie	pie tobillo frontal
+pies primero	prono	abajo	pie	pie tobillo frontal
+pies primero	prono	derecha 	pie	pie tobillo lateral 
+pies primero	prono	izquierda	pie	pie tobillo lateral 
+pies primero	lateral derecho 	arriba	pie	pie tobillo lateral 
+pies primero	lateral derecho 	abajo	pie	pie tobillo lateral 
+pies primero	lateral derecho 	derecha 	pie	pie tobillo frontal
+pies primero	lateral derecho 	izquierda	pie	pie tobillo frontal
+pies primero	lateral izquierdo 	arriba	pie	pie tobillo lateral 
+pies primero	lateral izquierdo 	abajo	pie	pie tobillo lateral 
+pies primero	lateral izquierdo 	derecha 	pie	pie tobillo frontal
+pies primero	lateral izquierdo 	izquierda	pie	pie tobillo frontal
+				
+cabeza primero	supino	arriba	angiotac cerebro	cabeza frontal
+cabeza primero	supino	abajo	angiotac cerebro	cabeza frontal
+cabeza primero	supino	derecha 	angiotac cerebro	cabeza lateral
+cabeza primero	supino	izquierda	angiotac cerebro	cabeza lateral
+cabeza primero	prono	arriba	angiotac cerebro	cabeza frontal
+cabeza primero	prono	abajo	angiotac cerebro	cabeza frontal
+cabeza primero	prono	derecha 	angiotac cerebro	cabeza lateral
+cabeza primero	prono	izquierda	angiotac cerebro	cabeza lateral
+cabeza primero	lateral derecho	arriba	angiotac cerebro	cabeza lateral
+cabeza primero	lateral derecho	abajo	angiotac cerebro	cabeza lateral
+cabeza primero	lateral derecho	derecha 	angiotac cerebro	cabeza frontal
+cabeza primero	lateral derecho	izquierda	angiotac cerebro	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	angiotac cerebro	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	angiotac cerebro	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	angiotac cerebro	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	angiotac cerebro	cabeza frontal
+				
+cabeza primero	supino	arriba	angiotac cuello	cabeza frontal
+cabeza primero	supino	abajo	angiotac cuello	cabeza frontal
+cabeza primero	supino	derecha 	angiotac cuello	cabeza lateral
+cabeza primero	supino	izquierda	angiotac cuello	cabeza lateral
+cabeza primero	prono	arriba	angiotac cuello	cabeza frontal
+cabeza primero	prono	abajo	angiotac cuello	cabeza frontal
+cabeza primero	prono	derecha 	angiotac cuello	cabeza lateral
+cabeza primero	prono	izquierda	angiotac cuello	cabeza lateral
+cabeza primero	lateral derecho	arriba	angiotac cuello	cabeza lateral
+cabeza primero	lateral derecho	abajo	angiotac cuello	cabeza lateral
+cabeza primero	lateral derecho	derecha 	angiotac cuello	cabeza frontal
+cabeza primero	lateral derecho	izquierda	angiotac cuello	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	angiotac cuello	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	angiotac cuello	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	angiotac cuello	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	angiotac cuello	cabeza frontal
+				
+cabeza primero	supino	arriba	angiotac cerebro cuello	cabeza frontal
+cabeza primero	supino	abajo	angiotac cerebro cuello	cabeza frontal
+cabeza primero	supino	derecha 	angiotac cerebro cuello	cabeza lateral
+cabeza primero	supino	izquierda	angiotac cerebro cuello	cabeza lateral
+cabeza primero	prono	arriba	angiotac cerebro cuello	cabeza frontal
+cabeza primero	prono	abajo	angiotac cerebro cuello	cabeza frontal
+cabeza primero	prono	derecha 	angiotac cerebro cuello	cabeza lateral
+cabeza primero	prono	izquierda	angiotac cerebro cuello	cabeza lateral
+cabeza primero	lateral derecho	arriba	angiotac cerebro cuello	cabeza lateral
+cabeza primero	lateral derecho	abajo	angiotac cerebro cuello	cabeza lateral
+cabeza primero	lateral derecho	derecha 	angiotac cerebro cuello	cabeza frontal
+cabeza primero	lateral derecho	izquierda	angiotac cerebro cuello	cabeza frontal
+cabeza primero	lateral izquerdo	arriba	angiotac cerebro cuello	cabeza lateral
+cabeza primero	lateral izquerdo	abajo	angiotac cerebro cuello	cabeza lateral
+cabeza primero	lateral izquerdo	derecha 	angiotac cerebro cuello	cabeza frontal
+cabeza primero	lateral izquerdo	izquierda	angiotac cerebro cuello	cabeza frontal
+				
+cabeza primero	supino	arriba	angiotac torax	torax frontal
+cabeza primero	supino	abajo	angiotac torax	torax frontal
+cabeza primero	supino	derecha 	angiotac torax	torax lateral
+cabeza primero	supino	izquierda	angiotac torax	torax lateral
+cabeza primero	prono	arriba	angiotac torax	torax frontal
+cabeza primero	prono	abajo	angiotac torax	torax frontal
+cabeza primero	prono	derecha 	angiotac torax	torax lateral
+cabeza primero	prono	izquierda	angiotac torax	torax lateral
+cabeza primero	lateral derecho 	arriba	angiotac torax	torax lateral
+cabeza primero	lateral derecho 	abajo	angiotac torax	torax lateral
+cabeza primero	lateral derecho 	derecha 	angiotac torax	torax frontal
+cabeza primero	lateral derecho 	izquierda	angiotac torax	torax frontal
+cabeza primero	lateral izquierdo 	arriba	angiotac torax	torax lateral
+cabeza primero	lateral izquierdo 	abajo	angiotac torax	torax lateral
+cabeza primero	lateral izquierdo 	derecha 	angiotac torax	torax frontal
+cabeza primero	lateral izquierdo 	izquierda	angiotac torax	torax frontal
+				
+pies primero	supino	arriba	angiotac torax	torax frontal
+pies primero	supino	abajo	angiotac torax	torax frontal
+pies primero	supino	derecha 	angiotac torax	torax lateral
+pies primero	supino	izquierda	angiotac torax	torax lateral
+pies primero	prono	arriba	angiotac torax	torax frontal
+pies primero	prono	abajo	angiotac torax	torax frontal
+pies primero	prono	derecha 	angiotac torax	torax lateral
+pies primero	prono	izquierda	angiotac torax	torax lateral
+pies primero	lateral derecho 	arriba	angiotac torax	torax lateral
+pies primero	lateral derecho 	abajo	angiotac torax	torax lateral
+pies primero	lateral derecho 	derecha 	angiotac torax	torax frontal
+pies primero	lateral derecho 	izquierda	angiotac torax	torax frontal
+pies primero	lateral izquierdo 	arriba	angiotac torax	torax lateral
+pies primero	lateral izquierdo 	abajo	angiotac torax	torax lateral
+pies primero	lateral izquierdo 	derecha 	angiotac torax	torax frontal
+pies primero	lateral izquierdo 	izquierda	angiotac torax	torax frontal
+				
+cabeza primero	supino	arriba	angiotac abdomen	abdomen frontal
+cabeza primero	supino	abajo	angiotac abdomen	abdomen frontal
+cabeza primero	supino	derecha 	angiotac abdomen	abdomen lateral
+cabeza primero	supino	izquierda	angiotac abdomen	abdomen lateral
+cabeza primero	prono	arriba	angiotac abdomen	abdomen frontal
+cabeza primero	prono	abajo	angiotac abdomen	abdomen frontal
+cabeza primero	prono	derecha 	angiotac abdomen	abdomen ateral
+cabeza primero	prono	izquierda	angiotac abdomen	abdomen lateral
+cabeza primero	lateral derecho 	arriba	angiotac abdomen	abdomen lateral
+cabeza primero	lateral derecho 	abajo	angiotac abdomen	abdomen lateral
+cabeza primero	lateral derecho 	derecha 	angiotac abdomen	abdomen frontal
+cabeza primero	lateral derecho 	izquierda	angiotac abdomen	abdomen frontal
+cabeza primero	lateral izquierdo 	arriba	angiotac abdomen	abdomen lateral
+cabeza primero	lateral izquierdo 	abajo	angiotac abdomen	abdomen lateral
+cabeza primero	lateral izquierdo 	derecha 	angiotac abdomen	abdomen frontal
+cabeza primero	lateral izquierdo 	izquierda	angiotac abdomen	abdomen frontal
+				
+pies primero	supino	arriba	angiotac abdomen	abdomen frontal
+pies primero	supino	abajo	angiotac abdomen	abdomen frontal
+pies primero	supino	derecha 	angiotac abdomen	abdomen lateral
+pies primero	supino	izquierda	angiotac abdomen	abdomen lateral
+pies primero	prono	arriba	angiotac abdomen	abdomen frontal
+pies primero	prono	abajo	angiotac abdomen	abdomen  frontal
+pies primero	prono	derecha 	angiotac abdomen	abdomen lateral
+pies primero	prono	izquierda	angiotac abdomen	abdomen ateral
+pies primero	lateral derecho 	arriba	angiotac abdomen	abdomen ateral
+pies primero	lateral derecho 	abajo	angiotac abdomen	abdomen lateral
+pies primero	lateral derecho 	derecha 	angiotac abdomen	abdomen  frontal
+pies primero	lateral derecho 	izquierda	angiotac abdomen	abdomen frontal
+pies primero	lateral izquierdo 	arriba	angiotac abdomen	abdomen lateral
+pies primero	lateral izquierdo 	abajo	angiotac abdomen	abdomen lateral
+pies primero	lateral izquierdo 	derecha 	angiotac abdomen	abdomen rontal
+pies primero	lateral izquierdo 	izquierda	angiotac abdomen	abdomen frontal
+				
+cabeza primero	supino	arriba	angiotac abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	supino	abajo	angiotac abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	supino	derecha 	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	supino	izquierda	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	prono	arriba	angiotac abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	prono	abajo	angiotac abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	prono	derecha 	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	prono	izquierda	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral derecho 	arriba	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral derecho 	abajo	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral derecho 	derecha 	angiotac abdomen y pelvis 	abdomenpelvis  frontal
+cabeza primero	lateral derecho 	izquierda	angiotac abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	lateral izquierdo 	arriba	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral izquierdo 	abajo	angiotac abdomen y pelvis 	abdomenpelvis lateral
+cabeza primero	lateral izquierdo 	derecha 	angiotac abdomen y pelvis 	abdomenpelvis frontal
+cabeza primero	lateral izquierdo 	izquierda	angiotac abdomen y pelvis 	abdomenpelvis frontal
+				
+pies primero	supino	arriba	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	supino	abajo	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	supino	derecha 	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	supino	izquierda	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	prono	arriba	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	prono	abajo	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	prono	derecha 	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	prono	izquierda	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral derecho 	arriba	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral derecho 	abajo	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral derecho 	derecha 	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	lateral derecho 	izquierda	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	lateral izquierdo 	arriba	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral izquierdo 	abajo	angiotac abdomen y pelvis 	abdomenpelvis lateral
+pies primero	lateral izquierdo 	derecha 	angiotac abdomen y pelvis 	abdomenpelvis frontal
+pies primero	lateral izquierdo 	izquierda	angiotac abdomen y pelvis 	abdomenpelvis frontal
+				
+cabeza primero	supino	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	supino	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	supino	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	supino	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	prono	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	prono	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	prono	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	prono	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral derecho 	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral derecho 	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral derecho 	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	lateral derecho 	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	lateral izquierdo 	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral izquierdo 	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+cabeza primero	lateral izquierdo 	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+cabeza primero	lateral izquierdo 	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+				
+pies primero	supino	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	supino	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	supino	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	supino	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	prono	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	prono	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	prono	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	prono	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral derecho 	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral derecho 	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral derecho 	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	lateral derecho 	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	lateral izquierdo 	arriba	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral izquierdo 	abajo	angiotac torax abdomen y pelvis	torax abdomen pelvis lateral
+pies primero	lateral izquierdo 	derecha 	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+pies primero	lateral izquierdo 	izquierda	angiotac torax abdomen y pelvis	torax abdomen pelvis frontal
+				
+cabeza primero	supino	arriba	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	supino	abajo	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	supino	derecha 	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	supino	izquierda	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	prono	arriba	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	prono	abajo	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	prono	derecha 	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	prono	izquierda	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	lateral derecho 	arriba	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	lateral derecho 	abajo	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	lateral derecho 	derecha 	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	lateral derecho 	izquierda	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	lateral izquierdo 	arriba	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	lateral izquierdo 	abajo	angiotac extremidad superior derecha	angiotac extremidad superior derecha lateral 
+cabeza primero	lateral izquierdo 	derecha 	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+cabeza primero	lateral izquierdo 	izquierda	angiotac extremidad superior derecha	angiotac extremidad superior derecha frontal
+				
+cabeza primero	supino	arriba	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo frontal
+cabeza primero	supino	abajo	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo frontal
+cabeza primero	supino	derecha 	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	supino	izquierda	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	prono	arriba	angiotac extremidad superior izquierda	 angiotac extremidad superior izquierdo frontal
+cabeza primero	prono	abajo	angiotac extremidad superior izquierda	fangiotac extremidad superior izquierdo frontal
+cabeza primero	prono	derecha 	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	prono	izquierda	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	lateral derecho 	arriba	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	lateral derecho 	abajo	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	lateral derecho 	derecha 	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo frontal
+cabeza primero	lateral derecho 	izquierda	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo frontal
+cabeza primero	lateral izquierdo 	arriba	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	lateral izquierdo 	abajo	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo lateral 
+cabeza primero	lateral izquierdo 	derecha 	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo frontal
+cabeza primero	lateral izquierdo 	izquierda	angiotac extremidad superior izquierda	angiotac extremidad superior izquierdo frontal
+				
+pies primero	supino	arriba	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	supino	abajo	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	supino	derecha 	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	supino	izquierda	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	prono	arriba	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	prono	abajo	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	prono	derecha 	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	prono	izquierda	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	lateral derecho 	arriba	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	lateral derecho 	abajo	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	lateral derecho 	derecha 	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	lateral derecho 	izquierda	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	lateral izquierdo 	arriba	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	lateral izquierdo 	abajo	angiotac extremidad inferior	angiotac extremidad inferior lateral 
+pies primero	lateral izquierdo 	derecha 	angiotac extremidad inferior	angiotac extremidad inferior frontal
+pies primero	lateral izquierdo 	izquierda	angiotac extremidad inferior	angiotac extremidad inferior frontal"""
 
 def cargar_reglas_rx_desde_tsv(tsv_texto):
     reglas = {}
