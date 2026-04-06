@@ -2485,36 +2485,6 @@ def extraer_primer_numero(texto):
     except Exception:
         return None
 
-def formatear_numero_colimacion(valor):
-    if valor is None:
-        return ""
-    try:
-        valor = float(valor)
-    except Exception:
-        return ""
-
-    if valor.is_integer():
-        return str(int(valor))
-
-    texto = f"{valor:.3f}".rstrip("0").rstrip(".")
-    return texto.replace(".", ",")
-
-def calcular_colimacion_desde_matriz(valor_matriz):
-    texto_mat = str(valor_matriz).strip().lower().replace(",", ".")
-    if "x" not in texto_mat:
-        return ""
-
-    partes = re.split(r"\s*x\s*", texto_mat)
-    if len(partes) != 2:
-        return ""
-
-    try:
-        total = float(partes[0]) * float(partes[1])
-    except Exception:
-        return ""
-
-    return formatear_numero_colimacion(total)
-
 def obtener_colimacion_total_mm(numero=1):
     pref = adq_prefijo(numero)
     valor_colimacion = st.session_state.get(f"{pref}_colimacion", "")
@@ -2592,7 +2562,7 @@ def render_calculos_exploracion(numero=1):
     colimacion_txt = f"{colimacion_total_mm:.3f} mm" if colimacion_total_mm is not None else "No disponible"
     st.caption(
         f"Protocolo de referencia: {protocolo_txt} · Cobertura promedio entre Inicio y Fin: {cobertura_txt} · "
-        f"Colimación total usada para el cálculo: {colimacion_txt}"
+        f"Cobertura total usada para el cálculo: {colimacion_txt}"
     )
 
 def render_bloque_adquisicion(numero=1):
@@ -2627,11 +2597,9 @@ def render_bloque_adquisicion(numero=1):
         if f"_{pref}_matriz_detectores" in st.session_state:
             st.session_state[f"_{pref}_matriz_detectores"] = "Seleccionar"
 
-    st.session_state[f"{pref}_colimacion"] = calcular_colimacion_desde_matriz(
+    st.session_state[f"{pref}_colimacion"] = calcular_cobertura_desde_matriz(
         st.session_state.get(f"{pref}_matriz_detectores", "Seleccionar")
     )
-    if f"_{pref}_colimacion" in st.session_state:
-        st.session_state[f"_{pref}_colimacion"] = st.session_state[f"{pref}_colimacion"]
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -2652,6 +2620,9 @@ def render_bloque_adquisicion(numero=1):
             f"{pref}_tipo_exploracion"
         )
         persistent_selectbox("Matriz de detectores", opciones_matriz, f"{pref}_matriz_detectores")
+        st.session_state[f"{pref}_colimacion"] = calcular_cobertura_desde_matriz(
+            st.session_state.get(f"{pref}_matriz_detectores", "Seleccionar")
+        )
 
     with col2:
         persistent_selectbox(
@@ -2711,7 +2682,7 @@ def render_bloque_adquisicion(numero=1):
             ["Seleccionar", "Small 200", "Head 350", "Large 500"],
             f"{pref}_sfov"
         )
-        st.text_input("Colimación (mm)", value=st.session_state.get(f"{pref}_colimacion", ""), key=f"display_{pref}_colimacion", disabled=True)
+        st.text_input("Cobertura (mm)", value=st.session_state.get(f"{pref}_colimacion", ""), key=f"display_{pref}_colimacion", disabled=True)
         persistent_text_input("Inicio de adquisición", f"{pref}_inicio_adquisicion")
         persistent_text_input("Fin de adquisición", f"{pref}_fin_adquisicion")
 
@@ -2775,7 +2746,7 @@ def render_resumen_adquisicion(numero=1, mostrar_topo2=False):
     st.write(f"**Tipo de exploración:** {st.session_state[f'{pref}_tipo_exploracion']}")
     st.write(f"**Espesor (mm):** {st.session_state[f'{pref}_espesor']}")
     st.write(f"**Matriz de detectores:** {st.session_state[f'{pref}_matriz_detectores']}")
-    st.write(f"**Colimación (mm):** {st.session_state[f'{pref}_colimacion']}")
+    st.write(f"**Cobertura (mm):** {st.session_state[f'{pref}_colimacion']}")
     st.write(f"**Inicio de adquisición:** {st.session_state[f'{pref}_inicio_adquisicion']}")
     st.write(f"**Fin de adquisición:** {st.session_state[f'{pref}_fin_adquisicion']}")
     st.write(f"**Giro del tubo:** {st.session_state[f'{pref}_giro_tubo']}")
