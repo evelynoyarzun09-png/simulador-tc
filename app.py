@@ -80,14 +80,19 @@ DEFAULTS = {
     "topo2_rx_iniciado": False,
 
     # Adquisición
+    "adq_fase_adquisicion": "Seleccionar",
+    "adq_instruccion_voz": "Seleccionar",
+    "adq_delay": "Seleccionar",
+    "adq_tipo_exploracion": "Seleccionar",
+    "adq_espesor": "Seleccionar",
+    "adq_matriz_detectores": "Seleccionar",
+    "adq_colimacion": "",
+    "adq_inicio_adquisicion": "",
+    "adq_fin_adquisicion": "",
+    "adq_giro_tubo": "Seleccionar",
     "adq_kvp": "Seleccionar",
     "adq_mas": 100,
     "adq_pitch": 1.0,
-    "adq_rotacion": 0.5,
-    "adq_colimacion": "",
-    "adq_espesor_corte": 1.0,
-    "adq_longitud": 30.0,
-    "adq_modo": "Seleccionar",
     "adq_topo1_limite_superior": 15,
     "adq_topo1_limite_inferior": 85,
     "adq_topo2_limite_superior": 15,
@@ -2202,41 +2207,89 @@ elif seccion == "Adquisición":
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Parámetros de adquisición</div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        persistent_selectbox("kVp", ["Seleccionar", 80, 100, 120, 140], "adq_kvp")
-        persistent_number_input("mAs", "adq_mas", min_value=1)
-        persistent_number_input("Pitch", "adq_pitch", min_value=0.1, step=0.1)
-        persistent_number_input("Tiempo de rotación (s)", "adq_rotacion", min_value=0.1, step=0.1)
+    opciones_delay = [
+        "Seleccionar", "Bolus tracking", "Bolus test", "0 sg", "5 sg", "10 sg", "15 sg", "20 sg",
+        "25 sg", "30 sg", "35 sg", "40 sg", "45 sg", "50 sg", "55 sg", "1 min", "2 min", "3 min",
+        "4 min", "5 min", "6 min", "7 min", "8 min", "9 min", "10 min", "11 min", "12 min",
+        "13 min", "14 min", "15 min", "16 min", "17 min", "18 min", "19 min", "20 min"
+    ]
 
-    with col2:
-        persistent_text_input("Colimación", "adq_colimacion")
-        persistent_number_input("Espesor de corte (mm)", "adq_espesor_corte", min_value=0.1, step=0.1)
-        persistent_number_input("Longitud de barrido (cm)", "adq_longitud", min_value=1.0)
-        persistent_selectbox("Modo de adquisición", ["Seleccionar", "Helicoidal", "Secuencial"], "adq_modo")
+    persistent_selectbox(
+        "Fase de adquisición",
+        ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
+        "adq_fase_adquisicion"
+    )
+    persistent_selectbox(
+        "Instrucción de voz",
+        ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
+        "adq_instruccion_voz"
+    )
+    persistent_selectbox("Delay", opciones_delay, "adq_delay")
+    persistent_selectbox(
+        "Tipo de exploración",
+        ["Seleccionar", "Helicoidal", "Secuencial"],
+        "adq_tipo_exploracion"
+    )
+    persistent_selectbox(
+        "Espesor",
+        ["Seleccionar", "0,625", "1,25", "2,5", "5"],
+        "adq_espesor"
+    )
+
+    tipo_exploracion = st.session_state.get("adq_tipo_exploracion", "Seleccionar")
+    if tipo_exploracion == "Helicoidal":
+        opciones_matriz = ["Seleccionar", "64 x 0,625", "32 x 1,25", "16 x 0,625"]
+    elif tipo_exploracion == "Secuencial":
+        opciones_matriz = ["Seleccionar", "2 x 0,625", "1 x 1,25", "32 x 1,25", "64 x 0,625"]
+    else:
+        opciones_matriz = ["Seleccionar"]
+        st.info("Primero selecciona el tipo de exploración para habilitar la matriz de detectores.")
+
+    if st.session_state.get("adq_matriz_detectores") not in opciones_matriz:
+        st.session_state["adq_matriz_detectores"] = "Seleccionar"
+        st.session_state["_adq_matriz_detectores"] = "Seleccionar"
+
+    persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
+    persistent_text_input("Colimación", "adq_colimacion")
+    persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
+    persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
+    persistent_selectbox(
+        "Giro del tubo",
+        ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
+        "adq_giro_tubo"
+    )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
     adquisicion_completa = all([
-        seleccion_completa(st.session_state["adq_kvp"]),
+        seleccion_completa(st.session_state["adq_fase_adquisicion"]),
+        seleccion_completa(st.session_state["adq_instruccion_voz"]),
+        seleccion_completa(st.session_state["adq_delay"]),
+        seleccion_completa(st.session_state["adq_tipo_exploracion"]),
+        seleccion_completa(st.session_state["adq_espesor"]),
+        seleccion_completa(st.session_state["adq_matriz_detectores"]),
         texto_completo(st.session_state["adq_colimacion"]),
-        seleccion_completa(st.session_state["adq_modo"]),
+        texto_completo(st.session_state["adq_inicio_adquisicion"]),
+        texto_completo(st.session_state["adq_fin_adquisicion"]),
+        seleccion_completa(st.session_state["adq_giro_tubo"]),
     ])
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-    st.write(f"**kVp:** {st.session_state['adq_kvp']}")
-    st.write(f"**mAs:** {st.session_state['adq_mas']}")
-    st.write(f"**Pitch:** {st.session_state['adq_pitch']}")
-    st.write(f"**Tiempo de rotación:** {st.session_state['adq_rotacion']} s")
+    st.write(f"**Fase de adquisición:** {st.session_state['adq_fase_adquisicion']}")
+    st.write(f"**Instrucción de voz:** {st.session_state['adq_instruccion_voz']}")
+    st.write(f"**Delay:** {st.session_state['adq_delay']}")
+    st.write(f"**Tipo de exploración:** {st.session_state['adq_tipo_exploracion']}")
+    st.write(f"**Espesor:** {st.session_state['adq_espesor']}")
+    st.write(f"**Matriz de detectores:** {st.session_state['adq_matriz_detectores']}")
     st.write(f"**Colimación:** {st.session_state['adq_colimacion']}")
-    st.write(f"**Espesor de corte:** {st.session_state['adq_espesor_corte']} mm")
-    st.write(f"**Longitud:** {st.session_state['adq_longitud']} cm")
-    st.write(f"**Modo:** {st.session_state['adq_modo']}")
-    st.write(f"**Topograma 1:** límite superior {st.session_state['adq_topo1_limite_superior']}% · límite inferior {st.session_state['adq_topo1_limite_inferior']}%")
+    st.write(f"**Inicio de adquisición:** {st.session_state['adq_inicio_adquisicion']}")
+    st.write(f"**Fin de adquisición:** {st.session_state['adq_fin_adquisicion']}")
+    st.write(f"**Giro del tubo:** {st.session_state['adq_giro_tubo']}")
+    st.write(f"**Topograma 1:** inicio {st.session_state['adq_topo1_limite_superior']}% · fin {st.session_state['adq_topo1_limite_inferior']}%")
     if mostrar_topo2:
-        st.write(f"**Topograma 2:** límite superior {st.session_state['adq_topo2_limite_superior']}% · límite inferior {st.session_state['adq_topo2_limite_inferior']}%")
+        st.write(f"**Topograma 2:** inicio {st.session_state['adq_topo2_limite_superior']}% · fin {st.session_state['adq_topo2_limite_inferior']}%")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
