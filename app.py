@@ -106,12 +106,14 @@ DEFAULTS = {
     "adq_topo2_limite_inferior": 85,
 
     # Reconstrucción
+    "recon_fase": "Seleccionar",
+    "recon_tipo": "Seleccionar",
+    "recon_intensidad": "Seleccionar",
     "recon_kernel": "Seleccionar",
-    "recon_grosor": 1.0,
-    "recon_intervalo": 0.5,
-    "recon_planos": [],
-    "recon_algoritmo": "Seleccionar",
-    "recon_ventana": "Seleccionar",
+    "recon_nivel_ventana": "Seleccionar",
+    "recon_ancho_ventana": "Seleccionar",
+    "recon_grosor": "Seleccionar",
+    "recon_incremento": "Seleccionar",
 
     # Reformación
     "reform_tipo": [],
@@ -3135,33 +3137,69 @@ elif seccion == "Reconstrucción":
         if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
+    fases_recon = ["Seleccionar", "Sin contraste", "Angiográfica", "Venosa o portal", "Tardía"]
+    tipos_recon = ["Seleccionar", "Retroproyección filtrada", "Safire", "Asir"]
+    intensidades_safire = ["Seleccionar", "1", "2", "3", "4", "5"]
+    intensidades_asir = ["Seleccionar"] + [f"{i}%" for i in range(10, 101, 10)]
+    kernels_recon = ["Seleccionar", "Suave 20f", "Standar 30f", "Definidon 70f", "Ultradefinido 80f"]
+    niveles_ventana = ["Seleccionar"] + [str(i) for i in range(-1000, 1001, 50)]
+    anchos_ventana = ["Seleccionar"] + [str(i) for i in range(50, 4001, 50)]
+
+    def lista_mm_hasta_6():
+        valores = ["Seleccionar"]
+        actual = 0.0
+        while actual <= 6.0001:
+            if abs(actual - round(actual)) < 1e-9:
+                valores.append(str(int(round(actual))))
+            else:
+                valores.append(f"{actual:.2f}".replace('.', ','))
+            actual += 0.25
+        return valores
+
+    opciones_mm = lista_mm_hasta_6()
+
     col1, col2 = st.columns(2)
     with col1:
-        persistent_selectbox("Kernel / filtro", ["Seleccionar", "Blando", "Estándar", "Óseo", "Pulmonar", "Otro"], "recon_kernel")
-        persistent_number_input("Grosor de reconstrucción (mm)", "recon_grosor", min_value=0.1, step=0.1)
-        persistent_number_input("Intervalo de reconstrucción (mm)", "recon_intervalo", min_value=0.1, step=0.1)
+        persistent_selectbox("Fase a reconstruir", fases_recon, "recon_fase")
+        persistent_selectbox("Tipo de reconstrucción", tipos_recon, "recon_tipo")
+        if st.session_state["recon_tipo"] == "Safire":
+            persistent_selectbox("Intensidad Safire", intensidades_safire, "recon_intensidad")
+        elif st.session_state["recon_tipo"] == "Asir":
+            persistent_selectbox("Intensidad Asir", intensidades_asir, "recon_intensidad")
+        else:
+            st.session_state["recon_intensidad"] = "Seleccionar"
+        persistent_selectbox("Filtro kernel", kernels_recon, "recon_kernel")
 
     with col2:
-        persistent_multiselect("Planos reconstruidos", ["Axial", "Coronal", "Sagital", "Oblicuo"], "recon_planos")
-        persistent_selectbox("Algoritmo", ["Seleccionar", "FBP", "Iterativa", "Otro"], "recon_algoritmo")
-        persistent_selectbox("Ventana principal", ["Seleccionar", "Partes blandas", "Pulmón", "Ósea", "Otra"], "recon_ventana")
+        persistent_selectbox("Nivel de ventana", niveles_ventana, "recon_nivel_ventana")
+        persistent_selectbox("Ancho de ventana", anchos_ventana, "recon_ancho_ventana")
+        persistent_selectbox("Grosor de corte", opciones_mm, "recon_grosor")
+        persistent_selectbox("Incremento", opciones_mm, "recon_incremento")
 
+    intensidad_requerida = st.session_state["recon_tipo"] in ["Safire", "Asir"]
     reconstruccion_completa = all([
+        seleccion_completa(st.session_state["recon_fase"]),
+        seleccion_completa(st.session_state["recon_tipo"]),
+        (seleccion_completa(st.session_state["recon_intensidad"]) if intensidad_requerida else True),
         seleccion_completa(st.session_state["recon_kernel"]),
-        lista_completa(st.session_state["recon_planos"]),
-        seleccion_completa(st.session_state["recon_algoritmo"]),
-        seleccion_completa(st.session_state["recon_ventana"]),
+        seleccion_completa(st.session_state["recon_nivel_ventana"]),
+        seleccion_completa(st.session_state["recon_ancho_ventana"]),
+        seleccion_completa(st.session_state["recon_grosor"]),
+        seleccion_completa(st.session_state["recon_incremento"]),
     ])
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-    st.write(f"**Kernel:** {st.session_state['recon_kernel']}")
-    st.write(f"**Grosor:** {st.session_state['recon_grosor']} mm")
-    st.write(f"**Intervalo:** {st.session_state['recon_intervalo']} mm")
-    st.write(f"**Planos:** {', '.join(st.session_state['recon_planos']) if st.session_state['recon_planos'] else 'Ninguno'}")
-    st.write(f"**Algoritmo:** {st.session_state['recon_algoritmo']}")
-    st.write(f"**Ventana:** {st.session_state['recon_ventana']}")
+    st.write(f"**Fase a reconstruir:** {st.session_state['recon_fase']}")
+    st.write(f"**Tipo de reconstrucción:** {st.session_state['recon_tipo']}")
+    if intensidad_requerida:
+        st.write(f"**Intensidad:** {st.session_state['recon_intensidad']}")
+    st.write(f"**Filtro kernel:** {st.session_state['recon_kernel']}")
+    st.write(f"**Nivel de ventana:** {st.session_state['recon_nivel_ventana']}")
+    st.write(f"**Ancho de ventana:** {st.session_state['recon_ancho_ventana']}")
+    st.write(f"**Grosor de corte:** {st.session_state['recon_grosor']} mm")
+    st.write(f"**Incremento:** {st.session_state['recon_incremento']} mm")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
