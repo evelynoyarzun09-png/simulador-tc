@@ -2823,6 +2823,7 @@ elif seccion == "Adquisición":
         if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
+    mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
 
     adquisiciones_completas = []
     adquisiciones_completas.append(render_bloque_adquisicion(1))
