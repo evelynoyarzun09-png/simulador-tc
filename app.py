@@ -2,6 +2,7 @@ import streamlit as st
 from pathlib import Path
 from datetime import date
 import hmac
+import re
 import openpyxl
 import base64
 import streamlit.components.v1 as components
@@ -2355,6 +2356,212 @@ def render_topogramas_adquisicion(numero=1):
                 f"tubo {str(st.session_state.get(f'{prefijo_topo}_posicion_tubo', 'Seleccionar')).lower()}"
             )
 
+
+PROTOCOLO_LONGITUD_REFERENCIA_CM = {
+    "cerebro": 16.0,
+    "cavidades perinasales": 12.0,
+    "maxilofacial": 18.0,
+    "orbitas": 10.0,
+    "oidos": 8.0,
+    "cuello": 20.0,
+    "columna cervical": 18.0,
+    "torax": 35.0,
+    "abdomen": 30.0,
+    "pelvis": 22.0,
+    "abdomen y pelvis": 45.0,
+    "torax abdomen y pelvis": 65.0,
+    "pielotac": 32.0,
+    "columna dorsal": 30.0,
+    "columna lumbar": 25.0,
+    "hombro": 16.0,
+    "brazo": 28.0,
+    "codo": 12.0,
+    "antebrazo": 24.0,
+    "muneca": 10.0,
+    "mano": 12.0,
+    "cadera": 18.0,
+    "rodilla": 14.0,
+    "pierna": 32.0,
+    "tobillo": 10.0,
+    "pie": 14.0,
+    "angiotac cerebro": 16.0,
+    "angiotac cuello": 20.0,
+    "angiotac cerebro cuello": 32.0,
+    "angiotac torax": 35.0,
+    "angiotac abdomen": 30.0,
+    "angiotac abdomen y pelvis": 45.0,
+    "angiotac torax abdomen y pelvis": 65.0,
+    "angiotac extremidad superior derecha": 70.0,
+    "angiotac extremidad superior izquierda": 70.0,
+    "angiotac extremidad inferior": 95.0,
+}
+
+def normalizar_texto_calculo(valor):
+    return (
+        str(valor)
+        .strip()
+        .lower()
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("í", "i")
+        .replace("ó", "o")
+        .replace("ú", "u")
+        .replace("ñ", "n")
+    )
+
+def obtener_protocolo_referencia_adquisicion():
+    protocolo_1 = st.session_state.get("topo_region", "Seleccionar")
+    if seleccion_completa(protocolo_1):
+        return protocolo_1
+    protocolo_2 = st.session_state.get("topo2_region", "Seleccionar")
+    if seleccion_completa(protocolo_2):
+        return protocolo_2
+    return "Seleccionar"
+
+def obtener_longitud_referencia_cm(protocolo):
+    if not seleccion_completa(protocolo):
+        return None
+    protocolo_norm = normalizar_texto_calculo(protocolo)
+    if protocolo_norm in PROTOCOLO_LONGITUD_REFERENCIA_CM:
+        return PROTOCOLO_LONGITUD_REFERENCIA_CM[protocolo_norm]
+    for clave, valor in PROTOCOLO_LONGITUD_REFERENCIA_CM.items():
+        if clave in protocolo_norm:
+            return valor
+    return None
+
+def obtener_limites_adquisicion(numero=1):
+    pref = adq_prefijo(numero)
+    if numero == 1:
+        limites = [
+            (st.session_state.get("adq_topo1_limite_superior", 15), st.session_state.get("adq_topo1_limite_inferior", 85))
+        ]
+        if st.session_state.get("mostrar_topo2", False):
+            limites.append(
+                (st.session_state.get("adq_topo2_limite_superior", 15), st.session_state.get("adq_topo2_limite_inferior", 85))
+            )
+        return limites
+    limites = [
+        (st.session_state.get(f"{pref}_topo1_limite_superior", 15), st.session_state.get(f"{pref}_topo1_limite_inferior", 85))
+    ]
+    if st.session_state.get("mostrar_topo2", False):
+        limites.append(
+            (st.session_state.get(f"{pref}_topo2_limite_superior", 15), st.session_state.get(f"{pref}_topo2_limite_inferior", 85))
+        )
+    return limites
+
+def calcular_largo_adquisicion_cm(numero=1):
+    protocolo = obtener_protocolo_referencia_adquisicion()
+    longitud_referencia_cm = obtener_longitud_referencia_cm(protocolo)
+    if longitud_referencia_cm is None:
+        return None, protocolo, None, None
+
+    coberturas = []
+    for limite_superior, limite_inferior in obtener_limites_adquisicion(numero):
+        try:
+            sup = float(limite_superior)
+            inf = float(limite_inferior)
+        except Exception:
+            continue
+        if inf > sup:
+            coberturas.append((inf - sup) / 100.0)
+
+    if not coberturas:
+        return None, protocolo, longitud_referencia_cm, None
+
+    cobertura_promedio = sum(coberturas) / len(coberturas)
+    largo_cm = longitud_referencia_cm * cobertura_promedio
+    return round(largo_cm, 2), protocolo, longitud_referencia_cm, cobertura_promedio
+
+def extraer_primer_numero(texto):
+    if texto is None:
+        return None
+    texto = str(texto).strip().lower().replace(",", ".")
+    coincidencia = re.search(r"\d+(?:\.\d+)?", texto)
+    if not coincidencia:
+        return None
+    try:
+        return float(coincidencia.group(0))
+    except Exception:
+        return None
+
+def obtener_colimacion_total_mm(numero=1):
+    pref = adq_prefijo(numero)
+    valor_colimacion = st.session_state.get(f"{pref}_colimacion", "")
+    valor_matriz = st.session_state.get(f"{pref}_matriz_detectores", "Seleccionar")
+
+    texto_col = str(valor_colimacion).strip().lower().replace(",", ".")
+    if "x" in texto_col:
+        partes = re.split(r"\s*x\s*", texto_col)
+        if len(partes) == 2:
+            try:
+                return round(float(partes[0]) * float(partes[1]), 3)
+            except Exception:
+                pass
+
+    numero_col = extraer_primer_numero(valor_colimacion)
+    if numero_col is not None:
+        return numero_col
+
+    texto_mat = str(valor_matriz).strip().lower().replace(",", ".")
+    if "x" in texto_mat:
+        partes = re.split(r"\s*x\s*", texto_mat)
+        if len(partes) == 2:
+            try:
+                return round(float(partes[0]) * float(partes[1]), 3)
+            except Exception:
+                return None
+    return None
+
+def calcular_tiempo_exploracion_seg(numero=1):
+    pref = adq_prefijo(numero)
+    tipo_exploracion = st.session_state.get(f"{pref}_tipo_exploracion", "Seleccionar")
+    if tipo_exploracion != "Helicoidal":
+        return None, "no_helicoidal", None
+
+    largo_cm, protocolo, longitud_referencia_cm, cobertura_promedio = calcular_largo_adquisicion_cm(numero)
+    pitch = extraer_primer_numero(st.session_state.get(f"{pref}_pitch"))
+    giro = extraer_primer_numero(st.session_state.get(f"{pref}_giro_tubo"))
+    colimacion_total_mm = obtener_colimacion_total_mm(numero)
+
+    if largo_cm is None or pitch is None or giro is None or colimacion_total_mm in [None, 0]:
+        return None, "incompleto", colimacion_total_mm
+
+    largo_mm = largo_cm * 10.0
+    tiempo_seg = (largo_mm * giro) / (pitch * colimacion_total_mm)
+    return round(tiempo_seg, 2), "ok", colimacion_total_mm
+
+def render_calculos_exploracion(numero=1):
+    largo_cm, protocolo, longitud_referencia_cm, cobertura_promedio = calcular_largo_adquisicion_cm(numero)
+    tiempo_seg, estado_tiempo, colimacion_total_mm = calcular_tiempo_exploracion_seg(numero)
+
+    st.markdown("<div style='height:0.3rem;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Cálculo automático</div>', unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        valor_largo = f"{largo_cm:.2f} cm" if largo_cm is not None else "No disponible"
+        st.info(f"**LARGO DE ADQUISICIÓN**\n\n{valor_largo}")
+    with c2:
+        if estado_tiempo == "ok":
+            valor_tiempo = f"{tiempo_seg:.2f} s"
+        elif estado_tiempo == "no_helicoidal":
+            valor_tiempo = "No aplica en secuencial"
+        else:
+            valor_tiempo = "Completa pitch / giro / colimación"
+        st.info(f"**TIEMPO DE EXPLORACIÓN**\n\n{valor_tiempo}")
+    with c3:
+        valor_ref = f"{longitud_referencia_cm:.1f} cm" if longitud_referencia_cm is not None else "No disponible"
+        st.info(f"**LONGITUD DE REFERENCIA**\n\n{valor_ref}")
+
+    protocolo_txt = protocolo if seleccion_completa(protocolo) else "No definido"
+    cobertura_txt = f"{cobertura_promedio * 100:.1f}%" if cobertura_promedio is not None else "No disponible"
+    colimacion_txt = f"{colimacion_total_mm:.3f} mm" if colimacion_total_mm is not None else "No disponible"
+
+    st.caption(
+        f"Protocolo de referencia: {protocolo_txt} · Cobertura promedio entre Inicio y Fin: {cobertura_txt} · "
+        f"Colimación total usada para el cálculo: {colimacion_txt}"
+    )
+
 def render_bloque_adquisicion(numero=1):
     pref = adq_prefijo(numero)
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
@@ -2480,6 +2687,8 @@ def render_bloque_adquisicion(numero=1):
         if archivo_roi is not None:
             render_roi_interactiva_html(archivo_roi, key_suffix=f"{pref}_bolus")
 
+    render_calculos_exploracion(numero)
+
     st.markdown('</div>', unsafe_allow_html=True)
 
     modulacion = st.session_state.get(f"{pref}_modulacion_corriente", "Seleccionar")
@@ -2542,6 +2751,21 @@ def render_resumen_adquisicion(numero=1, mostrar_topo2=False):
     elif modulacion == "No":
         st.write(f"**kV:** {st.session_state[f'{pref}_kv_manual']}")
         st.write(f"**mAs:** {st.session_state[f'{pref}_mas_manual']}")
+
+    largo_cm, protocolo, longitud_referencia_cm, cobertura_promedio = calcular_largo_adquisicion_cm(numero)
+    tiempo_seg, estado_tiempo, colimacion_total_mm = calcular_tiempo_exploracion_seg(numero)
+    if largo_cm is not None:
+        st.write(f"**Largo de adquisición:** {largo_cm:.2f} cm")
+    else:
+        st.write("**Largo de adquisición:** No disponible")
+    if estado_tiempo == "ok":
+        st.write(f"**Tiempo de exploración:** {tiempo_seg:.2f} s")
+    elif estado_tiempo == "no_helicoidal":
+        st.write("**Tiempo de exploración:** No aplica en secuencial")
+    else:
+        st.write("**Tiempo de exploración:** Completa pitch / giro / colimación")
+    if longitud_referencia_cm is not None:
+        st.write(f"**Longitud anatómica de referencia:** {longitud_referencia_cm:.1f} cm ({protocolo})")
     if numero == 1:
         st.write(f"**Topograma 1:** inicio {st.session_state['adq_topo1_limite_superior']}% · fin {st.session_state['adq_topo1_limite_inferior']}%")
         if mostrar_topo2:
