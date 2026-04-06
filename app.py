@@ -360,7 +360,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                     ctx.beginPath();
                     ctx.arc(roi.x, roi.y, roi.r, 0, Math.PI * 2);
                     ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 1.4;
+                    ctx.lineWidth = 1.2;
                     ctx.stroke();
                 }}
             }}
@@ -2059,7 +2059,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                     <button id="add-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
                     <button id="clear-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
                     <label style="color:white;font-size:14px;">Tamaño matriz</label>
-                    <input id="size-{key_suffix}" type="range" min="18" max="100" value="40" step="1" style="width:130px;"/>
+                    <input id="size-{key_suffix}" type="range" min="4" max="220" value="40" step="1" style="width:130px;"/>
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente dentro de la imagen.</div>
@@ -2127,7 +2127,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 if (hasBox) {{
                     const half = box.size / 2;
                     ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 1.4;
+                    ctx.lineWidth = 1.2;
                     ctx.strokeRect(box.x - half, box.y - half, box.size, box.size);
                 }}
             }}
