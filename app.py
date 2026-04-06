@@ -2221,26 +2221,6 @@ elif seccion == "Adquisición":
     opciones_kv_referencia = ["Seleccionar", "70", "80", "100", "110", "120", "130", "140"]
     opciones_mas_referencia = ["Seleccionar", "50", "100", "150", "200", "250", "300", "350", "400", "450", "500", "550", "600"]
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        persistent_selectbox(
-            "Fase de adquisición",
-            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
-            "adq_fase_adquisicion"
-        )
-        persistent_selectbox(
-            "Tipo de exploración",
-            ["Seleccionar", "Helicoidal", "Secuencial"],
-            "adq_tipo_exploracion"
-        )
-        persistent_selectbox(
-            "Espesor (mm)",
-            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
-            "adq_espesor"
-        )
-        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
-
     tipo_exploracion = st.session_state.get("adq_tipo_exploracion", "Seleccionar")
     if tipo_exploracion == "Helicoidal":
         opciones_matriz = ["Seleccionar", "64 x 0,625", "32 x 1,25", "16 x 0,625"]
@@ -2253,72 +2233,86 @@ elif seccion == "Adquisición":
         st.session_state["adq_matriz_detectores"] = "Seleccionar"
         st.session_state["_adq_matriz_detectores"] = "Seleccionar"
 
-    with col2:
+    modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        persistent_selectbox(
+            "Fase de adquisición",
+            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
+            "adq_fase_adquisicion"
+        )
         persistent_selectbox(
             "Instrucción de voz",
             ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
             "adq_instruccion_voz"
         )
-        persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
-        persistent_text_input("Colimación (mm)", "adq_colimacion")
-        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
-
-    with col3:
         persistent_selectbox("Delay", opciones_delay, "adq_delay")
+        persistent_selectbox(
+            "Tipo de exploración",
+            ["Seleccionar", "Helicoidal", "Secuencial"],
+            "adq_tipo_exploracion"
+        )
+        persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
+
+    with col2:
         persistent_selectbox(
             "Giro del tubo",
             ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
             "adq_giro_tubo"
         )
-        persistent_selectbox(
-            "SFOV",
-            ["Seleccionar", "Small 200", "Head 350", "Large 500"],
-            "adq_sfov"
-        )
+        if tipo_exploracion == "Helicoidal":
+            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
+        else:
+            st.session_state["adq_pitch"] = "Seleccionar"
+            st.session_state["_adq_pitch"] = "Seleccionar"
+            st.markdown("<div style='height: 78px;'></div>", unsafe_allow_html=True)
+
         persistent_selectbox(
             "Modulación de corriente",
             ["Seleccionar", "Si", "No"],
             "adq_modulacion_corriente"
         )
 
-    if tipo_exploracion == "Helicoidal":
-        col_pitch_izq, col_pitch_cen, col_pitch_der = st.columns([1, 1, 1])
-        with col_pitch_izq:
-            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
-    else:
-        st.session_state["adq_pitch"] = "Seleccionar"
-        st.session_state["_adq_pitch"] = "Seleccionar"
+        if modulacion == "Si":
+            persistent_selectbox("kV", opciones_kv_referencia, "adq_kv_referencia")
+            persistent_selectbox("mAs", opciones_mas_referencia, "adq_mas_referencia")
 
-    modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
-    if modulacion == "Si":
-        col_mod1, col_mod2, col_mod3 = st.columns(3)
-        with col_mod1:
-            persistent_selectbox("kV referencia", opciones_kv_referencia, "adq_kv_referencia")
-        with col_mod2:
-            persistent_selectbox("mAs referencia", opciones_mas_referencia, "adq_mas_referencia")
-
-        st.session_state["adq_kv_manual"] = 120
-        st.session_state["adq_mas_manual"] = 100
-        st.session_state["_adq_kv_manual"] = 120
-        st.session_state["_adq_mas_manual"] = 100
-
-    elif modulacion == "No":
-        col_mod1, col_mod2, col_mod3 = st.columns(3)
-        with col_mod1:
+            st.session_state["adq_kv_manual"] = 120
+            st.session_state["adq_mas_manual"] = 100
+            st.session_state["_adq_kv_manual"] = 120
+            st.session_state["_adq_mas_manual"] = 100
+        elif modulacion == "No":
             persistent_number_input("kV", "adq_kv_manual", min_value=1, max_value=200, step=1)
-        with col_mod2:
             persistent_number_input("mAs", "adq_mas_manual", min_value=1, max_value=1000, step=1)
 
-        st.session_state["adq_kv_referencia"] = "Seleccionar"
-        st.session_state["adq_mas_referencia"] = "Seleccionar"
-        st.session_state["_adq_kv_referencia"] = "Seleccionar"
-        st.session_state["_adq_mas_referencia"] = "Seleccionar"
+            st.session_state["adq_kv_referencia"] = "Seleccionar"
+            st.session_state["adq_mas_referencia"] = "Seleccionar"
+            st.session_state["_adq_kv_referencia"] = "Seleccionar"
+            st.session_state["_adq_mas_referencia"] = "Seleccionar"
+        else:
+            st.session_state["adq_kv_referencia"] = "Seleccionar"
+            st.session_state["adq_mas_referencia"] = "Seleccionar"
+            st.session_state["_adq_kv_referencia"] = "Seleccionar"
+            st.session_state["_adq_mas_referencia"] = "Seleccionar"
+            st.markdown("<div style='height: 78px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 78px;'></div>", unsafe_allow_html=True)
 
-    else:
-        st.session_state["adq_kv_referencia"] = "Seleccionar"
-        st.session_state["adq_mas_referencia"] = "Seleccionar"
-        st.session_state["_adq_kv_referencia"] = "Seleccionar"
-        st.session_state["_adq_mas_referencia"] = "Seleccionar"
+    with col3:
+        persistent_selectbox(
+            "Espesor",
+            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
+            "adq_espesor"
+        )
+        persistent_selectbox(
+            "SFOV",
+            ["Seleccionar", "Small 200", "Head 350", "Large 500"],
+            "adq_sfov"
+        )
+        persistent_text_input("Colimación", "adq_colimacion")
+        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
+        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
