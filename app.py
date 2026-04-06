@@ -1202,22 +1202,22 @@ cabeza primero	lateral izquerdo	abajo	angiotac cuello	cabeza lateral
 cabeza primero	lateral izquerdo	derecha 	angiotac cuello	cabeza frontal
 cabeza primero	lateral izquerdo	izquierda	angiotac cuello	cabeza frontal
 				
-cabeza primero	supino	arriba	angiotac cerebro cuello	cabeza frontal
-cabeza primero	supino	abajo	angiotac cerebro cuello	cabeza frontal
-cabeza primero	supino	derecha 	angiotac cerebro cuello	cabeza lateral
-cabeza primero	supino	izquierda	angiotac cerebro cuello	cabeza lateral
-cabeza primero	prono	arriba	angiotac cerebro cuello	cabeza frontal
-cabeza primero	prono	abajo	angiotac cerebro cuello	cabeza frontal
-cabeza primero	prono	derecha 	angiotac cerebro cuello	cabeza lateral
-cabeza primero	prono	izquierda	angiotac cerebro cuello	cabeza lateral
-cabeza primero	lateral derecho	arriba	angiotac cerebro cuello	cabeza lateral
-cabeza primero	lateral derecho	abajo	angiotac cerebro cuello	cabeza lateral
-cabeza primero	lateral derecho	derecha 	angiotac cerebro cuello	cabeza frontal
-cabeza primero	lateral derecho	izquierda	angiotac cerebro cuello	cabeza frontal
-cabeza primero	lateral izquerdo	arriba	angiotac cerebro cuello	cabeza lateral
-cabeza primero	lateral izquerdo	abajo	angiotac cerebro cuello	cabeza lateral
-cabeza primero	lateral izquerdo	derecha 	angiotac cerebro cuello	cabeza frontal
-cabeza primero	lateral izquerdo	izquierda	angiotac cerebro cuello	cabeza frontal
+cabeza primero	supino	arriba	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	supino	abajo	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	supino	derecha 	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	supino	izquierda	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	prono	arriba	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	prono	abajo	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	prono	derecha 	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	prono	izquierda	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	lateral derecho	arriba	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	lateral derecho	abajo	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	lateral derecho	derecha 	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	lateral derecho	izquierda	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	lateral izquerdo	arriba	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	lateral izquerdo	abajo	angiotac cerebro cuello	angiotac cerebro cuello lateral
+cabeza primero	lateral izquerdo	derecha 	angiotac cerebro cuello	angiotac cerebro cuello frontal
+cabeza primero	lateral izquerdo	izquierda	angiotac cerebro cuello	angiotac cerebro cuello frontal
 				
 cabeza primero	supino	arriba	angiotac torax	torax frontal
 cabeza primero	supino	abajo	angiotac torax	torax frontal
