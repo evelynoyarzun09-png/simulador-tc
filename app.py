@@ -276,7 +276,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                     <button id="add-roi-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar ROI</button>
                     <button id="clear-roi-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar ROI</button>
                     <label style="color:white;font-size:14px;">Tamaño ROI</label>
-                    <input id="radius-{key_suffix}" type="range" min="10" max="160" value="45" step="1" />
+                    <input id="radius-{key_suffix}" type="range" min="2" max="160" value="20" step="1" />
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el círculo rojo con el mouse para mover la ROI libremente.</div>
@@ -298,7 +298,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             let dragOffsetY = 0;
             let cssWidth = 0;
             let cssHeight = 0;
-            let roi = {{ x: 0, y: 0, r: 45 }};
+            let roi = {{ x: 0, y: 0, r: 20 }};
 
             function getCssSize() {{
                 const maxWidth = 760;
