@@ -292,7 +292,11 @@ def render_topograma_interactivo(imagen_topo, key_sup, key_inf, canvas_key_base,
 
     factor = width / ancho_original
     alto_canvas = max(80, int(alto_original * factor))
-    imagen_redimensionada = imagen.resize((width, alto_canvas))
+    imagen_redimensionada = imagen.resize((width, alto_canvas)).convert("RGBA")
+    try:
+        imagen_redimensionada.format = "PNG"
+    except Exception:
+        pass
 
     y_sup = int((int(st.session_state.get(key_sup, 15)) / 100) * alto_canvas)
     y_inf = int((int(st.session_state.get(key_inf, 85)) / 100) * alto_canvas)
