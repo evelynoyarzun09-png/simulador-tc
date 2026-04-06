@@ -194,6 +194,30 @@ def persistent_number_input(label, key, **kwargs):
 
 
 
+def ajustar_imagen_a_lienzo_uniforme(imagen, tamano_lienzo=(420, 420), color_fondo=(32, 32, 32)):
+    if imagen is None:
+        return None
+
+    try:
+        imagen = imagen.convert("RGB")
+        ancho_lienzo, alto_lienzo = tamano_lienzo
+        ancho_img, alto_img = imagen.size
+
+        escala = min(ancho_lienzo / ancho_img, alto_lienzo / alto_img)
+        nuevo_ancho = max(1, int(ancho_img * escala))
+        nuevo_alto = max(1, int(alto_img * escala))
+
+        imagen_redimensionada = imagen.resize((nuevo_ancho, nuevo_alto))
+        lienzo = Image.new("RGB", tamano_lienzo, color_fondo)
+
+        offset_x = (ancho_lienzo - nuevo_ancho) // 2
+        offset_y = (alto_lienzo - nuevo_alto) // 2
+        lienzo.paste(imagen_redimensionada, (offset_x, offset_y))
+        return lienzo
+    except Exception:
+        return imagen
+
+
 def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferior_pct):
     if ruta_imagen is None:
         return None
@@ -218,7 +242,7 @@ def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferio
         draw.text((margen_texto, max(5, y_superior - 22)), "Inicio", fill=(0, 255, 255))
         draw.text((margen_texto, max(5, y_inferior - 22)), "Fin", fill=(255, 180, 0))
 
-        return imagen
+        return ajustar_imagen_a_lienzo_uniforme(imagen)
     except Exception:
         return None
 
@@ -2138,9 +2162,13 @@ elif seccion == "Adquisición":
                     st.warning("El límite superior debe quedar por encima del inferior.")
                 imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
                 if imagen_con_limites is not None:
-                    st.image(imagen_con_limites, width=217)
+                    st.image(imagen_con_limites, width=260)
                 else:
-                    mostrar_imagen_actualizada(imagen_topo, width=217)
+                    try:
+                        imagen_base = ajustar_imagen_a_lienzo_uniforme(Image.open(imagen_topo).convert("RGB"))
+                        st.image(imagen_base, width=260)
+                    except Exception:
+                        mostrar_imagen_actualizada(imagen_topo, width=260)
             else:
                 st.markdown(
                     """
