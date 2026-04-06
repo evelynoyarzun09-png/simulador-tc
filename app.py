@@ -15,7 +15,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
 # -------------------------
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
-A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png" 
+A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
 TOPOGRAMA_IMG = BASE_DIR / "topograma.png"
 
 PACIENTE_IMG_PNG = BASE_DIR / "paciente.png"
@@ -2538,7 +2538,7 @@ def render_calculos_exploracion(numero=1):
     st.markdown("<div style='height:0.3rem;'></div>", unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Cálculo automático</div>', unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     with c1:
         valor_largo = f"{largo_cm:.2f} cm" if largo_cm is not None else "No disponible"
         st.info(f"**LARGO DE ADQUISICIÓN**\n\n{valor_largo}")
@@ -2550,8 +2550,6 @@ def render_calculos_exploracion(numero=1):
         else:
             valor_tiempo = "Completa pitch / giro / colimación"
         st.info(f"**TIEMPO DE EXPLORACIÓN**\n\n{valor_tiempo}")
-    with c3:
-
     protocolo_txt = protocolo if seleccion_completa(protocolo) else "No definido"
     cobertura_txt = f"{cobertura_promedio * 100:.1f}%" if cobertura_promedio is not None else "No disponible"
     colimacion_txt = f"{colimacion_total_mm:.3f} mm" if colimacion_total_mm is not None else "No disponible"
