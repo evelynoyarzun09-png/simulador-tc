@@ -2138,9 +2138,9 @@ elif seccion == "Adquisición":
                     st.warning("El límite superior debe quedar por encima del inferior.")
                 imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
                 if imagen_con_limites is not None:
-                    st.image(imagen_con_limites, width=130)
+                    st.image(imagen_con_limites, width=217)
                 else:
-                    mostrar_imagen_actualizada(imagen_topo, width=130)
+                    mostrar_imagen_actualizada(imagen_topo, width=217)
             else:
                 st.markdown(
                     """
