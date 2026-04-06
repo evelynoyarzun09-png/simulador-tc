@@ -15,7 +15,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
 # -------------------------
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
-A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
+A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png" 
 TOPOGRAMA_IMG = BASE_DIR / "topograma.png"
 
 PACIENTE_IMG_PNG = BASE_DIR / "paciente.png"
@@ -2551,8 +2551,6 @@ def render_calculos_exploracion(numero=1):
             valor_tiempo = "Completa pitch / giro / colimación"
         st.info(f"**TIEMPO DE EXPLORACIÓN**\n\n{valor_tiempo}")
     with c3:
-        valor_ref = f"{longitud_referencia_cm:.1f} cm" if longitud_referencia_cm is not None else "No disponible"
-        st.info(f"**LONGITUD DE REFERENCIA**\n\n{valor_ref}")
 
     protocolo_txt = protocolo if seleccion_completa(protocolo) else "No definido"
     cobertura_txt = f"{cobertura_promedio * 100:.1f}%" if cobertura_promedio is not None else "No disponible"
@@ -2765,8 +2763,6 @@ def render_resumen_adquisicion(numero=1, mostrar_topo2=False):
         st.write("**Tiempo de exploración:** No aplica en secuencial")
     else:
         st.write("**Tiempo de exploración:** Completa pitch / giro / colimación")
-    if longitud_referencia_cm is not None:
-        st.write(f"**Longitud anatómica de referencia:** {longitud_referencia_cm:.1f} cm ({protocolo})")
     if numero == 1:
         st.write(f"**Topograma 1:** inicio {st.session_state['adq_topo1_limite_superior']}% · fin {st.session_state['adq_topo1_limite_inferior']}%")
         if mostrar_topo2:
