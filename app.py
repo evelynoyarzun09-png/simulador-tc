@@ -90,9 +90,13 @@ DEFAULTS = {
     "adq_inicio_adquisicion": "",
     "adq_fin_adquisicion": "",
     "adq_giro_tubo": "Seleccionar",
-    "adq_kvp": "Seleccionar",
-    "adq_mas": 100,
-    "adq_pitch": 1.0,
+    "adq_modulacion_corriente": "Seleccionar",
+    "adq_kv_referencia": "Seleccionar",
+    "adq_mas_referencia": "Seleccionar",
+    "adq_kv_manual": 120,
+    "adq_mas_manual": 100,
+    "adq_pitch": "Seleccionar",
+    "adq_sfov": "Seleccionar",
     "adq_topo1_limite_superior": 15,
     "adq_topo1_limite_inferior": 85,
     "adq_topo2_limite_superior": 15,
@@ -2213,28 +2217,29 @@ elif seccion == "Adquisición":
         "4 min", "5 min", "6 min", "7 min", "8 min", "9 min", "10 min", "11 min", "12 min",
         "13 min", "14 min", "15 min", "16 min", "17 min", "18 min", "19 min", "20 min"
     ]
+    opciones_pitch = ["Seleccionar", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6", "0,7", "0,8", "0,9", "1", "1,1", "1,2", "1,3", "1,4", "1,5"]
+    opciones_kv_referencia = ["Seleccionar", "70", "80", "100", "110", "120", "130", "140"]
+    opciones_mas_referencia = ["Seleccionar", "50", "100", "150", "200", "250", "300", "350", "400", "450", "500", "550", "600"]
 
-    persistent_selectbox(
-        "Fase de adquisición",
-        ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
-        "adq_fase_adquisicion"
-    )
-    persistent_selectbox(
-        "Instrucción de voz",
-        ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
-        "adq_instruccion_voz"
-    )
-    persistent_selectbox("Delay", opciones_delay, "adq_delay")
-    persistent_selectbox(
-        "Tipo de exploración",
-        ["Seleccionar", "Helicoidal", "Secuencial"],
-        "adq_tipo_exploracion"
-    )
-    persistent_selectbox(
-        "Espesor",
-        ["Seleccionar", "0,625", "1,25", "2,5", "5"],
-        "adq_espesor"
-    )
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        persistent_selectbox(
+            "Fase de adquisición",
+            ["Seleccionar", "Sin contraste", "Angiográfica", "Arterial", "Venosa o portal", "Tardía"],
+            "adq_fase_adquisicion"
+        )
+        persistent_selectbox(
+            "Tipo de exploración",
+            ["Seleccionar", "Helicoidal", "Secuencial"],
+            "adq_tipo_exploracion"
+        )
+        persistent_selectbox(
+            "Espesor (mm)",
+            ["Seleccionar", "0,625", "1,25", "2,5", "5"],
+            "adq_espesor"
+        )
+        persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
 
     tipo_exploracion = st.session_state.get("adq_tipo_exploracion", "Seleccionar")
     if tipo_exploracion == "Helicoidal":
@@ -2243,23 +2248,93 @@ elif seccion == "Adquisición":
         opciones_matriz = ["Seleccionar", "2 x 0,625", "1 x 1,25", "32 x 1,25", "64 x 0,625"]
     else:
         opciones_matriz = ["Seleccionar"]
-        st.info("Primero selecciona el tipo de exploración para habilitar la matriz de detectores.")
 
     if st.session_state.get("adq_matriz_detectores") not in opciones_matriz:
         st.session_state["adq_matriz_detectores"] = "Seleccionar"
         st.session_state["_adq_matriz_detectores"] = "Seleccionar"
 
-    persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
-    persistent_text_input("Colimación", "adq_colimacion")
-    persistent_text_input("Inicio de adquisición", "adq_inicio_adquisicion")
-    persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
-    persistent_selectbox(
-        "Giro del tubo",
-        ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
-        "adq_giro_tubo"
-    )
+    with col2:
+        persistent_selectbox(
+            "Instrucción de voz",
+            ["Seleccionar", "Ninguna", "Inspiración", "Espiración", "No trague", "No respire"],
+            "adq_instruccion_voz"
+        )
+        persistent_selectbox("Matriz de detectores", opciones_matriz, "adq_matriz_detectores")
+        persistent_text_input("Colimación (mm)", "adq_colimacion")
+        persistent_text_input("Fin de adquisición", "adq_fin_adquisicion")
+
+    with col3:
+        persistent_selectbox("Delay", opciones_delay, "adq_delay")
+        persistent_selectbox(
+            "Giro del tubo",
+            ["Seleccionar", "0,33 sg", "0,5 sg", "1 sg", "1,5 sg"],
+            "adq_giro_tubo"
+        )
+        persistent_selectbox(
+            "SFOV",
+            ["Seleccionar", "Small 200", "Head 350", "Large 500"],
+            "adq_sfov"
+        )
+        persistent_selectbox(
+            "Modulación de corriente",
+            ["Seleccionar", "Si", "No"],
+            "adq_modulacion_corriente"
+        )
+
+    if tipo_exploracion == "Helicoidal":
+        col_pitch_izq, col_pitch_cen, col_pitch_der = st.columns([1, 1, 1])
+        with col_pitch_izq:
+            persistent_selectbox("Pitch", opciones_pitch, "adq_pitch")
+    else:
+        st.session_state["adq_pitch"] = "Seleccionar"
+        st.session_state["_adq_pitch"] = "Seleccionar"
+
+    modulacion = st.session_state.get("adq_modulacion_corriente", "Seleccionar")
+    if modulacion == "Si":
+        col_mod1, col_mod2, col_mod3 = st.columns(3)
+        with col_mod1:
+            persistent_selectbox("kV referencia", opciones_kv_referencia, "adq_kv_referencia")
+        with col_mod2:
+            persistent_selectbox("mAs referencia", opciones_mas_referencia, "adq_mas_referencia")
+
+        st.session_state["adq_kv_manual"] = 120
+        st.session_state["adq_mas_manual"] = 100
+        st.session_state["_adq_kv_manual"] = 120
+        st.session_state["_adq_mas_manual"] = 100
+
+    elif modulacion == "No":
+        col_mod1, col_mod2, col_mod3 = st.columns(3)
+        with col_mod1:
+            persistent_number_input("kV", "adq_kv_manual", min_value=1, max_value=200, step=1)
+        with col_mod2:
+            persistent_number_input("mAs", "adq_mas_manual", min_value=1, max_value=1000, step=1)
+
+        st.session_state["adq_kv_referencia"] = "Seleccionar"
+        st.session_state["adq_mas_referencia"] = "Seleccionar"
+        st.session_state["_adq_kv_referencia"] = "Seleccionar"
+        st.session_state["_adq_mas_referencia"] = "Seleccionar"
+
+    else:
+        st.session_state["adq_kv_referencia"] = "Seleccionar"
+        st.session_state["adq_mas_referencia"] = "Seleccionar"
+        st.session_state["_adq_kv_referencia"] = "Seleccionar"
+        st.session_state["_adq_mas_referencia"] = "Seleccionar"
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+    modulacion_ok = False
+    if modulacion == "Si":
+        modulacion_ok = all([
+            seleccion_completa(st.session_state["adq_kv_referencia"]),
+            seleccion_completa(st.session_state["adq_mas_referencia"]),
+        ])
+    elif modulacion == "No":
+        modulacion_ok = all([
+            st.session_state["adq_kv_manual"] is not None,
+            st.session_state["adq_mas_manual"] is not None,
+        ])
+
+    pitch_ok = True if tipo_exploracion != "Helicoidal" else seleccion_completa(st.session_state["adq_pitch"])
 
     adquisicion_completa = all([
         seleccion_completa(st.session_state["adq_fase_adquisicion"]),
@@ -2272,6 +2347,10 @@ elif seccion == "Adquisición":
         texto_completo(st.session_state["adq_inicio_adquisicion"]),
         texto_completo(st.session_state["adq_fin_adquisicion"]),
         seleccion_completa(st.session_state["adq_giro_tubo"]),
+        seleccion_completa(st.session_state["adq_sfov"]),
+        seleccion_completa(st.session_state["adq_modulacion_corriente"]),
+        modulacion_ok,
+        pitch_ok,
     ])
 
     st.divider()
@@ -2281,20 +2360,33 @@ elif seccion == "Adquisición":
     st.write(f"**Instrucción de voz:** {st.session_state['adq_instruccion_voz']}")
     st.write(f"**Delay:** {st.session_state['adq_delay']}")
     st.write(f"**Tipo de exploración:** {st.session_state['adq_tipo_exploracion']}")
-    st.write(f"**Espesor:** {st.session_state['adq_espesor']}")
+    st.write(f"**Espesor (mm):** {st.session_state['adq_espesor']}")
     st.write(f"**Matriz de detectores:** {st.session_state['adq_matriz_detectores']}")
-    st.write(f"**Colimación:** {st.session_state['adq_colimacion']}")
+    st.write(f"**Colimación (mm):** {st.session_state['adq_colimacion']}")
     st.write(f"**Inicio de adquisición:** {st.session_state['adq_inicio_adquisicion']}")
     st.write(f"**Fin de adquisición:** {st.session_state['adq_fin_adquisicion']}")
     st.write(f"**Giro del tubo:** {st.session_state['adq_giro_tubo']}")
+    st.write(f"**SFOV:** {st.session_state['adq_sfov']}")
+    if tipo_exploracion == "Helicoidal":
+        st.write(f"**Pitch:** {st.session_state['adq_pitch']}")
+    st.write(f"**Modulación de corriente:** {st.session_state['adq_modulacion_corriente']}")
+    if modulacion == "Si":
+        st.write(f"**kV referencia:** {st.session_state['adq_kv_referencia']}")
+        st.write(f"**mAs referencia:** {st.session_state['adq_mas_referencia']}")
+    elif modulacion == "No":
+        st.write(f"**kV:** {st.session_state['adq_kv_manual']}")
+        st.write(f"**mAs:** {st.session_state['adq_mas_manual']}")
     st.write(f"**Topograma 1:** inicio {st.session_state['adq_topo1_limite_superior']}% · fin {st.session_state['adq_topo1_limite_inferior']}%")
     if mostrar_topo2:
         st.write(f"**Topograma 2:** inicio {st.session_state['adq_topo2_limite_superior']}% · fin {st.session_state['adq_topo2_limite_inferior']}%")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
-    with c2:
-        if st.button("Siguiente", use_container_width=True, disabled=not adquisicion_completa):
+    with c1:
+        if st.button("⬅ Volver a Topograma", use_container_width=True):
+            ir_a("Topograma"); st.rerun()
+    with c3:
+        if st.button("Siguiente: Reconstrucción ➡", use_container_width=True, disabled=not adquisicion_completa):
             ir_a("Reconstrucción"); st.rerun()
 
 elif seccion == "Reconstrucción":
