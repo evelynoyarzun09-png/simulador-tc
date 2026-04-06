@@ -2271,6 +2271,16 @@ def obtener_nombre_imagen_reconstruccion():
             "ancho_max": 140,
             "imagen": "cerebro_sin_contraste_blanda",
         },
+        {
+            "protocolo": "cerebro",
+            "fase": "sin_contraste",
+            "kernels": {"definidon_70f", "ultradefinido_80f", "definido_70f", "ultradefinido"},
+            "nivel_min": 500,
+            "nivel_max": 800,
+            "ancho_min": 1500,
+            "ancho_max": 2500,
+            "imagen": "cerebro_sin_contraste_oseo",
+        },
     ]
 
     for regla in reglas:
@@ -3416,7 +3426,7 @@ elif seccion == "Reconstrucción":
     ):
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
         st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-        st.info("Se activó la regla de imagen, pero no se encontró el archivo 'cerebro_sin contraste_blanda' en la carpeta de la app.")
+        st.info("Se activó una regla de imagen, pero no se encontró el archivo correspondiente en la carpeta de la app.")
         st.markdown('</div>', unsafe_allow_html=True)
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
