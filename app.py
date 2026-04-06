@@ -2052,19 +2052,19 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         data_uri = f"data:{mime};base64,{encoded}"
 
         html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:560px;margin:0 auto;">
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:560px;margin:0 auto;overflow:visible;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
                 <div style="color:white;font-weight:700;">MATRIZ DE RECONSTRUCCIÓN</div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <button id="add-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
                     <button id="clear-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
                     <label style="color:white;font-size:14px;">Tamaño matriz</label>
-                    <input id="size-{key_suffix}" type="range" min="4" max="220" value="40" step="1" style="width:130px;"/>
+                    <input id="size-{key_suffix}" type="range" min="2" max="520" value="40" step="1" style="width:130px;"/>
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente dentro de la imagen.</div>
-            <div style="display:flex;justify-content:center;">
-                <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;"></canvas>
+            <div style="display:flex;justify-content:center;overflow:visible;">
+                <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;overflow:visible;"></canvas>
             </div>
         </div>
 
