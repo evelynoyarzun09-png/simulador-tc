@@ -280,7 +280,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el círculo rojo con el mouse para mover la ROI libremente.</div>
-            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;"></canvas>
+            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;"></canvas>
         </div>
 
         <script>
@@ -296,25 +296,39 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             let dragging = false;
             let dragOffsetX = 0;
             let dragOffsetY = 0;
-            let scale = 1;
-            let roi = {{ x: 180, y: 180, r: 45 }};
+            let cssWidth = 0;
+            let cssHeight = 0;
+            let roi = {{ x: 0, y: 0, r: 45 }};
+
+            function getCssSize() {{
+                const maxWidth = 760;
+                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
+                const height = width * (img.height / img.width);
+                return {{ width, height }};
+            }}
 
             function resizeCanvas() {{
-                const maxWidth = 760;
-                const containerWidth = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
-                scale = containerWidth / img.width;
-                canvas.width = containerWidth;
-                canvas.height = img.height * scale;
+                if (!img.width) return;
+                const dpr = window.devicePixelRatio || 1;
+                const size = getCssSize();
+                cssWidth = size.width;
+                cssHeight = size.height;
+
+                canvas.style.width = cssWidth + 'px';
+                canvas.style.height = cssHeight + 'px';
+                canvas.width = Math.round(cssWidth * dpr);
+                canvas.height = Math.round(cssHeight * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 draw();
             }}
 
             function draw() {{
                 if (!img.width) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, cssWidth, cssHeight);
+                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
                 if (hasROI) {{
                     ctx.beginPath();
-                    ctx.arc(roi.x * scale, roi.y * scale, roi.r * scale, 0, Math.PI * 2);
+                    ctx.arc(roi.x, roi.y, roi.r, 0, Math.PI * 2);
                     ctx.strokeStyle = 'red';
                     ctx.lineWidth = 1.4;
                     ctx.stroke();
@@ -331,22 +345,28 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
                 const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
 
                 return {{
-                    x: (clientX - rect.left) / scale,
-                    y: (clientY - rect.top) / scale
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
                 }};
             }}
 
             function clampROI() {{
-                roi.x = Math.max(roi.r, Math.min(img.width - roi.r, roi.x));
-                roi.y = Math.max(roi.r, Math.min(img.height - roi.r, roi.y));
+                roi.x = Math.max(roi.r, Math.min(cssWidth - roi.r, roi.x));
+                roi.y = Math.max(roi.r, Math.min(cssHeight - roi.r, roi.y));
+            }}
+
+            function pointHitsROI(pos) {{
+                const dx = pos.x - roi.x;
+                const dy = pos.y - roi.y;
+                return Math.sqrt(dx * dx + dy * dy) <= roi.r + 10;
             }}
 
             addBtn.addEventListener('click', (event) => {{
                 event.preventDefault();
                 hasROI = true;
                 roi.r = parseInt(radiusInput.value, 10);
-                roi.x = img.width / 2;
-                roi.y = img.height / 2;
+                roi.x = cssWidth / 2;
+                roi.y = cssHeight / 2;
                 clampROI();
                 draw();
             }});
@@ -368,10 +388,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             function startDragging(event) {{
                 if (!hasROI) return;
                 const pos = getPointerPos(event);
-                const dx = pos.x - roi.x;
-                const dy = pos.y - roi.y;
-                const distancia = Math.sqrt(dx * dx + dy * dy);
-                if (distancia <= roi.r + 18) {{
+                if (pointHitsROI(pos)) {{
                     dragging = true;
                     dragOffsetX = pos.x - roi.x;
                     dragOffsetY = pos.y - roi.y;
@@ -396,13 +413,13 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             }}
 
             canvas.addEventListener('mousedown', startDragging);
-            document.addEventListener('mousemove', moveDragging);
-            document.addEventListener('mouseup', stopDragging);
+            window.addEventListener('mousemove', moveDragging);
+            window.addEventListener('mouseup', stopDragging);
 
             canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
-            document.addEventListener('touchmove', moveDragging, {{ passive: false }});
-            document.addEventListener('touchend', stopDragging);
-            document.addEventListener('touchcancel', stopDragging);
+            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
+            window.addEventListener('touchend', stopDragging);
+            window.addEventListener('touchcancel', stopDragging);
 
             canvas.addEventListener('click', (event) => {{
                 if (!hasROI || dragging) return;
@@ -414,9 +431,10 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             }});
 
             img.onload = () => {{
-                roi.x = img.width / 2;
-                roi.y = img.height / 2;
                 resizeCanvas();
+                roi.x = cssWidth / 2;
+                roi.y = cssHeight / 2;
+                draw();
                 window.addEventListener('resize', resizeCanvas);
             }};
 
@@ -428,8 +446,6 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
         components.html(html_code, height=700)
     except Exception as e:
         st.warning(f"No fue posible cargar la ROI interactiva: {{e}}")
-
-
 
 def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_line"):
     try:
