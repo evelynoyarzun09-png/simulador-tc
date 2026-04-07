@@ -263,7 +263,15 @@ def ajustar_imagen_a_lienzo_uniforme(imagen, tamano_lienzo=(420, 420), color_fon
         return imagen
 
 
-def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferior_pct):
+def crear_topograma_con_limites(
+    ruta_imagen,
+    limite_superior_pct,
+    limite_inferior_pct,
+    color_inicio=(0, 255, 255),
+    color_fin=(255, 180, 0),
+    texto_inicio="Inicio",
+    texto_fin="Fin",
+):
     if ruta_imagen is None:
         return None
     ruta = Path(ruta_imagen)
@@ -281,11 +289,11 @@ def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferio
         grosor = max(3, alto // 120)
         margen_texto = max(8, ancho // 40)
 
-        draw.line([(0, y_superior), (ancho, y_superior)], fill=(0, 255, 255), width=grosor)
-        draw.line([(0, y_inferior), (ancho, y_inferior)], fill=(255, 180, 0), width=grosor)
+        draw.line([(0, y_superior), (ancho, y_superior)], fill=color_inicio, width=grosor)
+        draw.line([(0, y_inferior), (ancho, y_inferior)], fill=color_fin, width=grosor)
 
-        draw.text((margen_texto, max(5, y_superior - 22)), "Inicio", fill=(0, 255, 255))
-        draw.text((margen_texto, max(5, y_inferior - 22)), "Fin", fill=(255, 180, 0))
+        draw.text((margen_texto, max(5, y_superior - 22)), texto_inicio, fill=color_inicio)
+        draw.text((margen_texto, max(5, y_inferior - 22)), texto_fin, fill=color_fin)
 
         return ajustar_imagen_a_lienzo_uniforme(imagen)
     except Exception:
@@ -2738,7 +2746,15 @@ def render_topogramas_reconstruccion():
 
                 if limite_superior >= limite_inferior:
                     st.warning("El límite superior debe quedar por encima del inferior.")
-                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
+                imagen_con_limites = crear_topograma_con_limites(
+                    imagen_topo,
+                    limite_superior,
+                    limite_inferior,
+                    color_inicio=(255, 0, 255),
+                    color_fin=(0, 255, 0),
+                    texto_inicio="Inicio",
+                    texto_fin="Fin",
+                )
                 if imagen_con_limites is not None:
                     st.image(imagen_con_limites, width=260)
                 else:
