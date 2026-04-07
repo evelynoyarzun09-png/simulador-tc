@@ -1264,68 +1264,62 @@ def recon_prefijo(numero):
 def render_nav_links(prev_section):
     st.markdown(
         """
-        <style>
-        .nav-color-script-note {
-            display:none;
-        }
-        </style>
-        <div class="nav-color-script-note"></div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    col_inicio, col_volver, _ = st.columns([1, 1, 2])
-
-    with col_inicio:
-        if st.button("🏠 VOLVER AL INICIO", key=f"nav_inicio_{st.session_state.seccion}", use_container_width=True):
-            st.session_state.seccion = "A Practicar"
-            st.rerun()
-
-    with col_volver:
-        if st.button("⬅ VOLVER", key=f"nav_volver_{st.session_state.seccion}", use_container_width=True):
-            st.session_state.seccion = prev_section
-            st.rerun()
-
-    components.html(
-        """
         <script>
         (() => {
-            function styleNavButtons() {
-                const parentDoc = window.parent.document;
-                if (!parentDoc) return;
-                const buttons = parentDoc.querySelectorAll('div[data-testid="stButton"] > button');
-                buttons.forEach((btn) => {
-                    const text = (btn.innerText || '').trim();
-                    if (text === '🏠 VOLVER AL INICIO') {
-                        btn.style.background = '#2F80ED';
-                        btn.style.color = 'white';
-                        btn.style.border = 'none';
-                        btn.style.borderRadius = '12px';
-                        btn.style.fontWeight = '700';
-                        btn.style.fontSize = '16px';
-                        btn.style.minHeight = '48px';
-                        btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.18)';
-                    }
-                    if (text === '⬅ VOLVER') {
-                        btn.style.background = '#27AE60';
-                        btn.style.color = 'white';
-                        btn.style.border = 'none';
-                        btn.style.borderRadius = '12px';
-                        btn.style.fontWeight = '700';
-                        btn.style.fontSize = '16px';
-                        btn.style.minHeight = '48px';
-                        btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.18)';
-                    }
+            const paintNavButtons = () => {
+                const docs = [window.document];
+                try {
+                    if (window.parent && window.parent.document) docs.push(window.parent.document);
+                } catch (e) {}
+
+                docs.forEach((doc) => {
+                    const buttons = doc.querySelectorAll('button');
+                    buttons.forEach((btn) => {
+                        const text = (btn.innerText || btn.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+                        if (text.includes('volver al inicio')) {
+                            btn.style.setProperty('background', '#2f80ed', 'important');
+                            btn.style.setProperty('background-color', '#2f80ed', 'important');
+                            btn.style.setProperty('color', '#ffffff', 'important');
+                            btn.style.setProperty('border', '1px solid #2367be', 'important');
+                            btn.style.setProperty('box-shadow', '0 2px 6px rgba(0,0,0,0.18)', 'important');
+                        }
+
+                        if (text === '⬅ volver' || text.endsWith(' volver') || text === 'volver' || text.includes('⬅ volver')) {
+                            btn.style.setProperty('background', '#27ae60', 'important');
+                            btn.style.setProperty('background-color', '#27ae60', 'important');
+                            btn.style.setProperty('color', '#ffffff', 'important');
+                            btn.style.setProperty('border', '1px solid #1f8c4d', 'important');
+                            btn.style.setProperty('box-shadow', '0 2px 6px rgba(0,0,0,0.18)', 'important');
+                        }
+                    });
                 });
-            }
-            styleNavButtons();
-            const observer = new MutationObserver(() => styleNavButtons());
-            observer.observe(window.parent.document.body, { childList: true, subtree: true });
+            };
+
+            paintNavButtons();
+            setTimeout(paintNavButtons, 150);
+            setTimeout(paintNavButtons, 500);
+            setTimeout(paintNavButtons, 1000);
+            setInterval(paintNavButtons, 1200);
+
+            try {
+                const observer = new MutationObserver(() => paintNavButtons());
+                observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
+            } catch (e) {}
         })();
         </script>
         """,
-        height=0,
+        unsafe_allow_html=True,
     )
+    col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
+    with col_inicio:
+        if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
+            st.session_state.seccion = "A Practicar"
+            st.rerun()
+    with col_volver:
+        if st.button("⬅ Volver", key=f"volver_anterior_{st.session_state.seccion}", use_container_width=True):
+            st.session_state.seccion = prev_section
+            st.rerun()
 
 # -------------------------
 # VALIDACIONES
