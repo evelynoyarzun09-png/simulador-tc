@@ -1879,6 +1879,13 @@ def obtener_protocolos_filtrados(prefijo_estado="topo"):
         if existe:
             protocolos_validos.append(protocolo)
 
+    # Permitir protocolos agregados manualmente aunque aún no tengan reglas de imagen asociadas
+    # para que sigan apareciendo en la lista desplegable del topograma.
+    protocolos_forzados = {"muslo"}
+    for protocolo in protocolos_base:
+        if protocolo in protocolos_forzados and protocolo not in protocolos_validos:
+            protocolos_validos.append(protocolo)
+
     return protocolos_validos
 
 
