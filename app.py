@@ -981,7 +981,7 @@ MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
     "pelvis": ["Seleccionar", "pelvis"],
     "columnas": ["Seleccionar", "columna cervical", "columna dorsal", "columna lumbar"],
     "extremidad superior": ["Seleccionar", "hombro", "brazo", "codo", "antebrazo", "muñeca", "mano"],
-    "extremidad inferior": ["Seleccionar", "cadera", "rodilla", "pierna", "tobillo", "pie"],
+    "extremidad inferior": ["Seleccionar", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie"],
     "angiotac": [
         "Seleccionar",
         "angiotac extremidad superior derecha",
@@ -3440,7 +3440,7 @@ elif seccion == "Reconstrucción":
     intensidades_asir = ["Seleccionar"] + [f"{i}%" for i in range(10, 101, 10)]
     kernels_recon = ["Seleccionar", "Suave 20f", "Standar 30f", "Definidon 70f", "Ultradefinido 80f"]
     niveles_ventana = ["Seleccionar"] + [str(i) for i in range(-1000, 1001, 10)]
-    anchos_ventana = ["Seleccionar"] + [str(i) for i in range(10, 3001, 10)]
+    anchos_ventana = ["Seleccionar"] + [str(i) for i in range(50, 4001, 50)]
 
     def lista_mm_hasta_6():
         valores = ["Seleccionar"]
