@@ -1265,35 +1265,38 @@ def render_nav_links(prev_section):
     st.markdown(
         """
         <style>
-        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(1) div.stButton > button {
+        .nav-blue-marker + div div.stButton > button {
             background-color: #2f80ed !important;
             color: white !important;
             border: 1px solid #2367be !important;
         }
-        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(1) div.stButton > button:hover {
+        .nav-blue-marker + div div.stButton > button:hover {
             background-color: #276fd0 !important;
             color: white !important;
+            border: 1px solid #2367be !important;
         }
-        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) div.stButton > button {
+        .nav-green-marker + div div.stButton > button {
             background-color: #27ae60 !important;
             color: white !important;
             border: 1px solid #1f8c4d !important;
         }
-        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) div.stButton > button:hover {
+        .nav-green-marker + div div.stButton > button:hover {
             background-color: #219150 !important;
             color: white !important;
+            border: 1px solid #1f8c4d !important;
         }
         </style>
-        <div class="nav-color-row"></div>
         """,
         unsafe_allow_html=True,
     )
     col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
     with col_inicio:
+        st.markdown('<div class="nav-blue-marker"></div>', unsafe_allow_html=True)
         if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
             st.session_state.seccion = "A Practicar"
             st.rerun()
     with col_volver:
+        st.markdown('<div class="nav-green-marker"></div>', unsafe_allow_html=True)
         if st.button("⬅ Volver", key=f"volver_anterior_{st.session_state.seccion}", use_container_width=True):
             st.session_state.seccion = prev_section
             st.rerun()
