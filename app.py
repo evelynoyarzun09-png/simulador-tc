@@ -5,6 +5,8 @@ import hmac
 import re
 import openpyxl
 import base64
+import json
+from html import escape
 import streamlit.components.v1 as components
 from PIL import Image, ImageDraw
 
@@ -263,6 +265,299 @@ def ajustar_imagen_a_lienzo_uniforme(imagen, tamano_lienzo=(420, 420), color_fon
         return imagen
 
 
+
+
+def imagen_a_data_uri(fuente):
+    try:
+        if fuente is None:
+            return None
+        if isinstance(fuente, Image.Image):
+            from io import BytesIO
+            buffer = BytesIO()
+            fuente.save(buffer, format="PNG")
+            return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("utf-8")
+        ruta = Path(fuente)
+        if not ruta.exists():
+            return None
+        sufijo = ruta.suffix.lower()
+        mime = "image/png" if sufijo == ".png" else "image/jpeg"
+        return f"data:{mime};base64," + base64.b64encode(ruta.read_bytes()).decode("utf-8")
+    except Exception:
+        return None
+
+
+def texto_pdf(valor):
+    if isinstance(valor, list):
+        return ", ".join(str(v) for v in valor) if valor else "-"
+    if valor is None:
+        return "-"
+    texto = str(valor).strip()
+    return texto if texto else "-"
+
+
+def crear_topograma_data_uri_para_exportacion(ruta_imagen, limite_superior, limite_inferior, color_inicio=(0, 255, 255), color_fin=(255, 180, 0)):
+    imagen = crear_topograma_con_limites(
+        ruta_imagen,
+        limite_superior,
+        limite_inferior,
+        color_inicio=color_inicio,
+        color_fin=color_fin,
+        texto_inicio="Inicio",
+        texto_fin="Fin",
+    )
+    if imagen is None:
+        return imagen_a_data_uri(ruta_imagen)
+    return imagen_a_data_uri(imagen)
+
+
+def bloque_resumen_exportacion(titulo, filas):
+    filas_html = "".join(
+        f"<div class='pdf-row'><div class='pdf-label'>{escape(str(label))}</div><div class='pdf-value'>{escape(texto_pdf(valor))}</div></div>"
+        for label, valor in filas
+    )
+    return f"<section class='pdf-section'><h3>{escape(titulo)}</h3>{filas_html}</section>"
+
+
+def bloque_imagen_exportacion(titulo, data_uri=None, storage_key=None):
+    if not data_uri and not storage_key:
+        return ""
+    attrs = f" data-storage-key='{escape(storage_key)}'" if storage_key else ""
+    src = data_uri or ""
+    return f"""
+    <section class='pdf-section pdf-image-block'{attrs}>
+        <h3>{escape(titulo)}</h3>
+        <img src='{src}' alt='{escape(titulo)}' />
+    </section>
+    """
+
+
+def render_panel_exportacion_pdf():
+    filas_preparacion = [
+        ("Nombres", st.session_state.get("prep_nombres")),
+        ("Apellidos", st.session_state.get("prep_apellidos")),
+        ("Fecha de nacimiento", st.session_state.get("prep_fecha_nac")),
+        ("Examen", st.session_state.get("prep_examen")),
+        ("Peso", f"{st.session_state.get('prep_peso')} kg"),
+        ("Embarazo", st.session_state.get("prep_embarazo")),
+        ("Creatinina", st.session_state.get("prep_creatinina")),
+        ("Medio de contraste EV", st.session_state.get("prep_medio_contraste_ev")),
+        ("Vía venosa", st.session_state.get("prep_via_venosa")),
+        ("Cantidad de contraste", st.session_state.get("prep_cantidad_contraste")),
+        ("Método de inyección", st.session_state.get("prep_metodo_inyeccion")),
+        ("Medio de contraste oral", st.session_state.get("prep_medio_contraste_oral")),
+    ]
+
+    secciones_html = [bloque_resumen_exportacion("Preparación de paciente", filas_preparacion)]
+
+    for prefijo, titulo in [("topo", "Topograma 1"), ("topo2", "Topograma 2")]:
+        if prefijo == "topo2" and not st.session_state.get("mostrar_topo2", False):
+            continue
+        filas_topo = [
+            ("Entrada paciente", st.session_state.get(f"{prefijo}_entrada_paciente")),
+            ("Posicionamiento", st.session_state.get(f"{prefijo}_posicionamiento")),
+            ("Posición del tubo", st.session_state.get(f"{prefijo}_posicion_tubo")),
+            ("Posición de brazos / extremidades", st.session_state.get(f"{prefijo}_posicion_brazos")),
+            ("Región anatómica", st.session_state.get(f"{prefijo}_region_anatomica")),
+            ("Protocolo", st.session_state.get(f"{prefijo}_region")),
+            ("Inicio topograma", st.session_state.get(f"{prefijo}_inicio")),
+            ("Término topograma", st.session_state.get(f"{prefijo}_termino")),
+            ("RX iniciado", "Sí" if st.session_state.get(f"{prefijo}_rx_iniciado") else "No"),
+        ]
+        secciones_html.append(bloque_resumen_exportacion(titulo, filas_topo))
+        if st.session_state.get(f"{prefijo}_rx_iniciado"):
+            data_uri_topo = imagen_a_data_uri(obtener_imagen_rx_topograma(prefijo))
+            if data_uri_topo:
+                secciones_html.append(bloque_imagen_exportacion(f"{titulo} - imagen RX", data_uri_topo))
+
+    snapshot_blocks = []
+    for numero in range(1, 7):
+        pref = adq_prefijo(numero)
+        if numero > 1 and not st.session_state.get(f"mostrar_{pref}", False):
+            continue
+
+        filas_adq = [
+            ("Fase de adquisición", st.session_state.get(f"{pref}_fase_adquisicion")),
+            ("Instrucción de voz", st.session_state.get(f"{pref}_instruccion_voz")),
+            ("Delay", st.session_state.get(f"{pref}_delay")),
+            ("Tipo de exploración", st.session_state.get(f"{pref}_tipo_exploracion")),
+            ("Espesor", st.session_state.get(f"{pref}_espesor")),
+            ("Matriz detectores", st.session_state.get(f"{pref}_matriz_detectores")),
+            ("Cobertura", st.session_state.get(f"{pref}_colimacion")),
+            ("Inicio de adquisición", st.session_state.get(f"{pref}_inicio_adquisicion")),
+            ("Fin de adquisición", st.session_state.get(f"{pref}_fin_adquisicion")),
+            ("Giro de tubo", st.session_state.get(f"{pref}_giro_tubo")),
+            ("Modulación de corriente", st.session_state.get(f"{pref}_modulacion_corriente")),
+            ("kV referencia", st.session_state.get(f"{pref}_kv_referencia")),
+            ("mAs referencia", st.session_state.get(f"{pref}_mas_referencia")),
+            ("kV manual", st.session_state.get(f"{pref}_kv_manual")),
+            ("mAs manual", st.session_state.get(f"{pref}_mas_manual")),
+            ("Pitch", st.session_state.get(f"{pref}_pitch")),
+            ("SFOV", st.session_state.get(f"{pref}_sfov")),
+        ]
+        secciones_html.append(bloque_resumen_exportacion(f"Adquisición {numero}", filas_adq))
+
+        topo1_uri = crear_topograma_data_uri_para_exportacion(
+            obtener_imagen_rx_topograma("topo"),
+            int(st.session_state.get("adq_topo1_limite_superior" if numero == 1 else f"{pref}_topo1_limite_superior", 15)),
+            int(st.session_state.get("adq_topo1_limite_inferior" if numero == 1 else f"{pref}_topo1_limite_inferior", 85)),
+        )
+        if topo1_uri:
+            secciones_html.append(bloque_imagen_exportacion(f"Adquisición {numero} - topograma 1", topo1_uri))
+        if st.session_state.get("mostrar_topo2", False):
+            topo2_uri = crear_topograma_data_uri_para_exportacion(
+                obtener_imagen_rx_topograma("topo2"),
+                int(st.session_state.get("adq_topo2_limite_superior" if numero == 1 else f"{pref}_topo2_limite_superior", 15)),
+                int(st.session_state.get("adq_topo2_limite_inferior" if numero == 1 else f"{pref}_topo2_limite_inferior", 85)),
+            )
+            if topo2_uri:
+                secciones_html.append(bloque_imagen_exportacion(f"Adquisición {numero} - topograma 2", topo2_uri))
+
+        if st.session_state.get(f"{pref}_delay") in ["Bolus tracking", "Bolus test"]:
+            snapshot_blocks.append(bloque_imagen_exportacion(f"Adquisición {numero} - ROI bolus", storage_key=f"sim_tc_snapshot_{pref}_bolus"))
+            snapshot_blocks.append(bloque_imagen_exportacion(f"Adquisición {numero} - corte de bolus topograma 1", storage_key=f"sim_tc_snapshot_{pref}_topo_bolus"))
+            if st.session_state.get("mostrar_topo2", False):
+                snapshot_blocks.append(bloque_imagen_exportacion(f"Adquisición {numero} - corte de bolus topograma 2", storage_key=f"sim_tc_snapshot_{pref}_topo2_bolus"))
+
+    filas_recon = [
+        ("Fase a reconstruir", st.session_state.get("recon_fase")),
+        ("Tipo de reconstrucción", st.session_state.get("recon_tipo")),
+        ("Intensidad", st.session_state.get("recon_intensidad")),
+        ("Filtro kernel", st.session_state.get("recon_kernel")),
+        ("Nivel de ventana", st.session_state.get("recon_nivel_ventana")),
+        ("Ancho de ventana", st.session_state.get("recon_ancho_ventana")),
+        ("Grosor de corte", st.session_state.get("recon_grosor")),
+        ("Incremento", st.session_state.get("recon_incremento")),
+    ]
+    secciones_html.append(bloque_resumen_exportacion("Reconstrucción", filas_recon))
+    secciones_html.append(bloque_imagen_exportacion("Reconstrucción - matriz interactiva", storage_key="sim_tc_snapshot_recon_preview"))
+
+    recon_topo1 = crear_topograma_data_uri_para_exportacion(
+        obtener_imagen_rx_topograma("topo"),
+        int(st.session_state.get("recon_topo1_limite_superior", 15)),
+        int(st.session_state.get("recon_topo1_limite_inferior", 85)),
+        color_inicio=(255, 0, 255),
+        color_fin=(0, 255, 0),
+    )
+    if recon_topo1:
+        secciones_html.append(bloque_imagen_exportacion("Reconstrucción - topograma 1", recon_topo1))
+    if st.session_state.get("mostrar_topo2", False):
+        recon_topo2 = crear_topograma_data_uri_para_exportacion(
+            obtener_imagen_rx_topograma("topo2"),
+            int(st.session_state.get("recon_topo2_limite_superior", 15)),
+            int(st.session_state.get("recon_topo2_limite_inferior", 85)),
+            color_inicio=(255, 0, 255),
+            color_fin=(0, 255, 0),
+        )
+        if recon_topo2:
+            secciones_html.append(bloque_imagen_exportacion("Reconstrucción - topograma 2", recon_topo2))
+
+    filas_reform = [
+        ("Tipo de reformación", st.session_state.get("reform_tipo")),
+        ("Grosor slab", f"{st.session_state.get('reform_grosor')} mm"),
+        ("Orientación", st.session_state.get("reform_orientacion")),
+        ("Observaciones", st.session_state.get("reform_observaciones")),
+    ]
+    filas_jeringa = [
+        ("Tipo de contraste", st.session_state.get("jer_tipo_contraste")),
+        ("Volumen de contraste", f"{st.session_state.get('jer_volumen_contraste')} ml"),
+        ("Flujo", f"{st.session_state.get('jer_flujo')} ml/s"),
+        ("Flush", f"{st.session_state.get('jer_flush')} ml"),
+        ("Tiempo delay", f"{st.session_state.get('jer_tiempo_delay')} s"),
+        ("Sitio de punción", st.session_state.get("jer_sitio_puncion")),
+    ]
+    secciones_html.append(bloque_resumen_exportacion("Reformación", filas_reform))
+    secciones_html.append(bloque_resumen_exportacion("Jeringa inyectora", filas_jeringa))
+
+    contenido_html = "".join(secciones_html + snapshot_blocks)
+
+    html_code = f"""
+    <div style='background:#616161;border:1px solid #7a7a7a;border-radius:12px;padding:16px;'>
+        <div style='display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;'>
+            <div style='color:white;font-weight:700;font-size:18px;'>Exportación PDF de la simulación</div>
+            <button id='btn-exportar-pdf' style='background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;'>Descargar PDF</button>
+        </div>
+        <div style='color:#e8e8e8;font-size:13px;margin-bottom:14px;'>El PDF incluirá los campos completados, las imágenes visibles y las evidencias interactivas guardadas en el navegador.</div>
+        <div id='pdf-preview-root'>
+            {contenido_html}
+        </div>
+    </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'></script>
+    <style>
+        body {{ background:#505050; margin:0; font-family: Arial, Helvetica, sans-serif; }}
+        #pdf-preview-root {{ background:#f3f3f3; color:#222; padding:18px; border-radius:10px; }}
+        .pdf-section {{ background:white; border:1px solid #d7d7d7; border-radius:10px; padding:14px; margin-bottom:14px; break-inside: avoid; }}
+        .pdf-section h3 {{ margin:0 0 12px 0; font-size:16px; color:#111; }}
+        .pdf-row {{ display:flex; gap:12px; padding:6px 0; border-bottom:1px solid #ececec; }}
+        .pdf-row:last-child {{ border-bottom:none; }}
+        .pdf-label {{ width:42%; font-weight:700; }}
+        .pdf-value {{ width:58%; }}
+        .pdf-image-block img {{ width:100%; border:1px solid #dcdcdc; border-radius:8px; display:block; }}
+    </style>
+    <script>
+        (() => {{
+            function leerStorage(key) {{
+                try {{
+                    return window.parent.localStorage.getItem(key) || localStorage.getItem(key);
+                }} catch (e) {{
+                    try {{ return localStorage.getItem(key); }} catch (err) {{ return null; }}
+                }}
+            }}
+
+            document.querySelectorAll('.pdf-image-block[data-storage-key]').forEach((block) => {{
+                const key = block.getAttribute('data-storage-key');
+                const img = block.querySelector('img');
+                const src = leerStorage(key);
+                if (src) {{
+                    img.src = src;
+                }} else {{
+                    block.remove();
+                }}
+            }});
+
+            function descargarPdfDesdeElemento(elemento, nombreArchivo) {{
+                if (!window.html2canvas || !window.jspdf) {{
+                    alert('No fue posible cargar las librerías de exportación PDF.');
+                    return;
+                }}
+                html2canvas(elemento, {{ scale: 2, useCORS: true, backgroundColor: '#f3f3f3' }}).then((canvas) => {{
+                    const {{ jsPDF }} = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pageWidth = 210;
+                    const pageHeight = 297;
+                    const margin = 10;
+                    const usableWidth = pageWidth - margin * 2;
+                    const imgWidth = usableWidth;
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = margin;
+                    const imgData = canvas.toDataURL('image/png');
+
+                    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                    heightLeft -= (pageHeight - margin * 2);
+
+                    while (heightLeft > 0) {{
+                        position = margin - (imgHeight - heightLeft);
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                        heightLeft -= (pageHeight - margin * 2);
+                    }}
+
+                    pdf.save(nombreArchivo);
+                }});
+            }}
+
+            document.getElementById('btn-exportar-pdf').addEventListener('click', () => {{
+                descargarPdfDesdeElemento(document.getElementById('pdf-preview-root'), 'simulacion_tc.pdf');
+            }});
+        }})();
+    </script>
+    """
+
+    components.html(html_code, height=950, scrolling=True)
+
+
 def crear_topograma_con_limites(
     ruta_imagen,
     limite_superior_pct,
@@ -333,6 +628,7 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             const clearBtn = document.getElementById('clear-roi-{key_suffix}');
             const radiusInput = document.getElementById('radius-{key_suffix}');
             const img = new Image();
+            const storageKey = 'sim_tc_snapshot_{key_suffix}';
 
             let hasROI = false;
             let dragging = false;
@@ -523,6 +819,7 @@ def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_l
             const addBtn = document.getElementById('add-line-{key_suffix}');
             const clearBtn = document.getElementById('clear-line-{key_suffix}');
             const img = new Image();
+            const storageKey = 'sim_tc_snapshot_{key_suffix}';
 
             let hasLine = false;
             let dragging = false;
@@ -2113,6 +2410,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             const clearBtn = document.getElementById('clear-matriz-{key_suffix}');
             const sizeInput = document.getElementById('size-{key_suffix}');
             const img = new Image();
+            const storageKey = 'sim_tc_snapshot_{key_suffix}';
 
             let hasBox = false;
             let dragging = false;
@@ -3716,3 +4014,5 @@ elif seccion == "Jeringa inyectora":
 
     if jeringa_completa:
         st.success("Simulación completada.")
+        st.divider()
+        render_panel_exportacion_pdf()
