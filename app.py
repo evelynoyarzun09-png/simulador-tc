@@ -1265,89 +1265,67 @@ def render_nav_links(prev_section):
     st.markdown(
         """
         <style>
-        .nav-wrap {
-            display:flex;
-            gap:16px;
-            align-items:center;
-            margin: 0.15rem 0 0.8rem 0;
-        }
-        .nav-btn-html {
-            border:none;
-            border-radius:14px;
-            padding:14px 22px;
-            font-weight:700;
-            font-size:18px;
-            color:white;
-            cursor:pointer;
-            min-width:260px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-        }
-        .nav-btn-html:hover {
-            filter: brightness(1.05);
-        }
-        .nav-btn-inicio {
-            background:#2f80ed;
-        }
-        .nav-btn-volver {
-            background:#27ae60;
-        }
-        .hidden-nav-button {
-            height:0 !important;
-            overflow:hidden !important;
-            opacity:0 !important;
-            margin:0 !important;
-            padding:0 !important;
-        }
-        .hidden-nav-button div[data-testid="stButton"] {
-            margin:0 !important;
-            padding:0 !important;
-        }
-        .hidden-nav-button div[data-testid="stButton"] > button {
-            height:0 !important;
-            min-height:0 !important;
-            padding:0 !important;
-            border:none !important;
-            opacity:0 !important;
+        .nav-color-script-note {
+            display:none;
         }
         </style>
-
-        <div class="nav-wrap">
-            <button class="nav-btn-html nav-btn-inicio" onclick="clickHiddenNavButton('__NAV_INICIO__')">
-                🏠 VOLVER AL INICIO
-            </button>
-            <button class="nav-btn-html nav-btn-volver" onclick="clickHiddenNavButton('__NAV_VOLVER__')">
-                ⬅ VOLVER
-            </button>
-        </div>
-
-        <script>
-        function clickHiddenNavButton(targetText) {
-            const parentDoc = window.parent.document;
-            const buttons = parentDoc.querySelectorAll('button');
-            for (const btn of buttons) {
-                const text = (btn.innerText || '').trim();
-                if (text === targetText) {
-                    btn.click();
-                    return;
-                }
-            }
-        }
-        </script>
+        <div class="nav-color-script-note"></div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.markdown('<div class="hidden-nav-button">', unsafe_allow_html=True)
-    if st.button("__NAV_INICIO__", key=f"nav_inicio_{st.session_state.seccion}"):
-        st.session_state.seccion = "A Practicar"
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    col_inicio, col_volver, _ = st.columns([1, 1, 2])
 
-    st.markdown('<div class="hidden-nav-button">', unsafe_allow_html=True)
-    if st.button("__NAV_VOLVER__", key=f"nav_volver_{st.session_state.seccion}"):
-        st.session_state.seccion = prev_section
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    with col_inicio:
+        if st.button("🏠 VOLVER AL INICIO", key=f"nav_inicio_{st.session_state.seccion}", use_container_width=True):
+            st.session_state.seccion = "A Practicar"
+            st.rerun()
+
+    with col_volver:
+        if st.button("⬅ VOLVER", key=f"nav_volver_{st.session_state.seccion}", use_container_width=True):
+            st.session_state.seccion = prev_section
+            st.rerun()
+
+    components.html(
+        """
+        <script>
+        (() => {
+            function styleNavButtons() {
+                const parentDoc = window.parent.document;
+                if (!parentDoc) return;
+                const buttons = parentDoc.querySelectorAll('div[data-testid="stButton"] > button');
+                buttons.forEach((btn) => {
+                    const text = (btn.innerText || '').trim();
+                    if (text === '🏠 VOLVER AL INICIO') {
+                        btn.style.background = '#2F80ED';
+                        btn.style.color = 'white';
+                        btn.style.border = 'none';
+                        btn.style.borderRadius = '12px';
+                        btn.style.fontWeight = '700';
+                        btn.style.fontSize = '16px';
+                        btn.style.minHeight = '48px';
+                        btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.18)';
+                    }
+                    if (text === '⬅ VOLVER') {
+                        btn.style.background = '#27AE60';
+                        btn.style.color = 'white';
+                        btn.style.border = 'none';
+                        btn.style.borderRadius = '12px';
+                        btn.style.fontWeight = '700';
+                        btn.style.fontSize = '16px';
+                        btn.style.minHeight = '48px';
+                        btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.18)';
+                    }
+                });
+            }
+            styleNavButtons();
+            const observer = new MutationObserver(() => styleNavButtons());
+            observer.observe(window.parent.document.body, { childList: true, subtree: true });
+        })();
+        </script>
+        """,
+        height=0,
+    )
 
 # -------------------------
 # VALIDACIONES
