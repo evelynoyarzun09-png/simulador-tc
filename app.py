@@ -134,6 +134,7 @@ DEFAULTS = {
     "jer_flush": 30.0,
     "jer_tiempo_delay": 25.0,
     "jer_sitio_puncion": "Seleccionar",
+    "jer_no_usare": False,
 }
 
 for clave, valor in DEFAULTS.items():
@@ -457,14 +458,19 @@ def render_panel_exportacion_pdf():
         ("Orientación", st.session_state.get("reform_orientacion")),
         ("Observaciones", st.session_state.get("reform_observaciones")),
     ]
-    filas_jeringa = [
-        ("Tipo de contraste", st.session_state.get("jer_tipo_contraste")),
-        ("Volumen de contraste", f"{st.session_state.get('jer_volumen_contraste')} ml"),
-        ("Flujo", f"{st.session_state.get('jer_flujo')} ml/s"),
-        ("Flush", f"{st.session_state.get('jer_flush')} ml"),
-        ("Tiempo delay", f"{st.session_state.get('jer_tiempo_delay')} s"),
-        ("Sitio de punción", st.session_state.get("jer_sitio_puncion")),
-    ]
+    if st.session_state.get("jer_no_usare", False):
+        filas_jeringa = [
+            ("Uso de jeringa inyectora", "No la usaré"),
+        ]
+    else:
+        filas_jeringa = [
+            ("Tipo de contraste", st.session_state.get("jer_tipo_contraste")),
+            ("Volumen de contraste", f"{st.session_state.get('jer_volumen_contraste')} ml"),
+            ("Flujo", f"{st.session_state.get('jer_flujo')} ml/s"),
+            ("Flush", f"{st.session_state.get('jer_flush')} ml"),
+            ("Tiempo delay", f"{st.session_state.get('jer_tiempo_delay')} s"),
+            ("Sitio de punción", st.session_state.get("jer_sitio_puncion")),
+        ]
     secciones_html.append(bloque_resumen_exportacion("Reformación", filas_reform))
     secciones_html.append(bloque_resumen_exportacion("Jeringa inyectora", filas_jeringa))
 
@@ -3985,31 +3991,40 @@ elif seccion == "Jeringa inyectora":
         if st.button("⬅ Volver", use_container_width=True):
             volver_anterior(); st.rerun()
 
-    col1, col2 = st.columns(2)
-    with col1:
-        persistent_selectbox("Tipo de contraste", ["Yodado", "No iónico", "Isoosmolar"], "jer_tipo_contraste")
-        persistent_number_input("Volumen de contraste (ml)", "jer_volumen_contraste", min_value=1.0, step=1.0)
-        persistent_number_input("Flujo (ml/s)", "jer_flujo", min_value=0.1, step=0.1)
+    st.toggle("No la usaré", key="jer_no_usare")
 
-    with col2:
-        persistent_number_input("Flush / suero (ml)", "jer_flush", min_value=0.0, step=1.0)
-        persistent_number_input("Tiempo delay (s)", "jer_tiempo_delay", min_value=0.0, step=1.0)
-        persistent_selectbox("Sitio de punción", ["Seleccionar", "MSD", "MSI", "Pliegue antecubital derecho", "Pliegue antecubital izquierdo", "CVC"], "jer_sitio_puncion")
+    if not st.session_state.get("jer_no_usare", False):
+        col1, col2 = st.columns(2)
+        with col1:
+            persistent_selectbox("Tipo de contraste", ["Yodado", "No iónico", "Isoosmolar"], "jer_tipo_contraste")
+            persistent_number_input("Volumen de contraste (ml)", "jer_volumen_contraste", min_value=1.0, step=1.0)
+            persistent_number_input("Flujo (ml/s)", "jer_flujo", min_value=0.1, step=0.1)
 
-    jeringa_completa = all([
-        texto_completo(st.session_state["jer_tipo_contraste"]),
-        seleccion_completa(st.session_state["jer_sitio_puncion"]),
-    ])
+        with col2:
+            persistent_number_input("Flush / suero (ml)", "jer_flush", min_value=0.0, step=1.0)
+            persistent_number_input("Tiempo delay (s)", "jer_tiempo_delay", min_value=0.0, step=1.0)
+            persistent_selectbox("Sitio de punción", ["Seleccionar", "MSD", "MSI", "Pliegue antecubital derecho", "Pliegue antecubital izquierdo", "CVC"], "jer_sitio_puncion")
+
+        jeringa_completa = all([
+            texto_completo(st.session_state["jer_tipo_contraste"]),
+            seleccion_completa(st.session_state["jer_sitio_puncion"]),
+        ])
+    else:
+        jeringa_completa = True
+        st.info("Se omitió el uso de la jeringa inyectora para este caso.")
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-    st.write(f"**Tipo de contraste:** {st.session_state['jer_tipo_contraste']}")
-    st.write(f"**Volumen de contraste:** {st.session_state['jer_volumen_contraste']} ml")
-    st.write(f"**Flujo:** {st.session_state['jer_flujo']} ml/s")
-    st.write(f"**Flush:** {st.session_state['jer_flush']} ml")
-    st.write(f"**Tiempo delay:** {st.session_state['jer_tiempo_delay']} s")
-    st.write(f"**Sitio de punción:** {st.session_state['jer_sitio_puncion']}")
+    if st.session_state.get("jer_no_usare", False):
+        st.write("**Uso de jeringa inyectora:** No la usaré")
+    else:
+        st.write(f"**Tipo de contraste:** {st.session_state['jer_tipo_contraste']}")
+        st.write(f"**Volumen de contraste:** {st.session_state['jer_volumen_contraste']} ml")
+        st.write(f"**Flujo:** {st.session_state['jer_flujo']} ml/s")
+        st.write(f"**Flush:** {st.session_state['jer_flush']} ml")
+        st.write(f"**Tiempo delay:** {st.session_state['jer_tiempo_delay']} s")
+        st.write(f"**Sitio de punción:** {st.session_state['jer_sitio_puncion']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     if jeringa_completa:
