@@ -8,7 +8,7 @@ import base64
 import json
 from html import escape
 import streamlit.components.v1 as components
-from PIL import Image, ImageDraw
+from PIL import Image, ImagexDraw
 from urllib.parse import quote
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
@@ -1262,6 +1262,32 @@ def recon_prefijo(numero):
 
 
 def render_nav_links(prev_section):
+    st.markdown(
+        """
+        <style>
+        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(1) div.stButton > button {
+            background-color: #2f80ed !important;
+            color: white !important;
+            border: 1px solid #2367be !important;
+        }
+        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(1) div.stButton > button:hover {
+            background-color: #276fd0 !important;
+            color: white !important;
+        }
+        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) div.stButton > button {
+            background-color: #27ae60 !important;
+            color: white !important;
+            border: 1px solid #1f8c4d !important;
+        }
+        .nav-color-row + div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) div.stButton > button:hover {
+            background-color: #219150 !important;
+            color: white !important;
+        }
+        </style>
+        <div class="nav-color-row"></div>
+        """,
+        unsafe_allow_html=True,
+    )
     col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
     with col_inicio:
         if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
