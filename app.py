@@ -8,7 +8,7 @@ import base64
 import json
 from html import escape
 import streamlit.components.v1 as components
-from PIL import Image, ImagexDraw
+from PIL import Image, ImageDraw
 from urllib.parse import quote
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
