@@ -1264,41 +1264,90 @@ def recon_prefijo(numero):
 def render_nav_links(prev_section):
     st.markdown(
         """
+        <style>
+        .nav-wrap {
+            display:flex;
+            gap:16px;
+            align-items:center;
+            margin: 0.15rem 0 0.8rem 0;
+        }
+        .nav-btn-html {
+            border:none;
+            border-radius:14px;
+            padding:14px 22px;
+            font-weight:700;
+            font-size:18px;
+            color:white;
+            cursor:pointer;
+            min-width:260px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
+        .nav-btn-html:hover {
+            filter: brightness(1.05);
+        }
+        .nav-btn-inicio {
+            background:#2f80ed;
+        }
+        .nav-btn-volver {
+            background:#27ae60;
+        }
+        .hidden-nav-button {
+            height:0 !important;
+            overflow:hidden !important;
+            opacity:0 !important;
+            margin:0 !important;
+            padding:0 !important;
+        }
+        .hidden-nav-button div[data-testid="stButton"] {
+            margin:0 !important;
+            padding:0 !important;
+        }
+        .hidden-nav-button div[data-testid="stButton"] > button {
+            height:0 !important;
+            min-height:0 !important;
+            padding:0 !important;
+            border:none !important;
+            opacity:0 !important;
+        }
+        </style>
+
+        <div class="nav-wrap">
+            <button class="nav-btn-html nav-btn-inicio" onclick="clickHiddenNavButton('__NAV_INICIO__')">
+                🏠 VOLVER AL INICIO
+            </button>
+            <button class="nav-btn-html nav-btn-volver" onclick="clickHiddenNavButton('__NAV_VOLVER__')">
+                ⬅ VOLVER
+            </button>
+        </div>
+
         <script>
-        (() => {
-            const applyNavButtonColors = () => {
-                const buttons = window.parent.document.querySelectorAll('button');
-                buttons.forEach((btn) => {
-                    const text = (btn.innerText || '').trim();
-                    if (text.includes('Volver al inicio')) {
-                        btn.style.background = '#2f80ed';
-                        btn.style.color = '#ffffff';
-                        btn.style.border = '1px solid #2367be';
-                    }
-                    if (text === '⬅ Volver' || text.endsWith(' Volver') || text === 'Volver' || text.includes('⬅ Volver')) {
-                        btn.style.background = '#27ae60';
-                        btn.style.color = '#ffffff';
-                        btn.style.border = '1px solid #1f8c4d';
-                    }
-                });
-            };
-            applyNavButtonColors();
-            const observer = new MutationObserver(() => applyNavButtonColors());
-            observer.observe(window.parent.document.body, { childList: true, subtree: true });
-        })();
+        function clickHiddenNavButton(targetText) {
+            const parentDoc = window.parent.document;
+            const buttons = parentDoc.querySelectorAll('button');
+            for (const btn of buttons) {
+                const text = (btn.innerText || '').trim();
+                if (text === targetText) {
+                    btn.click();
+                    return;
+                }
+            }
+        }
         </script>
         """,
         unsafe_allow_html=True,
     )
-    col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
-    with col_inicio:
-        if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
-            st.session_state.seccion = "A Practicar"
-            st.rerun()
-    with col_volver:
-        if st.button("⬅ Volver", key=f"volver_anterior_{st.session_state.seccion}", use_container_width=True):
-            st.session_state.seccion = prev_section
-            st.rerun()
+
+    st.markdown('<div class="hidden-nav-button">', unsafe_allow_html=True)
+    if st.button("__NAV_INICIO__", key=f"nav_inicio_{st.session_state.seccion}"):
+        st.session_state.seccion = "A Practicar"
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="hidden-nav-button">', unsafe_allow_html=True)
+    if st.button("__NAV_VOLVER__", key=f"nav_volver_{st.session_state.seccion}"):
+        st.session_state.seccion = prev_section
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # VALIDACIONES
