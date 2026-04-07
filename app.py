@@ -263,15 +263,7 @@ def ajustar_imagen_a_lienzo_uniforme(imagen, tamano_lienzo=(420, 420), color_fon
         return imagen
 
 
-def crear_topograma_con_limites(
-    ruta_imagen,
-    limite_superior_pct,
-    limite_inferior_pct,
-    color_inicio=(0, 255, 255),
-    color_fin=(255, 180, 0),
-    texto_inicio="Inicio",
-    texto_fin="Fin",
-):
+def crear_topograma_con_limites(ruta_imagen, limite_superior_pct, limite_inferior_pct):
     if ruta_imagen is None:
         return None
     ruta = Path(ruta_imagen)
@@ -289,11 +281,11 @@ def crear_topograma_con_limites(
         grosor = max(3, alto // 120)
         margen_texto = max(8, ancho // 40)
 
-        draw.line([(0, y_superior), (ancho, y_superior)], fill=color_inicio, width=grosor)
-        draw.line([(0, y_inferior), (ancho, y_inferior)], fill=color_fin, width=grosor)
+        draw.line([(0, y_superior), (ancho, y_superior)], fill=(0, 255, 255), width=grosor)
+        draw.line([(0, y_inferior), (ancho, y_inferior)], fill=(255, 180, 0), width=grosor)
 
-        draw.text((margen_texto, max(5, y_superior - 22)), texto_inicio, fill=color_inicio)
-        draw.text((margen_texto, max(5, y_inferior - 22)), texto_fin, fill=color_fin)
+        draw.text((margen_texto, max(5, y_superior - 22)), "Inicio", fill=(0, 255, 255))
+        draw.text((margen_texto, max(5, y_inferior - 22)), "Fin", fill=(255, 180, 0))
 
         return ajustar_imagen_a_lienzo_uniforme(imagen)
     except Exception:
@@ -2071,66 +2063,83 @@ def valor_numerico_desde_texto(valor):
     except Exception:
         return None
 
-def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="recon_matrix"):
+def render_video_matriz_reconstruccion_interactiva_html(uploaded_video, key_suffix="recon_video_matrix"):
+    if uploaded_video is None:
+        st.info("Sube un video para visualizar la reconstrucción y ajustar la matriz roja.")
+        return
+
     try:
-        if isinstance(imagen_fuente, Path):
-            ruta = imagen_fuente
-        else:
-            ruta = Path(imagen_fuente)
+        video_bytes = uploaded_video.getvalue()
+        mime_type = getattr(uploaded_video, "type", None) or "video/mp4"
+        video_b64 = base64.b64encode(video_bytes).decode("utf-8")
+        data_uri = f"data:{mime_type};base64,{video_b64}"
 
-        if not ruta.exists():
-            st.info("No se encontró la imagen de reconstrucción.")
-            return
-
-        image_bytes = ruta.read_bytes()
-        sufijo = ruta.suffix.lower()
-        mime = "image/png" if sufijo == ".png" else "image/jpeg"
-        encoded = base64.b64encode(image_bytes).decode("utf-8")
-        data_uri = f"data:{mime};base64,{encoded}"
-
-        html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:560px;margin:0 auto;overflow:visible;">
+        html_template = """
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;max-width:900px;margin:0 auto;overflow:visible;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-                <div style="color:white;font-weight:700;">MATRIZ DE RECONSTRUCCIÓN</div>
+                <div style="color:white;font-weight:700;">VIDEO DE RECONSTRUCCIÓN</div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <button id="add-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
-                    <button id="clear-matriz-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
+                    <button id="add-matriz-__KEY_SUFFIX__" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar matriz</button>
+                    <button id="clear-matriz-__KEY_SUFFIX__" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar matriz</button>
                     <label style="color:white;font-size:14px;">Tamaño matriz</label>
-                    <input id="size-{key_suffix}" type="range" min="2" max="520" value="40" step="1" style="width:130px;"/>
+                    <input id="size-__KEY_SUFFIX__" type="range" min="20" max="520" value="90" step="1" style="width:140px;"/>
                 </div>
             </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Arrastra el cuadrado rojo para mover la matriz de reconstrucción libremente dentro de la imagen.</div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:8px;">Arrastra el cuadrado rojo para mover la matriz. Haz clic o arrastra la barra inferior para recorrer el video con el mouse. También puedes usar la rueda del mouse sobre el visor.</div>
             <div style="display:flex;justify-content:center;overflow:visible;">
-                <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:grab;touch-action:none;display:block;overflow:visible;"></canvas>
+                <div id="wrap-__KEY_SUFFIX__" style="position:relative;width:min(100%,760px);background:#222;border-radius:10px;overflow:hidden;">
+                    <video id="video-__KEY_SUFFIX__" playsinline muted preload="metadata" style="display:block;width:100%;height:auto;background:#111;"></video>
+                    <canvas id="canvas-__KEY_SUFFIX__" style="position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none;display:block;"></canvas>
+                </div>
+            </div>
+            <div style="margin-top:12px;">
+                <div id="timeline-__KEY_SUFFIX__" style="position:relative;height:16px;background:#2d2d2d;border-radius:999px;cursor:pointer;overflow:hidden;">
+                    <div id="progress-__KEY_SUFFIX__" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:#b8bec7;"></div>
+                    <div id="thumb-__KEY_SUFFIX__" style="position:absolute;top:50%;left:0%;width:14px;height:14px;background:#ff4d4d;border-radius:50%;transform:translate(-50%, -50%);"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;color:#d8d8d8;font-size:12px;gap:10px;flex-wrap:wrap;">
+                    <div id="time-__KEY_SUFFIX__">00:00 / 00:00</div>
+                    <div>Rueda del mouse: avanzar / retroceder</div>
+                </div>
             </div>
         </div>
 
         <script>
         (() => {{
-            const canvas = document.getElementById('canvas-{key_suffix}');
+            const video = document.getElementById('video-__KEY_SUFFIX__');
+            const canvas = document.getElementById('canvas-__KEY_SUFFIX__');
             const ctx = canvas.getContext('2d');
-            const addBtn = document.getElementById('add-matriz-{key_suffix}');
-            const clearBtn = document.getElementById('clear-matriz-{key_suffix}');
-            const sizeInput = document.getElementById('size-{key_suffix}');
-            const img = new Image();
+            const addBtn = document.getElementById('add-matriz-__KEY_SUFFIX__');
+            const clearBtn = document.getElementById('clear-matriz-__KEY_SUFFIX__');
+            const sizeInput = document.getElementById('size-__KEY_SUFFIX__');
+            const timeline = document.getElementById('timeline-__KEY_SUFFIX__');
+            const progress = document.getElementById('progress-__KEY_SUFFIX__');
+            const thumb = document.getElementById('thumb-__KEY_SUFFIX__');
+            const timeLabel = document.getElementById('time-__KEY_SUFFIX__');
 
-            let hasBox = false;
-            let dragging = false;
-            let dragOffsetX = 0;
-            let dragOffsetY = 0;
             let cssWidth = 0;
             let cssHeight = 0;
-            let box = {{ x: 0, y: 0, size: 70 }};
+            let hasBox = false;
+            let draggingBox = false;
+            let draggingTimeline = false;
+            let dragOffsetX = 0;
+            let dragOffsetY = 0;
+            let box = {{ x: 0, y: 0, size: 90 }};
 
-            function getCssSize() {{
-                const maxWidth = 360;
-                const width = Math.min((canvas.parentElement?.clientWidth || maxWidth), maxWidth);
-                const height = width * (img.height / img.width);
-                return {{ width, height }};
+            function formatTime(value) {{
+                if (!isFinite(value)) return '00:00';
+                const total = Math.max(0, Math.floor(value));
+                const min = String(Math.floor(total / 60)).padStart(2, '0');
+                const sec = String(total % 60).padStart(2, '0');
+                return `${{min}}:${{sec}}`;
+            }}
+
+            function updateTimeLabel() {{
+                timeLabel.textContent = `${{formatTime(video.currentTime)}} / ${{formatTime(video.duration)}}`;
             }}
 
             function syncSliderMax() {{
-                const maxSquare = Math.max(18, Math.floor(Math.min(cssWidth, cssHeight)));
+                const maxSquare = Math.max(20, Math.floor(Math.min(cssWidth, cssHeight)));
                 sizeInput.max = String(maxSquare);
                 if (parseInt(sizeInput.value, 10) > maxSquare) {{
                     sizeInput.value = String(maxSquare);
@@ -2142,12 +2151,11 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             }}
 
             function resizeCanvas() {{
-                if (!img.width) return;
+                if (!video.videoWidth || !video.videoHeight) return;
+                const rect = video.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                const size = getCssSize();
-                cssWidth = size.width;
-                cssHeight = size.height;
-
+                cssWidth = rect.width;
+                cssHeight = rect.height;
                 canvas.style.width = cssWidth + 'px';
                 canvas.style.height = cssHeight + 'px';
                 canvas.width = Math.round(cssWidth * dpr);
@@ -2158,15 +2166,28 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             }}
 
             function draw() {{
-                if (!img.width) return;
                 ctx.clearRect(0, 0, cssWidth, cssHeight);
-                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
-                if (hasBox) {{
-                    const half = box.size / 2;
-                    ctx.strokeStyle = 'red';
-                    ctx.lineWidth = 1.2;
-                    ctx.strokeRect(box.x - half, box.y - half, box.size, box.size);
-                }}
+                if (!hasBox) return;
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(box.x, box.y, box.size, box.size);
+                ctx.fillStyle = 'rgba(255,0,0,0.12)';
+                ctx.fillRect(box.x, box.y, box.size, box.size);
+            }}
+
+            function clampBox() {{
+                box.x = Math.max(0, Math.min(cssWidth - box.size, box.x));
+                box.y = Math.max(0, Math.min(cssHeight - box.size, box.y));
+            }}
+
+            function updateTimelineUI() {{
+                const fraction = (video.duration && isFinite(video.duration) && video.duration > 0)
+                    ? Math.min(1, Math.max(0, video.currentTime / video.duration))
+                    : 0;
+                const pct = fraction * 100;
+                progress.style.width = pct + '%';
+                thumb.style.left = pct + '%';
+                updateTimeLabel();
             }}
 
             function getPointerPos(event) {{
@@ -2179,23 +2200,50 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 return {{ x: clientX - rect.left, y: clientY - rect.top }};
             }}
 
-            function clampBox() {{
-                const half = box.size / 2;
-                box.x = Math.max(half, Math.min(cssWidth - half, box.x));
-                box.y = Math.max(half, Math.min(cssHeight - half, box.y));
+            function pointHitsBox(pos) {{
+                return hasBox
+                    && pos.x >= box.x - 8
+                    && pos.x <= box.x + box.size + 8
+                    && pos.y >= box.y - 8
+                    && pos.y <= box.y + box.size + 8;
             }}
 
-            function pointHitsBox(pos) {{
-                const half = box.size / 2;
-                return pos.x >= (box.x - half - 10) && pos.x <= (box.x + half + 10) && pos.y >= (box.y - half - 10) && pos.y <= (box.y + half + 10);
+            function seekFromClientX(clientX) {{
+                const rect = timeline.getBoundingClientRect();
+                const fraction = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                if (video.duration && isFinite(video.duration)) {{
+                    video.currentTime = fraction * video.duration;
+                }}
+                updateTimelineUI();
+                draw();
+            }}
+
+            function startTimelineDrag(event) {{
+                draggingTimeline = true;
+                const touch = event.touches && event.touches[0] ? event.touches[0] : null;
+                const clientX = touch ? touch.clientX : event.clientX;
+                seekFromClientX(clientX);
+                event.preventDefault();
+            }}
+
+            function moveTimelineDrag(event) {{
+                if (!draggingTimeline) return;
+                const touch = event.touches && event.touches[0] ? event.touches[0] : null;
+                const clientX = touch ? touch.clientX : event.clientX;
+                seekFromClientX(clientX);
+                event.preventDefault();
+            }}
+
+            function stopTimelineDrag() {{
+                draggingTimeline = false;
             }}
 
             addBtn.addEventListener('click', (event) => {{
                 event.preventDefault();
                 hasBox = true;
                 box.size = parseInt(sizeInput.value, 10);
-                box.x = cssWidth / 2;
-                box.y = cssHeight / 2;
+                box.x = Math.max(0, (cssWidth - box.size) / 2);
+                box.y = Math.max(0, (cssHeight - box.size) / 2);
                 clampBox();
                 draw();
             }});
@@ -2203,7 +2251,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
             clearBtn.addEventListener('click', (event) => {{
                 event.preventDefault();
                 hasBox = false;
-                dragging = false;
+                draggingBox = false;
                 canvas.style.cursor = 'grab';
                 draw();
             }});
@@ -2214,193 +2262,113 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
                 draw();
             }});
 
-            function startDragging(event) {{
-                if (!hasBox) return;
+            canvas.addEventListener('mousedown', (event) => {{
                 const pos = getPointerPos(event);
                 if (pointHitsBox(pos)) {{
-                    dragging = true;
+                    draggingBox = true;
                     dragOffsetX = pos.x - box.x;
                     dragOffsetY = pos.y - box.y;
                     canvas.style.cursor = 'grabbing';
                     event.preventDefault();
                 }}
-            }}
+            }});
 
-            function moveDragging(event) {{
-                if (!dragging || !hasBox) return;
+            window.addEventListener('mousemove', (event) => {{
+                if (!draggingBox) return;
                 const pos = getPointerPos(event);
                 box.x = pos.x - dragOffsetX;
                 box.y = pos.y - dragOffsetY;
                 clampBox();
                 draw();
                 event.preventDefault();
-            }}
+            }});
 
-            function stopDragging() {{
-                dragging = false;
+            window.addEventListener('mouseup', () => {{
+                draggingBox = false;
                 canvas.style.cursor = hasBox ? 'grab' : 'default';
-            }}
+            }});
 
-            canvas.addEventListener('mousedown', startDragging);
-            window.addEventListener('mousemove', moveDragging);
-            window.addEventListener('mouseup', stopDragging);
+            canvas.addEventListener('touchstart', (event) => {{
+                const pos = getPointerPos(event);
+                if (pointHitsBox(pos)) {{
+                    draggingBox = true;
+                    dragOffsetX = pos.x - box.x;
+                    dragOffsetY = pos.y - box.y;
+                    canvas.style.cursor = 'grabbing';
+                    event.preventDefault();
+                }}
+            }}, {{ passive: false }});
 
-            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
-            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
-            window.addEventListener('touchend', stopDragging);
-            window.addEventListener('touchcancel', stopDragging);
+            window.addEventListener('touchmove', (event) => {{
+                if (!draggingBox) return;
+                const pos = getPointerPos(event);
+                box.x = pos.x - dragOffsetX;
+                box.y = pos.y - dragOffsetY;
+                clampBox();
+                draw();
+                event.preventDefault();
+            }}, {{ passive: false }});
+
+            window.addEventListener('touchend', () => {{
+                draggingBox = false;
+                canvas.style.cursor = hasBox ? 'grab' : 'default';
+            }});
+            window.addEventListener('touchcancel', () => {{
+                draggingBox = false;
+                canvas.style.cursor = hasBox ? 'grab' : 'default';
+            }});
 
             canvas.addEventListener('click', (event) => {{
-                if (!hasBox || dragging) return;
+                if (!hasBox || draggingBox) return;
                 const pos = getPointerPos(event);
-                box.x = pos.x;
-                box.y = pos.y;
+                box.x = pos.x - (box.size / 2);
+                box.y = pos.y - (box.size / 2);
                 clampBox();
                 draw();
             }});
 
-            img.onload = () => {{
-                resizeCanvas();
-                box.x = cssWidth / 2;
-                box.y = cssHeight / 2;
-                draw();
-                window.addEventListener('resize', resizeCanvas);
-            }};
+            timeline.addEventListener('mousedown', startTimelineDrag);
+            timeline.addEventListener('touchstart', startTimelineDrag, {{ passive: false }});
+            window.addEventListener('mousemove', moveTimelineDrag);
+            window.addEventListener('touchmove', moveTimelineDrag, {{ passive: false }});
+            window.addEventListener('mouseup', stopTimelineDrag);
+            window.addEventListener('touchend', stopTimelineDrag);
+            window.addEventListener('touchcancel', stopTimelineDrag);
 
-            img.src = '{data_uri}';
+            document.getElementById('wrap-__KEY_SUFFIX__').addEventListener('wheel', (event) => {{
+                if (!video.duration || !isFinite(video.duration)) return;
+                event.preventDefault();
+                const delta = event.deltaY > 0 ? 0.08 : -0.08;
+                video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + delta));
+                updateTimelineUI();
+                draw();
+            }}, {{ passive: false }});
+
+            video.addEventListener('loadedmetadata', () => {{
+                video.pause();
+                resizeCanvas();
+                updateTimelineUI();
+                window.addEventListener('resize', resizeCanvas);
+            }});
+
+            video.addEventListener('timeupdate', () => {{
+                updateTimelineUI();
+                draw();
+            }});
+
+            video.addEventListener('seeked', draw);
+            video.addEventListener('pause', draw);
+            video.addEventListener('play', () => video.pause());
+
+            video.src = '__DATA_URI__';
         }})();
         </script>
         """
 
-        components.html(html_code, height=520)
+        html_code = html_template.replace("__KEY_SUFFIX__", str(key_suffix)).replace("__DATA_URI__", data_uri)
+        components.html(html_code, height=760)
     except Exception as e:
-        st.warning(f"No fue posible cargar la matriz de reconstrucción interactiva: {e}")
-
-
-def obtener_nombre_imagen_reconstruccion():
-    protocolo = st.session_state.get("topo_region", "Seleccionar")
-    fase = st.session_state.get("recon_fase", "Seleccionar")
-    kernel = st.session_state.get("recon_kernel", "Seleccionar")
-    nivel = valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana", ""))
-    ancho = valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana", ""))
-
-    if not all([
-        seleccion_completa(protocolo),
-        seleccion_completa(fase),
-        seleccion_completa(kernel),
-        nivel is not None,
-        ancho is not None,
-    ]):
-        return None
-
-    protocolo_norm = corregir_nombre_imagen(protocolo)
-    fase_norm = corregir_nombre_imagen(fase)
-    kernel_norm = corregir_nombre_imagen(kernel)
-
-    reglas = [
-        {
-            "protocolo": "cerebro",
-            "fase": "sin_contraste",
-            "kernels": {"standar_30f", "suave_20f"},
-            "nivel_min": 40,
-            "nivel_max": 60,
-            "ancho_min": 100,
-            "ancho_max": 140,
-            "imagen": "cerebro_sin_contraste_blanda",
-        },
-        {
-            "protocolo": "cerebro",
-            "fase": "sin_contraste",
-            "kernels": {"definidon_70f", "ultradefinido_80f", "definido_70f", "ultradefinido"},
-            "nivel_min": 500,
-            "nivel_max": 800,
-            "ancho_min": 1500,
-            "ancho_max": 2500,
-            "imagen": "cerebro_sin_contraste_oseo",
-        },
-    ]
-
-    for regla in reglas:
-        if (
-            protocolo_norm == regla["protocolo"]
-            and fase_norm == regla["fase"]
-            and kernel_norm in regla["kernels"]
-            and regla["nivel_min"] <= nivel <= regla["nivel_max"]
-            and regla["ancho_min"] <= ancho <= regla["ancho_max"]
-        ):
-            return regla["imagen"]
-
-    return None
-
-
-def obtener_archivo_imagen_reconstruccion():
-    nombre = obtener_nombre_imagen_reconstruccion()
-    if not nombre:
-        return None
-    return buscar_archivo_imagen_por_nombre(nombre)
-
-
-
-def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
-    entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
-    posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
-    tubo = st.session_state.get(f"{prefijo_estado}_posicion_tubo", "Seleccionar")
-
-    if (
-        entrada == "Seleccionar"
-        or posicionamiento == "Seleccionar"
-        or tubo == "Seleccionar"
-    ):
-        return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
-
-    entrada_norm = normalizar_texto_archivo(entrada)
-    posicionamiento_norm = normalizar_texto_archivo(posicionamiento)
-    tubo_norm = normalizar_texto_archivo(tubo)
-
-    variantes_tubo = [tubo_norm]
-    if tubo_norm == "derecha":
-        variantes_tubo.append("derecho")
-    elif tubo_norm == "izquierda":
-        variantes_tubo.append("izquierdo")
-
-    candidatos = []
-    extensiones = [".png", ".jpg", ".jpeg", ".webp"]
-
-    for tubo_variante in variantes_tubo:
-        bases = [
-            f"topograma_{entrada_norm}_{posicionamiento_norm}_{tubo_variante}",
-            f"topograma_{entrada_norm}__{posicionamiento_norm}__{tubo_variante}",
-            f"topograma_{entrada_norm}_{posicionamiento_norm}__{tubo_variante}",
-            f"topograma_{entrada_norm}__{posicionamiento_norm}_{tubo_variante}",
-        ]
-        for base in bases:
-            for ext in extensiones:
-                candidatos.append(f"{base}{ext}")
-
-    candidatos_unicos = []
-    for nombre in candidatos:
-        if nombre not in candidatos_unicos:
-            candidatos_unicos.append(nombre)
-
-    for nombre in candidatos_unicos:
-        ruta_imagen = BASE_DIR / nombre
-        if ruta_imagen.exists():
-            if sufijo_imagen:
-                st.session_state[f"nombre_topograma_actual_{sufijo_imagen}"] = nombre
-            else:
-                st.session_state["nombre_topograma_actual"] = nombre
-            return ruta_imagen
-
-    return TOPOGRAMA_IMG if TOPOGRAMA_IMG.exists() else None
-
-
-def obtener_imagen_topograma():
-    return obtener_imagen_topograma_generico("topo", "")
-
-def obtener_imagen_topograma_por_prefijo(prefijo_estado="topo"):
-    if prefijo_estado == "topo":
-        return obtener_imagen_topograma_generico("topo", "")
-    return obtener_imagen_topograma_generico(prefijo_estado, prefijo_estado)
+        st.warning(f"No fue posible cargar el video interactivo de reconstrucción: {e}")
 
 
 def obtener_imagen_rx_topograma(prefijo_estado="topo"):
@@ -2746,15 +2714,7 @@ def render_topogramas_reconstruccion():
 
                 if limite_superior >= limite_inferior:
                     st.warning("El límite superior debe quedar por encima del inferior.")
-                imagen_con_limites = crear_topograma_con_limites(
-                    imagen_topo,
-                    limite_superior,
-                    limite_inferior,
-                    color_inicio=(255, 0, 255),
-                    color_fin=(0, 255, 0),
-                    texto_inicio="Inicio",
-                    texto_fin="Fin",
-                )
+                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
                 if imagen_con_limites is not None:
                     st.image(imagen_con_limites, width=260)
                 else:
@@ -3538,35 +3498,16 @@ elif seccion == "Adquisición":
 elif seccion == "Reconstrucción":
     st.header("Reconstrucción")
 
-    imagen_recon = obtener_archivo_imagen_reconstruccion()
-    topograma_recon_disponible = obtener_imagen_rx_topograma("topo") is not None or (
-        st.session_state.get("mostrar_topo2", False) and obtener_imagen_rx_topograma("topo2") is not None
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Video de reconstrucción</div>', unsafe_allow_html=True)
+    archivo_video_recon = st.file_uploader(
+        "Subir video de reconstrucción",
+        type=["mp4", "mov", "webm", "m4v"],
+        key="recon_video_uploader",
+        help="Sube un video para recorrerlo con el mouse y ajustar la matriz roja sobre el visor."
     )
-    if imagen_recon is not None or topograma_recon_disponible:
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        col_recon, col_topo = st.columns([1.2, 1], vertical_alignment="top")
-        with col_recon:
-            st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-            if imagen_recon is not None:
-                render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix="recon_preview")
-            else:
-                st.info("No se encontró la imagen de reconstrucción, pero sí el topograma seleccionado para delimitar el rango de reconstrucción.")
-        with col_topo:
-            render_topogramas_reconstruccion()
-        st.markdown('</div>', unsafe_allow_html=True)
-    elif (
-        st.session_state.get("topo_region") == "cerebro"
-        and st.session_state.get("recon_fase") == "Sin contraste"
-        and st.session_state.get("recon_kernel") in ["Standar 30f", "Suave 20f"]
-        and valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana")) is not None
-        and valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana")) is not None
-        and 40 <= valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana")) <= 60
-        and 100 <= valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana")) <= 140
-    ):
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-        st.info("Se activó una regla de imagen, pero no se encontró el archivo correspondiente en la carpeta de la app.")
-        st.markdown('</div>', unsafe_allow_html=True)
+    render_video_matriz_reconstruccion_interactiva_html(archivo_video_recon, key_suffix="recon_video_preview")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     colv1, colv2, colv3 = st.columns([1, 6, 1])
     with colv1:
