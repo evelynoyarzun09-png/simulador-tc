@@ -981,7 +981,7 @@ MAPA_REGION_ANATOMICA_A_PROTOCOLOS = {
     "pelvis": ["Seleccionar", "pelvis"],
     "columnas": ["Seleccionar", "columna cervical", "columna dorsal", "columna lumbar"],
     "extremidad superior": ["Seleccionar", "hombro", "brazo", "codo", "antebrazo", "muñeca", "mano"],
-    "extremidad inferior": ["Seleccionar", "cadera", "muslo", "rodilla", "pierna", "tobillo", "pie"],
+    "extremidad inferior": ["Seleccionar", "cadera", "rodilla", "muslo", "pierna", "tobillo", "pie"],
     "angiotac": [
         "Seleccionar",
         "angiotac extremidad superior derecha",
