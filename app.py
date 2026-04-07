@@ -1262,46 +1262,43 @@ def recon_prefijo(numero):
 
 
 def render_nav_links(prev_section):
-    st.markdown(
+    components.html(
         """
         <script>
         (() => {
+            const applyButtonStyle = (btn, bg, border) => {
+                if (!btn) return;
+                btn.style.setProperty('background', bg, 'important');
+                btn.style.setProperty('background-color', bg, 'important');
+                btn.style.setProperty('color', '#ffffff', 'important');
+                btn.style.setProperty('border', `1px solid ${border}`, 'important');
+                btn.style.setProperty('box-shadow', '0 2px 6px rgba(0,0,0,0.18)', 'important');
+            };
+
             const paintNavButtons = () => {
-                const docs = [window.document];
+                let doc = null;
                 try {
-                    if (window.parent && window.parent.document) docs.push(window.parent.document);
-                } catch (e) {}
+                    doc = window.parent && window.parent.document ? window.parent.document : document;
+                } catch (e) {
+                    doc = document;
+                }
 
-                docs.forEach((doc) => {
-                    const buttons = doc.querySelectorAll('button');
-                    buttons.forEach((btn) => {
-                        const text = (btn.innerText || btn.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-
-                        if (text.includes('volver al inicio')) {
-                            btn.style.setProperty('background', '#2f80ed', 'important');
-                            btn.style.setProperty('background-color', '#2f80ed', 'important');
-                            btn.style.setProperty('color', '#ffffff', 'important');
-                            btn.style.setProperty('border', '1px solid #2367be', 'important');
-                            btn.style.setProperty('box-shadow', '0 2px 6px rgba(0,0,0,0.18)', 'important');
-                        }
-
-                        if (text === '⬅ volver' || text.endsWith(' volver') || text === 'volver' || text.includes('⬅ volver')) {
-                            btn.style.setProperty('background', '#27ae60', 'important');
-                            btn.style.setProperty('background-color', '#27ae60', 'important');
-                            btn.style.setProperty('color', '#ffffff', 'important');
-                            btn.style.setProperty('border', '1px solid #1f8c4d', 'important');
-                            btn.style.setProperty('box-shadow', '0 2px 6px rgba(0,0,0,0.18)', 'important');
-                        }
-                    });
+                const buttons = Array.from(doc.querySelectorAll('button'));
+                buttons.forEach((btn) => {
+                    const text = (btn.innerText || btn.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                    if (text.includes('volver al inicio')) {
+                        applyButtonStyle(btn, '#2f80ed', '#2367be');
+                    } else if (text === '⬅ volver' || text === 'volver' || text.includes('⬅ volver')) {
+                        applyButtonStyle(btn, '#27ae60', '#1f8c4d');
+                    }
                 });
             };
 
             paintNavButtons();
-            setTimeout(paintNavButtons, 150);
-            setTimeout(paintNavButtons, 500);
-            setTimeout(paintNavButtons, 1000);
-            setInterval(paintNavButtons, 1200);
-
+            setTimeout(paintNavButtons, 100);
+            setTimeout(paintNavButtons, 300);
+            setTimeout(paintNavButtons, 700);
+            setTimeout(paintNavButtons, 1200);
             try {
                 const observer = new MutationObserver(() => paintNavButtons());
                 observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
@@ -1309,7 +1306,8 @@ def render_nav_links(prev_section):
         })();
         </script>
         """,
-        unsafe_allow_html=True,
+        height=0,
+        width=0,
     )
     col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
     with col_inicio:
