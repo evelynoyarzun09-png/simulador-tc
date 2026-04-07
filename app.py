@@ -114,6 +114,10 @@ DEFAULTS = {
     "recon_ancho_ventana": "Seleccionar",
     "recon_grosor": "Seleccionar",
     "recon_incremento": "Seleccionar",
+    "recon_topo1_limite_superior": 15,
+    "recon_topo1_limite_inferior": 85,
+    "recon_topo2_limite_superior": 15,
+    "recon_topo2_limite_inferior": 85,
 
     # Reformación
     "reform_tipo": [],
@@ -2688,6 +2692,90 @@ def render_topogramas_adquisicion(numero=1):
             )
 
 
+def render_topogramas_reconstruccion():
+    mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
+    imagen_topo_1 = obtener_imagen_rx_topograma("topo")
+    imagen_topo_2 = obtener_imagen_rx_topograma("topo2") if mostrar_topo2 else None
+
+    st.markdown('<div class="titulo-bloque">Topograma seleccionado para reconstrucción</div>', unsafe_allow_html=True)
+    st.caption("Ajusta de forma interactiva el inicio y el fin de la reconstrucción en el topograma.")
+
+    if mostrar_topo2:
+        topo_col1, topo_col2 = st.columns(2)
+        bloques_topo = [
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "recon_topo1_limite_superior", "recon_topo1_limite_inferior"),
+            (topo_col2, "topo2", "Topograma 2", imagen_topo_2, "recon_topo2_limite_superior", "recon_topo2_limite_inferior"),
+        ]
+    else:
+        margen1, topo_col1, margen2 = st.columns([1.2, 1.6, 1.2])
+        bloques_topo = [
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "recon_topo1_limite_superior", "recon_topo1_limite_inferior"),
+        ]
+
+    for columna_topo, prefijo_topo, titulo_topo, imagen_topo, key_sup, key_inf in bloques_topo:
+        with columna_topo:
+            st.markdown(
+                f"""
+                <div style="font-weight:700; color:white; margin-bottom:0.35rem; text-align:center;">{titulo_topo}</div>
+                """,
+                unsafe_allow_html=True
+            )
+            if imagen_topo is not None and imagen_topo.exists():
+                limite_superior = st.slider(
+                    "Inicio reconstrucción",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_sup, 15)),
+                    key=key_sup,
+                )
+                limite_inferior = st.slider(
+                    "Fin reconstrucción",
+                    min_value=0,
+                    max_value=100,
+                    value=int(st.session_state.get(key_inf, 85)),
+                    key=key_inf,
+                )
+
+                if limite_superior >= limite_inferior:
+                    st.warning("El límite superior debe quedar por encima del inferior.")
+                imagen_con_limites = crear_topograma_con_limites(imagen_topo, limite_superior, limite_inferior)
+                if imagen_con_limites is not None:
+                    st.image(imagen_con_limites, width=260)
+                else:
+                    try:
+                        imagen_base = ajustar_imagen_a_lienzo_uniforme(Image.open(imagen_topo).convert("RGB"))
+                        st.image(imagen_base, width=260)
+                    except Exception:
+                        mostrar_imagen_actualizada(imagen_topo, width=260)
+            else:
+                st.markdown(
+                    """
+                    <div style="
+                        min-height:160px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:1px solid #7a7a7a;
+                        border-radius:14px;
+                        background-color:#4a4a4a;
+                        color:white;
+                        font-weight:600;
+                        text-align:center;
+                        padding:0.45rem;
+                    ">
+                        No se encontró la imagen del topograma seleccionado
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.caption(
+                f"{st.session_state.get(f'{prefijo_topo}_region', 'Seleccionar')} · "
+                f"{st.session_state.get(f'{prefijo_topo}_posicionamiento', 'Seleccionar')} · "
+                f"tubo {str(st.session_state.get(f'{prefijo_topo}_posicion_tubo', 'Seleccionar')).lower()}"
+            )
+
+
 PROTOCOLO_LONGITUD_REFERENCIA_CM = {
     "cerebro": 25.0,
     "cavidades perinasales": 15.0,
@@ -3435,10 +3523,20 @@ elif seccion == "Reconstrucción":
     st.header("Reconstrucción")
 
     imagen_recon = obtener_archivo_imagen_reconstruccion()
-    if imagen_recon is not None:
+    topograma_recon_disponible = obtener_imagen_rx_topograma("topo") is not None or (
+        st.session_state.get("mostrar_topo2", False) and obtener_imagen_rx_topograma("topo2") is not None
+    )
+    if imagen_recon is not None or topograma_recon_disponible:
         st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-        render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix="recon_preview")
+        col_recon, col_topo = st.columns([1.2, 1], vertical_alignment="top")
+        with col_recon:
+            st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
+            if imagen_recon is not None:
+                render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix="recon_preview")
+            else:
+                st.info("No se encontró la imagen de reconstrucción, pero sí el topograma seleccionado para delimitar el rango de reconstrucción.")
+        with col_topo:
+            render_topogramas_reconstruccion()
         st.markdown('</div>', unsafe_allow_html=True)
     elif (
         st.session_state.get("topo_region") == "cerebro"
