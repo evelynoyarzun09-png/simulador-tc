@@ -1264,39 +1264,38 @@ def recon_prefijo(numero):
 def render_nav_links(prev_section):
     st.markdown(
         """
-        <style>
-        .nav-blue-marker + div div.stButton > button {
-            background-color: #2f80ed !important;
-            color: white !important;
-            border: 1px solid #2367be !important;
-        }
-        .nav-blue-marker + div div.stButton > button:hover {
-            background-color: #276fd0 !important;
-            color: white !important;
-            border: 1px solid #2367be !important;
-        }
-        .nav-green-marker + div div.stButton > button {
-            background-color: #27ae60 !important;
-            color: white !important;
-            border: 1px solid #1f8c4d !important;
-        }
-        .nav-green-marker + div div.stButton > button:hover {
-            background-color: #219150 !important;
-            color: white !important;
-            border: 1px solid #1f8c4d !important;
-        }
-        </style>
+        <script>
+        (() => {
+            const applyNavButtonColors = () => {
+                const buttons = window.parent.document.querySelectorAll('button');
+                buttons.forEach((btn) => {
+                    const text = (btn.innerText || '').trim();
+                    if (text.includes('Volver al inicio')) {
+                        btn.style.background = '#2f80ed';
+                        btn.style.color = '#ffffff';
+                        btn.style.border = '1px solid #2367be';
+                    }
+                    if (text === '⬅ Volver' || text.endsWith(' Volver') || text === 'Volver' || text.includes('⬅ Volver')) {
+                        btn.style.background = '#27ae60';
+                        btn.style.color = '#ffffff';
+                        btn.style.border = '1px solid #1f8c4d';
+                    }
+                });
+            };
+            applyNavButtonColors();
+            const observer = new MutationObserver(() => applyNavButtonColors());
+            observer.observe(window.parent.document.body, { childList: true, subtree: true });
+        })();
+        </script>
         """,
         unsafe_allow_html=True,
     )
     col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
     with col_inicio:
-        st.markdown('<div class="nav-blue-marker"></div>', unsafe_allow_html=True)
         if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
             st.session_state.seccion = "A Practicar"
             st.rerun()
     with col_volver:
-        st.markdown('<div class="nav-green-marker"></div>', unsafe_allow_html=True)
         if st.button("⬅ Volver", key=f"volver_anterior_{st.session_state.seccion}", use_container_width=True):
             st.session_state.seccion = prev_section
             st.rerun()
