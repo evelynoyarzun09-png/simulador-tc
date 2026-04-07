@@ -1813,7 +1813,25 @@ pies primero	lateral derecho 	izquierda	angiotac extremidad inferior	angiotac ex
 pies primero	lateral izquierdo 	arriba	angiotac extremidad inferior	angiotac extremidad inferior lateral 
 pies primero	lateral izquierdo 	abajo	angiotac extremidad inferior	angiotac extremidad inferior lateral 
 pies primero	lateral izquierdo 	derecha 	angiotac extremidad inferior	angiotac extremidad inferior frontal
-pies primero	lateral izquierdo 	izquierda	angiotac extremidad inferior	angiotac extremidad inferior frontal"""
+pies primero	lateral izquierdo 	izquierda	angiotac extremidad inferior	angiotac extremidad inferior frontal
+
+pies primero	supino	arriba	muslo	muslo frontal
+pies primero	supino	abajo	muslo	muslo frontal
+pies primero	supino	derecha 	muslo	muslo lateral 
+pies primero	supino	izquierda	muslo	muslo lateral 
+pies primero	prono	arriba	muslo	muslo frontal
+pies primero	prono	abajo	muslo	muslo frontal
+pies primero	prono	derecha 	muslo	muslo lateral 
+pies primero	prono	izquierda	muslo	muslo lateral 
+pies primero	lateral derecho 	arriba	muslo	muslo lateral 
+pies primero	lateral derecho 	abajo	muslo	muslo lateral 
+pies primero	lateral derecho 	derecha 	muslo	muslo frontal
+pies primero	lateral derecho 	izquierda	muslo	muslo frontal
+pies primero	lateral izquierdo 	arriba	muslo	muslo lateral 
+pies primero	lateral izquierdo 	abajo	muslo	muslo lateral 
+pies primero	lateral izquierdo 	derecha 	muslo	muslo frontal
+pies primero	lateral izquierdo 	izquierda	muslo	muslo frontal
+"""
 
 def cargar_reglas_rx_desde_tsv(tsv_texto):
     reglas = {}
