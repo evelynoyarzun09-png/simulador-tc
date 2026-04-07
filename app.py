@@ -116,6 +116,9 @@ DEFAULTS = {
     "recon_ancho_ventana": "Seleccionar",
     "recon_grosor": "Seleccionar",
     "recon_incremento": "Seleccionar",
+    "recon_imagen_subida_bytes": None,
+    "recon_imagen_subida_nombre": "",
+    "recon_imagen_subida_mime": "",
     "recon_topo1_limite_superior": 15,
     "recon_topo1_limite_inferior": 85,
     "recon_topo2_limite_superior": 15,
@@ -2376,18 +2379,33 @@ def valor_numerico_desde_texto(valor):
 
 def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="recon_matrix"):
     try:
-        if isinstance(imagen_fuente, Path):
-            ruta = imagen_fuente
-        else:
-            ruta = Path(imagen_fuente)
+        image_bytes = None
+        mime = "image/png"
 
-        if not ruta.exists():
+        if isinstance(imagen_fuente, dict):
+            image_bytes = imagen_fuente.get("bytes")
+            mime = imagen_fuente.get("mime", "image/png") or "image/png"
+        elif isinstance(imagen_fuente, Image.Image):
+            buffer = BytesIO()
+            imagen_fuente.save(buffer, format="PNG")
+            image_bytes = buffer.getvalue()
+            mime = "image/png"
+        elif hasattr(imagen_fuente, "getvalue"):
+            image_bytes = imagen_fuente.getvalue()
+            mime = getattr(imagen_fuente, "type", "image/png") or "image/png"
+        else:
+            ruta = imagen_fuente if isinstance(imagen_fuente, Path) else Path(imagen_fuente)
+            if not ruta.exists():
+                st.info("No se encontró la imagen de reconstrucción.")
+                return
+            image_bytes = ruta.read_bytes()
+            sufijo = ruta.suffix.lower()
+            mime = "image/png" if sufijo == ".png" else "image/jpeg"
+
+        if not image_bytes:
             st.info("No se encontró la imagen de reconstrucción.")
             return
 
-        image_bytes = ruta.read_bytes()
-        sufijo = ruta.suffix.lower()
-        mime = "image/png" if sufijo == ".png" else "image/jpeg"
         encoded = base64.b64encode(image_bytes).decode("utf-8")
         data_uri = f"data:{mime};base64,{encoded}"
 
@@ -2643,6 +2661,33 @@ def obtener_archivo_imagen_reconstruccion():
         return None
     return buscar_archivo_imagen_por_nombre(nombre)
 
+
+def limpiar_imagen_reconstruccion_subida():
+    st.session_state["recon_imagen_subida_bytes"] = None
+    st.session_state["recon_imagen_subida_nombre"] = ""
+    st.session_state["recon_imagen_subida_mime"] = ""
+
+
+def registrar_imagen_reconstruccion_subida(archivo):
+    if archivo is None:
+        return
+    try:
+        st.session_state["recon_imagen_subida_bytes"] = archivo.getvalue()
+        st.session_state["recon_imagen_subida_nombre"] = getattr(archivo, "name", "imagen_reconstruccion")
+        st.session_state["recon_imagen_subida_mime"] = getattr(archivo, "type", "image/png") or "image/png"
+    except Exception:
+        pass
+
+
+def obtener_fuente_imagen_reconstruccion():
+    bytes_subidos = st.session_state.get("recon_imagen_subida_bytes")
+    if bytes_subidos:
+        return {
+            "bytes": bytes_subidos,
+            "mime": st.session_state.get("recon_imagen_subida_mime", "image/png") or "image/png",
+            "name": st.session_state.get("recon_imagen_subida_nombre", "imagen_reconstruccion"),
+        }
+    return obtener_archivo_imagen_reconstruccion()
 
 
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
@@ -3842,7 +3887,32 @@ elif seccion == "Adquisición":
 elif seccion == "Reconstrucción":
     st.header("Reconstrucción")
 
-    imagen_recon = obtener_archivo_imagen_reconstruccion()
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Imagen para matriz de reconstrucción</div>', unsafe_allow_html=True)
+    archivo_recon_subido = st.file_uploader(
+        "Subir imagen para aplicar la matriz de reconstrucción",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="recon_imagen_uploader",
+        help="Si subes una imagen aquí, la matriz de reconstrucción se aplicará sobre esa imagen en vez de usar la imagen automática de la app.",
+    )
+    if archivo_recon_subido is not None:
+        registrar_imagen_reconstruccion_subida(archivo_recon_subido)
+
+    col_img_recon_1, col_img_recon_2 = st.columns([3, 1])
+    with col_img_recon_1:
+        if st.session_state.get("recon_imagen_subida_nombre"):
+            st.caption(f"Imagen subida activa: {st.session_state['recon_imagen_subida_nombre']}")
+        else:
+            st.caption("No hay una imagen subida manualmente. Se usará la imagen automática de reconstrucción si existe.")
+    with col_img_recon_2:
+        if st.button("Quitar imagen subida", use_container_width=True, disabled=not bool(st.session_state.get("recon_imagen_subida_bytes"))):
+            limpiar_imagen_reconstruccion_subida()
+            if "recon_imagen_uploader" in st.session_state:
+                st.session_state["recon_imagen_uploader"] = None
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    imagen_recon = obtener_fuente_imagen_reconstruccion()
     topograma_recon_disponible = obtener_imagen_rx_topograma("topo") is not None or (
         st.session_state.get("mostrar_topo2", False) and obtener_imagen_rx_topograma("topo2") is not None
     )
@@ -3940,6 +4010,7 @@ elif seccion == "Reconstrucción":
     st.write(f"**Ancho de ventana:** {st.session_state['recon_ancho_ventana']}")
     st.write(f"**Grosor de corte:** {st.session_state['recon_grosor']} mm")
     st.write(f"**Incremento:** {st.session_state['recon_incremento']} mm")
+    st.write(f"**Imagen subida manualmente:** {st.session_state.get('recon_imagen_subida_nombre') or 'No'}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
