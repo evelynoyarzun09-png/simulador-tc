@@ -1258,55 +1258,7 @@ def render_botones_navegacion(seccion_actual):
 
 
 def inyectar_estilos_botones_navegacion():
-    components.html(
-        """
-        <script>
-        (function() {
-            function aplicarEstiloBoton(btn, fondo, borde) {
-                if (!btn) return;
-                btn.style.setProperty('background', fondo, 'important');
-                btn.style.setProperty('background-color', fondo, 'important');
-                btn.style.setProperty('color', '#ffffff', 'important');
-                btn.style.setProperty('-webkit-text-fill-color', '#ffffff', 'important');
-                btn.style.setProperty('border', '1px solid ' + borde, 'important');
-                btn.style.setProperty('box-shadow', 'none', 'important');
-            }
-
-            function textoNormalizado(btn) {
-                return (btn.innerText || btn.textContent || '')
-                    .replace(/\s+/g, ' ')
-                    .trim()
-                    .toLowerCase();
-            }
-
-            function pintarBotonesNavegacion(doc) {
-                if (!doc) return;
-                const botones = doc.querySelectorAll('button');
-                botones.forEach((btn) => {
-                    const texto = textoNormalizado(btn);
-                    if (texto.includes('volver al inicio')) {
-                        aplicarEstiloBoton(btn, '#1f77ff', '#165dcc');
-                    }
-                    if (texto === 'volver') {
-                        aplicarEstiloBoton(btn, '#19a857', '#0f7a3d');
-                    }
-                });
-            }
-
-            function repintarTodo() {
-                pintarBotonesNavegacion(window.parent.document);
-            }
-
-            repintarTodo();
-            const observer = new MutationObserver(repintarTodo);
-            observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
-            setInterval(repintarTodo, 300);
-        })();
-        </script>
-        """,
-        height=0,
-        width=0,
-    )
+    return
 
 
 inyectar_estilos_botones_navegacion()
@@ -3876,31 +3828,29 @@ elif seccion == "A Practicar":
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
-    col_img, col_menu = st.columns([1.15, 1], vertical_alignment="center")
+    col_img, col_menu = st.columns([1.15, 1], vertical_alignment="top")
 
     with col_img:
-        st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
-        if A_PRACTICAR_IMG.exists():
-            mostrar_imagen_actualizada(A_PRACTICAR_IMG, use_container_width=True)
-        else:
-            st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            if A_PRACTICAR_IMG.exists():
+                mostrar_imagen_actualizada(A_PRACTICAR_IMG, use_container_width=True)
+            else:
+                st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
 
     with col_menu:
-        st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
-        etapas_a_practicar = [
-            ("Preparación del paciente", "Preparación de paciente", "menu_preparacion"),
-            ("Topograma", "Topograma", "menu_topograma"),
-            ("Jeringa inyectora", "Jeringa inyectora", "menu_jeringa"),
-            ("Adquisición", "Adquisición", "menu_adquisicion"),
-            ("Reconstrucción", "Reconstrucción", "menu_reconstruccion"),
-            ("Reformación", "Reformación", "menu_reformacion"),
-        ]
-        for etiqueta, destino, boton_key in etapas_a_practicar:
-            if st.button(etiqueta, key=boton_key, use_container_width=True):
-                ir_a(destino)
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            etapas_a_practicar = [
+                ("Preparación del paciente", "Preparación de paciente", "menu_preparacion"),
+                ("Topograma", "Topograma", "menu_topograma"),
+                ("Jeringa inyectora", "Jeringa inyectora", "menu_jeringa"),
+                ("Adquisición", "Adquisición", "menu_adquisicion"),
+                ("Reconstrucción", "Reconstrucción", "menu_reconstruccion"),
+                ("Reformación", "Reformación", "menu_reformacion"),
+            ]
+            for etiqueta, destino, boton_key in etapas_a_practicar:
+                if st.button(etiqueta, key=boton_key, use_container_width=True, type="secondary"):
+                    st.session_state.seccion = destino
+                    st.rerun()
 
     st.divider()
     st.info("Haz clic en una etapa para continuar.")
