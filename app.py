@@ -14,7 +14,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
  
 # -------------------------
 # RUTA DE IMÁGENES
-# -------------------------x
+# -------------------------
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
 A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
@@ -1257,18 +1257,18 @@ input[type="date"] {
 SECCION_ANTERIOR = {
     "Preparación de paciente": "A Practicar",
     "Topograma": "Preparación de paciente",
-    "Adquisición": "Topograma",
+    "Jeringa inyectora": "Topograma",
+    "Adquisición": "Jeringa inyectora",
     "Reconstrucción": "Adquisición",
     "Reformación": "Reconstrucción",
-    "Jeringa inyectora": "Reformación",
 }
 
 SECCION_SIGUIENTE = {
     "Preparación de paciente": "Topograma",
-    "Topograma": "Adquisición",
+    "Topograma": "Jeringa inyectora",
+    "Jeringa inyectora": "Adquisición",
     "Adquisición": "Reconstrucción",
     "Reconstrucción": "Reformación",
-    "Reformación": "Jeringa inyectora",
 }
 
 def ir_a(seccion_destino):
@@ -3682,14 +3682,14 @@ elif seccion == "A Practicar":
             ir_a("Preparación de paciente"); st.rerun()
         if st.button("Topograma", use_container_width=True):
             ir_a("Topograma"); st.rerun()
+        if st.button("Jeringa inyectora", use_container_width=True):
+            ir_a("Jeringa inyectora"); st.rerun()
         if st.button("Adquisición", use_container_width=True):
             ir_a("Adquisición"); st.rerun()
         if st.button("Reconstrucción", use_container_width=True):
             ir_a("Reconstrucción"); st.rerun()
         if st.button("Reformación", use_container_width=True):
             ir_a("Reformación"); st.rerun()
-        if st.button("Jeringa inyectora", use_container_width=True):
-            ir_a("Jeringa inyectora"); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
