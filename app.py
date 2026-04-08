@@ -3839,21 +3839,46 @@ elif seccion == "A Practicar":
 
     with col_menu:
         with st.container(border=True):
-            etapas_a_practicar = [
-                ("Preparación del paciente", "Preparación de paciente", "menu_preparacion"),
-                ("Topograma", "Topograma", "menu_topograma"),
-                ("Jeringa inyectora", "Jeringa inyectora", "menu_jeringa"),
-                ("Adquisición", "Adquisición", "menu_adquisicion"),
-                ("Reconstrucción", "Reconstrucción", "menu_reconstruccion"),
-                ("Reformación", "Reformación", "menu_reformacion"),
+            etapas_a_practicar = {
+                "Preparación del paciente": "Preparación de paciente",
+                "Topograma": "Topograma",
+                "Jeringa inyectora": "Jeringa inyectora",
+                "Adquisición": "Adquisición",
+                "Reconstrucción": "Reconstrucción",
+                "Reformación": "Reformación",
+            }
+
+            opcion_etapa = st.radio(
+                "Etapas disponibles",
+                list(etapas_a_practicar.keys()),
+                key="menu_a_practicar_radio",
+                label_visibility="visible",
+            )
+
+            if st.button("Abrir etapa seleccionada", key="abrir_etapa_a_practicar", use_container_width=True):
+                ir_a(etapas_a_practicar[opcion_etapa])
+                st.rerun()
+
+            st.markdown("<div style='height:0.35rem;'></div>", unsafe_allow_html=True)
+            st.caption("Si los botones directos fallan en tu navegador, esta selección sigue funcionando de forma estable.")
+
+            col_b1, col_b2 = st.columns(2)
+            botones = [
+                ("Preparación del paciente", "Preparación de paciente", "directo_preparacion"),
+                ("Topograma", "Topograma", "directo_topograma"),
+                ("Jeringa inyectora", "Jeringa inyectora", "directo_jeringa"),
+                ("Adquisición", "Adquisición", "directo_adquisicion"),
+                ("Reconstrucción", "Reconstrucción", "directo_reconstruccion"),
+                ("Reformación", "Reformación", "directo_reformacion"),
             ]
-            for etiqueta, destino, boton_key in etapas_a_practicar:
-                if st.button(etiqueta, key=boton_key, use_container_width=True, type="secondary"):
-                    st.session_state.seccion = destino
-                    st.rerun()
+            for i, (etiqueta, destino, boton_key) in enumerate(botones):
+                with (col_b1 if i % 2 == 0 else col_b2):
+                    if st.button(etiqueta, key=boton_key, use_container_width=True):
+                        ir_a(destino)
+                        st.rerun()
 
     st.divider()
-    st.info("Haz clic en una etapa para continuar.")
+    st.info("Selecciona una etapa y luego pulsa 'Abrir etapa seleccionada'.")
 
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
