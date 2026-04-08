@@ -1262,53 +1262,6 @@ def recon_prefijo(numero):
 
 
 def render_nav_links(prev_section):
-    components.html(
-        """
-        <script>
-        (() => {
-            const applyButtonStyle = (btn, bg, border) => {
-                if (!btn) return;
-                btn.style.setProperty('background', bg, 'important');
-                btn.style.setProperty('background-color', bg, 'important');
-                btn.style.setProperty('color', '#ffffff', 'important');
-                btn.style.setProperty('border', `1px solid ${border}`, 'important');
-                btn.style.setProperty('box-shadow', '0 2px 6px rgba(0,0,0,0.18)', 'important');
-            };
-
-            const paintNavButtons = () => {
-                let doc = null;
-                try {
-                    doc = window.parent && window.parent.document ? window.parent.document : document;
-                } catch (e) {
-                    doc = document;
-                }
-
-                const buttons = Array.from(doc.querySelectorAll('button'));
-                buttons.forEach((btn) => {
-                    const text = (btn.innerText || btn.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-                    if (text.includes('volver al inicio')) {
-                        applyButtonStyle(btn, '#2f80ed', '#2367be');
-                    } else if (text === '⬅ volver' || text === 'volver' || text.includes('⬅ volver')) {
-                        applyButtonStyle(btn, '#27ae60', '#1f8c4d');
-                    }
-                });
-            };
-
-            paintNavButtons();
-            setTimeout(paintNavButtons, 100);
-            setTimeout(paintNavButtons, 300);
-            setTimeout(paintNavButtons, 700);
-            setTimeout(paintNavButtons, 1200);
-            try {
-                const observer = new MutationObserver(() => paintNavButtons());
-                observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
-            } catch (e) {}
-        })();
-        </script>
-        """,
-        height=0,
-        width=0,
-    )
     col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
     with col_inicio:
         if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
