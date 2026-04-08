@@ -3102,8 +3102,6 @@ def render_reformacion_obtenida_interactiva_html(image_source, key_suffix="refor
                     ctx.lineTo(arrow.tipX, arrow.tipY);
                     ctx.stroke();
                     drawArrowHead(arrow.startX, arrow.startY, arrow.tipX, arrow.tipY);
-                    drawHandle(arrow.startX, arrow.startY, '#4dd0e1');
-                    drawHandle(arrow.tipX, arrow.tipY, '#ff7043');
                     ctx.fillStyle = '#ffffff';
                     ctx.strokeStyle = 'rgba(0,0,0,0.7)';
                     ctx.lineWidth = 3;
