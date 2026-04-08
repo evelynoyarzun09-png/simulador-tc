@@ -1207,6 +1207,11 @@ input[type="date"] {
 .topo-compacto img {
     border-radius: 14px !important;
 }
+
+.bloque-a-practicar,
+.bloque-a-practicar * {
+    pointer-events: auto !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -3883,18 +3888,18 @@ elif seccion == "A Practicar":
 
     with col_menu:
         st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
-        if st.button("Preparación del paciente", use_container_width=True):
-            ir_a("Preparación de paciente"); st.rerun()
-        if st.button("Topograma", use_container_width=True):
-            ir_a("Topograma"); st.rerun()
-        if st.button("Jeringa inyectora", use_container_width=True):
-            ir_a("Jeringa inyectora"); st.rerun()
-        if st.button("Adquisición", use_container_width=True):
-            ir_a("Adquisición"); st.rerun()
-        if st.button("Reconstrucción", use_container_width=True):
-            ir_a("Reconstrucción"); st.rerun()
-        if st.button("Reformación", use_container_width=True):
-            ir_a("Reformación"); st.rerun()
+        etapas_a_practicar = [
+            ("Preparación del paciente", "Preparación de paciente", "menu_preparacion"),
+            ("Topograma", "Topograma", "menu_topograma"),
+            ("Jeringa inyectora", "Jeringa inyectora", "menu_jeringa"),
+            ("Adquisición", "Adquisición", "menu_adquisicion"),
+            ("Reconstrucción", "Reconstrucción", "menu_reconstruccion"),
+            ("Reformación", "Reformación", "menu_reformacion"),
+        ]
+        for etiqueta, destino, boton_key in etapas_a_practicar:
+            if st.button(etiqueta, key=boton_key, use_container_width=True):
+                ir_a(destino)
+                st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
