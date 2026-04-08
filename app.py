@@ -129,6 +129,12 @@ DEFAULTS = {
     "reform_grosor": 10.0,
     "reform_orientacion": "Seleccionar",
     "reform_observaciones": "",
+    "reform_rangos_img1_bytes": None,
+    "reform_rangos_img1_nombre": "",
+    "reform_rangos_img1_mime": "",
+    "reform_rangos_img2_bytes": None,
+    "reform_rangos_img2_nombre": "",
+    "reform_rangos_img2_mime": "",
 
     # Jeringa
     "jer_tipo_contraste": "Yodado",
@@ -2767,6 +2773,197 @@ def obtener_fuente_imagen_reconstruccion():
     return obtener_archivo_imagen_reconstruccion()
 
 
+def registrar_imagen_rangos_subida(archivo, numero=1):
+    if archivo is None:
+        return
+    prefijo = f"reform_rangos_img{numero}"
+    try:
+        st.session_state[f"{prefijo}_bytes"] = archivo.getvalue()
+        st.session_state[f"{prefijo}_nombre"] = getattr(archivo, "name", f"rangos_{numero}")
+        st.session_state[f"{prefijo}_mime"] = getattr(archivo, "type", "image/png") or "image/png"
+    except Exception:
+        pass
+
+
+def limpiar_imagen_rangos_subida(numero=1):
+    prefijo = f"reform_rangos_img{numero}"
+    st.session_state[f"{prefijo}_bytes"] = None
+    st.session_state[f"{prefijo}_nombre"] = ""
+    st.session_state[f"{prefijo}_mime"] = ""
+
+
+def obtener_fuente_imagen_rangos(numero=1):
+    prefijo = f"reform_rangos_img{numero}"
+    bytes_subidos = st.session_state.get(f"{prefijo}_bytes")
+    if bytes_subidos:
+        return {
+            "bytes": bytes_subidos,
+            "mime": st.session_state.get(f"{prefijo}_mime", "image/png") or "image/png",
+            "name": st.session_state.get(f"{prefijo}_nombre", f"rangos_{numero}"),
+        }
+    return None
+
+
+def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos"):
+    if image_source is None:
+        st.info("Sube una imagen para trabajar los rangos paralelos.")
+        return
+
+    try:
+        if isinstance(image_source, dict) and image_source.get("bytes"):
+            mime_type = image_source.get("mime", "image/png") or "image/png"
+            image_b64 = base64.b64encode(image_source["bytes"]).decode("utf-8")
+            data_uri = f"data:{mime_type};base64,{image_b64}"
+        else:
+            data_uri = imagen_a_data_uri(image_source)
+
+        if not data_uri:
+            st.warning("No fue posible cargar la imagen para los rangos.")
+            return
+
+        html_code = f"""
+        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
+            <div style="color:white;font-weight:700;font-size:16px;margin-bottom:10px;">RANGOS</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
+                <div>
+                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Cantidad de líneas</label>
+                    <input id="count-{key_suffix}" type="range" min="1" max="200" value="20" step="1" style="width:180px;" />
+                    <div id="count-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">20</div>
+                </div>
+                <div>
+                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Separación</label>
+                    <input id="spacing-{key_suffix}" type="range" min="4" max="60" value="14" step="1" style="width:160px;" />
+                    <div id="spacing-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">14 px</div>
+                </div>
+                <div>
+                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Ángulo</label>
+                    <input id="angle-{key_suffix}" type="range" min="0" max="180" value="0" step="1" style="width:160px;" />
+                    <div id="angle-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">0°</div>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button id="preset-axial-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Axial</button>
+                    <button id="preset-coronal-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Coronal</button>
+                    <button id="preset-sagital-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Sagital</button>
+                    <button id="preset-oblicuo-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Oblicuo</button>
+                </div>
+            </div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los rangos en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de líneas entre 1 y 200.</div>
+            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;"></canvas>
+        </div>
+
+        <script>
+        (() => {{
+            const canvas = document.getElementById('canvas-{key_suffix}');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            const countInput = document.getElementById('count-{key_suffix}');
+            const spacingInput = document.getElementById('spacing-{key_suffix}');
+            const angleInput = document.getElementById('angle-{key_suffix}');
+            const countValue = document.getElementById('count-value-{key_suffix}');
+            const spacingValue = document.getElementById('spacing-value-{key_suffix}');
+            const angleValue = document.getElementById('angle-value-{key_suffix}');
+            const presetAxial = document.getElementById('preset-axial-{key_suffix}');
+            const presetCoronal = document.getElementById('preset-coronal-{key_suffix}');
+            const presetSagital = document.getElementById('preset-sagital-{key_suffix}');
+            const presetOblicuo = document.getElementById('preset-oblicuo-{key_suffix}');
+            let cssWidth = 0;
+            let cssHeight = 0;
+
+            function getCssSize() {{
+                const maxWidth = 760;
+                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
+                const height = width * (img.height / img.width);
+                return {{ width, height }};
+            }}
+
+            function resizeCanvas() {{
+                if (!img.width) return;
+                const dpr = window.devicePixelRatio || 1;
+                const size = getCssSize();
+                cssWidth = size.width;
+                cssHeight = size.height;
+                canvas.style.width = cssWidth + 'px';
+                canvas.style.height = cssHeight + 'px';
+                canvas.width = Math.round(cssWidth * dpr);
+                canvas.height = Math.round(cssHeight * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                draw();
+            }}
+
+            function updateLabels() {{
+                countValue.textContent = countInput.value;
+                spacingValue.textContent = spacingInput.value + ' px';
+                angleValue.textContent = angleInput.value + '°';
+            }}
+
+            function drawParallelLines() {{
+                const count = parseInt(countInput.value, 10);
+                const spacing = parseFloat(spacingInput.value);
+                const angleDeg = parseFloat(angleInput.value);
+                const angle = angleDeg * Math.PI / 180;
+                const dirX = Math.cos(angle);
+                const dirY = Math.sin(angle);
+                const normalX = -dirY;
+                const normalY = dirX;
+                const centerX = cssWidth / 2;
+                const centerY = cssHeight / 2;
+                const halfSpan = Math.sqrt(cssWidth * cssWidth + cssHeight * cssHeight);
+                const offsetCenter = (count - 1) / 2;
+
+                ctx.strokeStyle = 'rgba(255, 80, 80, 0.92)';
+                ctx.lineWidth = 1.2;
+
+                for (let i = 0; i < count; i++) {{
+                    const offset = (i - offsetCenter) * spacing;
+                    const baseX = centerX + normalX * offset;
+                    const baseY = centerY + normalY * offset;
+                    const x1 = baseX - dirX * halfSpan;
+                    const y1 = baseY - dirY * halfSpan;
+                    const x2 = baseX + dirX * halfSpan;
+                    const y2 = baseY + dirY * halfSpan;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }}
+            }}
+
+            function draw() {{
+                if (!img.width) return;
+                ctx.clearRect(0, 0, cssWidth, cssHeight);
+                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
+                drawParallelLines();
+            }}
+
+            function setAngle(value) {{
+                angleInput.value = value;
+                updateLabels();
+                draw();
+            }}
+
+            countInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
+            spacingInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
+            angleInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
+            presetAxial.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(0); }});
+            presetCoronal.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(90); }});
+            presetSagital.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(90); }});
+            presetOblicuo.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(45); }});
+
+            img.onload = () => {{
+                updateLabels();
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }};
+
+            img.src = '{data_uri}';
+        }})();
+        </script>
+        """
+        components.html(html_code, height=620)
+    except Exception as e:
+        st.warning(f"No fue posible cargar los rangos paralelos: {e}")
+
+
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
     posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
@@ -4085,6 +4282,45 @@ elif seccion == "Reformación":
 
     render_botones_navegacion("Reformación")
 
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Rangos</div>', unsafe_allow_html=True)
+    col_rango_1, col_rango_2 = st.columns(2, vertical_alignment="top")
+
+    with col_rango_1:
+        archivo_rangos_1 = st.file_uploader(
+            "Subir imagen de rangos 1",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="reform_rangos_uploader_1",
+        )
+        if archivo_rangos_1 is not None:
+            registrar_imagen_rangos_subida(archivo_rangos_1, numero=1)
+        if st.session_state.get("reform_rangos_img1_nombre"):
+            st.caption(f"Imagen activa: {st.session_state['reform_rangos_img1_nombre']}")
+        if st.button("Quitar imagen rangos 1", key="quitar_rangos_1", use_container_width=True, disabled=not bool(st.session_state.get("reform_rangos_img1_bytes"))):
+            limpiar_imagen_rangos_subida(numero=1)
+            if "reform_rangos_uploader_1" in st.session_state:
+                st.session_state["reform_rangos_uploader_1"] = None
+            st.rerun()
+        render_rangos_paralelos_interactivos_html(obtener_fuente_imagen_rangos(1), key_suffix="reform_rangos_1")
+
+    with col_rango_2:
+        archivo_rangos_2 = st.file_uploader(
+            "Subir imagen de rangos 2",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="reform_rangos_uploader_2",
+        )
+        if archivo_rangos_2 is not None:
+            registrar_imagen_rangos_subida(archivo_rangos_2, numero=2)
+        if st.session_state.get("reform_rangos_img2_nombre"):
+            st.caption(f"Imagen activa: {st.session_state['reform_rangos_img2_nombre']}")
+        if st.button("Quitar imagen rangos 2", key="quitar_rangos_2", use_container_width=True, disabled=not bool(st.session_state.get("reform_rangos_img2_bytes"))):
+            limpiar_imagen_rangos_subida(numero=2)
+            if "reform_rangos_uploader_2" in st.session_state:
+                st.session_state["reform_rangos_uploader_2"] = None
+            st.rerun()
+        render_rangos_paralelos_interactivos_html(obtener_fuente_imagen_rangos(2), key_suffix="reform_rangos_2")
+    st.markdown('</div>', unsafe_allow_html=True)
+
     col1, col2 = st.columns(2)
     with col1:
         persistent_multiselect("Tipo de reformación", ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"], "reform_tipo")
@@ -4106,6 +4342,8 @@ elif seccion == "Reformación":
     st.write(f"**Grosor slab:** {st.session_state['reform_grosor']} mm")
     st.write(f"**Orientación:** {st.session_state['reform_orientacion']}")
     st.write(f"**Observaciones:** {st.session_state['reform_observaciones']}")
+    st.write(f"**Imagen de rangos 1:** {st.session_state.get('reform_rangos_img1_nombre') or 'No subida'}")
+    st.write(f"**Imagen de rangos 2:** {st.session_state.get('reform_rangos_img2_nombre') or 'No subida'}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     if reformacion_completa:
