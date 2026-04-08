@@ -129,8 +129,8 @@ DEFAULTS = {
     "reform_fase": "Seleccionar",
     "reform_tipo": "Seleccionar",
     "reform_plano": "Seleccionar",
-    "reform_grosor": 1,
-    "reform_distancia": 1,
+    "reform_grosor": "",
+    "reform_distancia": "",
     "reform_rangos_img1_bytes": None,
     "reform_rangos_img1_nombre": "",
     "reform_rangos_img1_mime": "",
@@ -226,6 +226,24 @@ def persistent_multiselect(label, options, key):
 def persistent_number_input(label, key, **kwargs):
     load_widget(key)
     st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
+
+
+def persistent_decimal_text_input(label, key, placeholder=""):
+    load_widget(key)
+    valor_actual = st.session_state.get(f"_{key}", "")
+    valor_actual = "" if valor_actual is None else str(valor_actual)
+
+    nuevo_valor = st.text_input(label, value=valor_actual, key=f"_{key}", placeholder=placeholder)
+    valor_limpio = re.sub(r"[^0-9.,]", "", nuevo_valor).replace(",", ".")
+
+    partes = valor_limpio.split(".")
+    if len(partes) > 2:
+        valor_limpio = partes[0] + "." + "".join(partes[1:])
+
+    if valor_limpio != nuevo_valor:
+        st.session_state[f"_{key}"] = valor_limpio
+
+    st.session_state[key] = valor_limpio
 
 def calcular_cobertura_desde_matriz(matriz_texto):
     matriz = str(matriz_texto).strip()
@@ -4640,8 +4658,8 @@ elif seccion == "Reformación":
         persistent_selectbox("Tipo de reformación", ["Seleccionar", "MPR", "VR", "MIP", "miniMIP"], "reform_tipo")
     with col2:
         persistent_selectbox("Plano de reformación", ["Seleccionar", "Axial", "Coronal", "Sagital", "Oblicuo", "Parasagital derecho", "Parasagital izquierdo", "Radial", "Coronal oblicuo derecho", "Coronal oblicuo izquierdo"], "reform_plano")
-        persistent_number_input("Grosor de corte", "reform_grosor", min_value=0, max_value=9999, step=1, format="%d")
-        persistent_number_input("Distancia de corte", "reform_distancia", min_value=0, max_value=9999, step=1, format="%d")
+        persistent_decimal_text_input("Grosor de corte", "reform_grosor", placeholder="Ej: 1.25")
+        persistent_decimal_text_input("Distancia de corte", "reform_distancia", placeholder="Ej: 0.75")
     st.markdown('</div>', unsafe_allow_html=True)
 
     reformacion_completa = all([
@@ -4649,8 +4667,8 @@ elif seccion == "Reformación":
         seleccion_completa(st.session_state["reform_fase"]),
         seleccion_completa(st.session_state["reform_tipo"]),
         seleccion_completa(st.session_state["reform_plano"]),
-        st.session_state["reform_grosor"] is not None,
-        st.session_state["reform_distancia"] is not None,
+        str(st.session_state["reform_grosor"]).strip() != "",
+        str(st.session_state["reform_distancia"]).strip() != "",
     ])
 
     st.divider()
