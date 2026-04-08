@@ -2799,7 +2799,10 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los rangos en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de cortes entre 1 y 200. La primera línea corresponde al corte 1 y se muestra también el último corte según la cantidad seleccionada.</div>
-            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;"></canvas>
+
+            <div style="width:100%;display:flex;justify-content:center;">
+                <canvas id="canvas-{key_suffix}" style="width:100%;max-width:900px;min-height:650px;border-radius:10px;background:#222;display:block;"></canvas>
+            </div>
         </div>
 
         <script>
@@ -2817,10 +2820,11 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             let cssHeight = 0;
 
             function getCssSize() {{
-                const maxWidth = 760;
-                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
-                const height = width * (img.height / img.width);
-                return {{ width, height }};
+                const containerWidth = Math.min(canvas.parentElement.clientWidth || 900, 900);
+                const maxVisibleHeight = 780;
+                const proportionalHeight = containerWidth * (img.height / img.width);
+                const finalHeight = Math.min(proportionalHeight, maxVisibleHeight);
+                return {{ width: containerWidth, height: finalHeight }};
             }}
 
             function resizeCanvas() {{
@@ -2862,8 +2866,8 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 const margin = 18;
 
                 const points = [];
-                if (isFirst) points.push({{ x: startX + ux * margin, y: startY + uy * margin }});
-                if (isLast) points.push({{ x: endX - ux * margin, y: endY - uy * margin }});
+                if (isFirst) points.push({ x: startX + ux * margin, y: startY + uy * margin });
+                if (isLast) points.push({ x: endX - ux * margin, y: endY - uy * margin });
 
                 points.forEach((p) => {{
                     ctx.strokeText(text, p.x, p.y);
@@ -2928,7 +2932,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
         }})();
         </script>
         """
-        components.html(html_code, height=620)
+        components.html(html_code, height=980)
     except Exception as e:
         st.warning(f"No fue posible cargar los rangos paralelos: {e}")
 
