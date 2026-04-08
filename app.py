@@ -2989,7 +2989,7 @@ def render_reformacion_obtenida_interactiva_html(image_source, key_suffix="refor
                 <button id="add-arrow-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar flecha</button>
                 <button id="remove-arrow-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar última flecha</button>
             </div>
-            <div style="display:grid;grid-template-columns:minmax(0, 1.4fr) minmax(290px, 0.9fr);gap:16px;align-items:start;">
+            <div style="display:grid;grid-template-columns:minmax(0, 2.2fr) minmax(220px, 0.55fr);gap:16px;align-items:start;">
                 <div>
                     <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;cursor:default;"></canvas>
                 </div>
@@ -3027,7 +3027,7 @@ def render_reformacion_obtenida_interactiva_html(image_source, key_suffix="refor
             }}
 
             function getCssSize() {{
-                const maxWidth = 860;
+                const maxWidth = 1280;
                 const width = Math.min(canvas.parentElement.clientWidth || maxWidth, maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
@@ -4632,7 +4632,7 @@ elif seccion == "Reformación":
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Reformación obtenida</div>', unsafe_allow_html=True)
 
-    col_reform_img, col_reform_param = st.columns([1.3, 1])
+    col_reform_img, col_reform_param = st.columns([2.6, 0.5])
 
     with col_reform_img:
         archivo_rangos_3 = st.file_uploader(
