@@ -3859,27 +3859,6 @@ elif seccion == "A Practicar":
                 ir_a(etapas_a_practicar[opcion_etapa])
                 st.rerun()
 
-            st.markdown("<div style='height:0.35rem;'></div>", unsafe_allow_html=True)
-            st.caption("Si los botones directos fallan en tu navegador, esta selección sigue funcionando de forma estable.")
-
-            col_b1, col_b2 = st.columns(2)
-            botones = [
-                ("Preparación del paciente", "Preparación de paciente", "directo_preparacion"),
-                ("Topograma", "Topograma", "directo_topograma"),
-                ("Jeringa inyectora", "Jeringa inyectora", "directo_jeringa"),
-                ("Adquisición", "Adquisición", "directo_adquisicion"),
-                ("Reconstrucción", "Reconstrucción", "directo_reconstruccion"),
-                ("Reformación", "Reformación", "directo_reformacion"),
-            ]
-            for i, (etiqueta, destino, boton_key) in enumerate(botones):
-                with (col_b1 if i % 2 == 0 else col_b2):
-                    if st.button(etiqueta, key=boton_key, use_container_width=True):
-                        ir_a(destino)
-                        st.rerun()
-
-    st.divider()
-    st.info("Selecciona una etapa y luego pulsa 'Abrir etapa seleccionada'.")
-
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
 
