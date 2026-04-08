@@ -125,10 +125,12 @@ DEFAULTS = {
     "recon_topo2_limite_inferior": 85,
 
     # Reformación
-    "reform_tipo": [],
-    "reform_grosor": 10.0,
-    "reform_orientacion": "Seleccionar",
-    "reform_observaciones": "",
+    "reform_reconstruccion": "Seleccionar",
+    "reform_fase": "Seleccionar",
+    "reform_tipo": "Seleccionar",
+    "reform_plano": "Seleccionar",
+    "reform_grosor": 1,
+    "reform_distancia": 1,
     "reform_rangos_img1_bytes": None,
     "reform_rangos_img1_nombre": "",
     "reform_rangos_img1_mime": "",
@@ -465,10 +467,12 @@ def render_panel_exportacion_pdf():
             secciones_html.append(bloque_imagen_exportacion("Reconstrucción - topograma 2", recon_topo2))
 
     filas_reform = [
+        ("Reconstrucción a reformar", st.session_state.get("reform_reconstruccion")),
+        ("Fase", st.session_state.get("reform_fase")),
         ("Tipo de reformación", st.session_state.get("reform_tipo")),
-        ("Grosor slab", f"{st.session_state.get('reform_grosor')} mm"),
-        ("Orientación", st.session_state.get("reform_orientacion")),
-        ("Observaciones", st.session_state.get("reform_observaciones")),
+        ("Plano de reformación", st.session_state.get("reform_plano")),
+        ("Grosor de corte", st.session_state.get("reform_grosor")),
+        ("Distancia de corte", st.session_state.get("reform_distancia")),
     ]
     if st.session_state.get("jer_no_usare", False):
         filas_jeringa = [
@@ -4627,27 +4631,37 @@ elif seccion == "Reformación":
     render_reformacion_obtenida_interactiva_html(obtener_fuente_imagen_rangos(3), key_suffix="reform_obtenida")
     st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Parámetros de reformación obtenida</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        persistent_multiselect("Tipo de reformación", ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"], "reform_tipo")
-        persistent_number_input("Grosor MIP / slab (mm)", "reform_grosor", min_value=0.1, step=0.1)
+        persistent_selectbox("Reconstrucción a reformar", ["Seleccionar", "Partes blandas", "Ósea", "Pulmonar", "Angiografía", "De cerebro"], "reform_reconstruccion")
+        persistent_selectbox("Tipo de fase", ["Seleccionar", "Sin contraste", "Angiografía", "Arterial", "Venosa o portal", "Tardía"], "reform_fase")
+        persistent_selectbox("Tipo de reformación", ["Seleccionar", "MPR", "VR", "MIP", "miniMIP"], "reform_tipo")
     with col2:
-        persistent_selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], "reform_orientacion")
-        persistent_text_area("Observaciones de reformación", "reform_observaciones")
+        persistent_selectbox("Plano de reformación", ["Seleccionar", "Axial", "Coronal", "Sagital", "Oblicuo", "Parasagital derecho", "Parasagital izquierdo", "Radial", "Coronal oblicuo derecho", "Coronal oblicuo izquierdo"], "reform_plano")
+        persistent_number_input("Grosor de corte", "reform_grosor", min_value=0, max_value=9999, step=1, format="%d")
+        persistent_number_input("Distancia de corte", "reform_distancia", min_value=0, max_value=9999, step=1, format="%d")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     reformacion_completa = all([
-        lista_completa(st.session_state["reform_tipo"]),
-        seleccion_completa(st.session_state["reform_orientacion"]),
-        texto_completo(st.session_state["reform_observaciones"]),
+        seleccion_completa(st.session_state["reform_reconstruccion"]),
+        seleccion_completa(st.session_state["reform_fase"]),
+        seleccion_completa(st.session_state["reform_tipo"]),
+        seleccion_completa(st.session_state["reform_plano"]),
+        st.session_state["reform_grosor"] is not None,
+        st.session_state["reform_distancia"] is not None,
     ])
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-    st.write(f"**Tipo:** {', '.join(st.session_state['reform_tipo']) if st.session_state['reform_tipo'] else 'Ninguno'}")
-    st.write(f"**Grosor slab:** {st.session_state['reform_grosor']} mm")
-    st.write(f"**Orientación:** {st.session_state['reform_orientacion']}")
-    st.write(f"**Observaciones:** {st.session_state['reform_observaciones']}")
+    st.write(f"**Reconstrucción a reformar:** {st.session_state['reform_reconstruccion']}")
+    st.write(f"**Fase:** {st.session_state['reform_fase']}")
+    st.write(f"**Tipo de reformación:** {st.session_state['reform_tipo']}")
+    st.write(f"**Plano de reformación:** {st.session_state['reform_plano']}")
+    st.write(f"**Grosor de corte:** {st.session_state['reform_grosor']}")
+    st.write(f"**Distancia de corte:** {st.session_state['reform_distancia']}")
     st.write(f"**Imagen de rangos 1:** {st.session_state.get('reform_rangos_img1_nombre') or 'No subida'}")
     st.write(f"**Imagen de rangos 2:** {st.session_state.get('reform_rangos_img2_nombre') or 'No subida'}")
     st.write(f"**Reformación obtenida:** {st.session_state.get('reform_rangos_img3_nombre') or 'No subida'}")
