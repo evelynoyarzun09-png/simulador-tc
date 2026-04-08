@@ -4631,41 +4631,42 @@ elif seccion == "Reformación":
 
     st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
     st.markdown('<div class="titulo-bloque">Reformación obtenida</div>', unsafe_allow_html=True)
-    archivo_rangos_3 = st.file_uploader(
-        "Subir imagen de reformación obtenida",
-        type=["png", "jpg", "jpeg", "webp"],
-        key="reform_rangos_uploader_3",
-    )
-    if archivo_rangos_3 is not None:
-        registrar_imagen_rangos_subida(archivo_rangos_3, numero=3)
 
-    col_reform_obt_1, col_reform_obt_2 = st.columns([3, 1])
-    with col_reform_obt_1:
-        if st.session_state.get("reform_rangos_img3_nombre"):
-            st.caption(f"Imagen activa: {st.session_state['reform_rangos_img3_nombre']}")
-        else:
-            st.caption("No hay imagen subida aún para reformación obtenida.")
-    with col_reform_obt_2:
-        if st.button("Quitar reformación obtenida", key="quitar_rangos_3", use_container_width=True, disabled=not bool(st.session_state.get("reform_rangos_img3_bytes"))):
-            limpiar_imagen_rangos_subida(numero=3)
-            if "reform_rangos_uploader_3" in st.session_state:
-                st.session_state["reform_rangos_uploader_3"] = None
-            st.rerun()
+    col_reform_img, col_reform_param = st.columns([1.3, 1])
 
-    render_reformacion_obtenida_interactiva_html(obtener_fuente_imagen_rangos(3), key_suffix="reform_obtenida")
-    st.markdown('</div>', unsafe_allow_html=True)
+    with col_reform_img:
+        archivo_rangos_3 = st.file_uploader(
+            "Subir imagen de reformación obtenida",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="reform_rangos_uploader_3",
+        )
+        if archivo_rangos_3 is not None:
+            registrar_imagen_rangos_subida(archivo_rangos_3, numero=3)
 
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Parámetros de reformación obtenida</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
+        col_reform_obt_1, col_reform_obt_2 = st.columns([3, 1])
+        with col_reform_obt_1:
+            if st.session_state.get("reform_rangos_img3_nombre"):
+                st.caption(f"Imagen activa: {st.session_state['reform_rangos_img3_nombre']}")
+            else:
+                st.caption("No hay imagen subida aún para reformación obtenida.")
+        with col_reform_obt_2:
+            if st.button("Quitar reformación obtenida", key="quitar_rangos_3", use_container_width=True, disabled=not bool(st.session_state.get("reform_rangos_img3_bytes"))):
+                limpiar_imagen_rangos_subida(numero=3)
+                if "reform_rangos_uploader_3" in st.session_state:
+                    st.session_state["reform_rangos_uploader_3"] = None
+                st.rerun()
+
+        render_reformacion_obtenida_interactiva_html(obtener_fuente_imagen_rangos(3), key_suffix="reform_obtenida")
+
+    with col_reform_param:
+        st.markdown('<div class="titulo-bloque" style="margin-top:0;">Parámetros de reformación obtenida</div>', unsafe_allow_html=True)
         persistent_selectbox("Reconstrucción a reformar", ["Seleccionar", "Partes blandas", "Ósea", "Pulmonar", "Angiografía", "De cerebro"], "reform_reconstruccion")
         persistent_selectbox("Tipo de fase", ["Seleccionar", "Sin contraste", "Angiografía", "Arterial", "Venosa o portal", "Tardía"], "reform_fase")
         persistent_selectbox("Tipo de reformación", ["Seleccionar", "MPR", "VR", "MIP", "miniMIP"], "reform_tipo")
-    with col2:
         persistent_selectbox("Plano de reformación", ["Seleccionar", "Axial", "Coronal", "Sagital", "Oblicuo", "Parasagital derecho", "Parasagital izquierdo", "Radial", "Coronal oblicuo derecho", "Coronal oblicuo izquierdo"], "reform_plano")
         persistent_decimal_text_input("Grosor de corte (mm)", "reform_grosor", placeholder="Ej: 1.25")
         persistent_decimal_text_input("Distancia de corte (mm)", "reform_distancia", placeholder="Ej: 0.75")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
     reformacion_completa = all([
