@@ -135,9 +135,6 @@ DEFAULTS = {
     "reform_rangos_img2_bytes": None,
     "reform_rangos_img2_nombre": "",
     "reform_rangos_img2_mime": "",
-    "reform_obtenida_img_bytes": None,
-    "reform_obtenida_img_nombre": "",
-    "reform_obtenida_img_mime": "",
 
     # Jeringa
     "jer_tipo_contraste": "Yodado",
@@ -1210,6 +1207,11 @@ input[type="date"] {
 .topo-compacto img {
     border-radius: 14px !important;
 }
+
+.bloque-a-practicar,
+.bloque-a-practicar * {
+    pointer-events: auto !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1256,55 +1258,7 @@ def render_botones_navegacion(seccion_actual):
 
 
 def inyectar_estilos_botones_navegacion():
-    components.html(
-        """
-        <script>
-        (function() {
-            function aplicarEstiloBoton(btn, fondo, borde) {
-                if (!btn) return;
-                btn.style.setProperty('background', fondo, 'important');
-                btn.style.setProperty('background-color', fondo, 'important');
-                btn.style.setProperty('color', '#ffffff', 'important');
-                btn.style.setProperty('-webkit-text-fill-color', '#ffffff', 'important');
-                btn.style.setProperty('border', '1px solid ' + borde, 'important');
-                btn.style.setProperty('box-shadow', 'none', 'important');
-            }
-
-            function textoNormalizado(btn) {
-                return (btn.innerText || btn.textContent || '')
-                    .replace(/\s+/g, ' ')
-                    .trim()
-                    .toLowerCase();
-            }
-
-            function pintarBotonesNavegacion(doc) {
-                if (!doc) return;
-                const botones = doc.querySelectorAll('button');
-                botones.forEach((btn) => {
-                    const texto = textoNormalizado(btn);
-                    if (texto.includes('volver al inicio')) {
-                        aplicarEstiloBoton(btn, '#1f77ff', '#165dcc');
-                    }
-                    if (texto === 'volver') {
-                        aplicarEstiloBoton(btn, '#19a857', '#0f7a3d');
-                    }
-                });
-            }
-
-            function repintarTodo() {
-                pintarBotonesNavegacion(window.parent.document);
-            }
-
-            repintarTodo();
-            const observer = new MutationObserver(repintarTodo);
-            observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
-            setInterval(repintarTodo, 300);
-        })();
-        </script>
-        """,
-        height=0,
-        width=0,
-    )
+    return
 
 
 inyectar_estilos_botones_navegacion()
@@ -2806,33 +2760,6 @@ def obtener_fuente_imagen_rangos(numero=1):
         }
     return None
 
-def registrar_imagen_reformacion_obtenida_subida(archivo):
-    if archivo is None:
-        return
-    try:
-        st.session_state["reform_obtenida_img_bytes"] = archivo.getvalue()
-        st.session_state["reform_obtenida_img_nombre"] = getattr(archivo, "name", "reformacion_obtenida")
-        st.session_state["reform_obtenida_img_mime"] = getattr(archivo, "type", "image/png") or "image/png"
-    except Exception:
-        pass
-
-
-def limpiar_imagen_reformacion_obtenida_subida():
-    st.session_state["reform_obtenida_img_bytes"] = None
-    st.session_state["reform_obtenida_img_nombre"] = ""
-    st.session_state["reform_obtenida_img_mime"] = ""
-
-
-def obtener_fuente_imagen_reformacion_obtenida():
-    bytes_subidos = st.session_state.get("reform_obtenida_img_bytes")
-    if bytes_subidos:
-        return {
-            "bytes": bytes_subidos,
-            "mime": st.session_state.get("reform_obtenida_img_mime", "image/png") or "image/png",
-            "name": st.session_state.get("reform_obtenida_img_nombre", "reformacion_obtenida"),
-        }
-    return None
-
 
 def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos"):
     if image_source is None:
@@ -2856,22 +2783,28 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             <div style="color:white;font-weight:700;font-size:16px;margin-bottom:10px;">RANGOS</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
                 <div>
-                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Cantidad de cortes</label>
-                    <input id="count-{key_suffix}" type="range" min="1" max="200" value="20" step="1" style="width:220px;" />
-                    <div id="count-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">Cortes 1 a 20</div>
+                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Cantidad de líneas</label>
+                    <input id="count-{key_suffix}" type="range" min="1" max="200" value="20" step="1" style="width:180px;" />
+                    <div id="count-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">20</div>
                 </div>
                 <div>
                     <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Separación</label>
-                    <input id="spacing-{key_suffix}" type="range" min="4" max="60" value="14" step="1" style="width:180px;" />
+                    <input id="spacing-{key_suffix}" type="range" min="4" max="60" value="14" step="1" style="width:160px;" />
                     <div id="spacing-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">14 px</div>
                 </div>
                 <div>
                     <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Ángulo</label>
-                    <input id="angle-{key_suffix}" type="range" min="0" max="360" value="0" step="1" style="width:180px;" />
+                    <input id="angle-{key_suffix}" type="range" min="0" max="180" value="0" step="1" style="width:160px;" />
                     <div id="angle-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">0°</div>
                 </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button id="preset-axial-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Axial</button>
+                    <button id="preset-coronal-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Coronal</button>
+                    <button id="preset-sagital-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Sagital</button>
+                    <button id="preset-oblicuo-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Oblicuo</button>
+                </div>
             </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los cortes en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de cortes entre 1 y 200.</div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los rangos en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de líneas entre 1 y 200.</div>
             <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;"></canvas>
         </div>
 
@@ -2886,6 +2819,10 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             const countValue = document.getElementById('count-value-{key_suffix}');
             const spacingValue = document.getElementById('spacing-value-{key_suffix}');
             const angleValue = document.getElementById('angle-value-{key_suffix}');
+            const presetAxial = document.getElementById('preset-axial-{key_suffix}');
+            const presetCoronal = document.getElementById('preset-coronal-{key_suffix}');
+            const presetSagital = document.getElementById('preset-sagital-{key_suffix}');
+            const presetOblicuo = document.getElementById('preset-oblicuo-{key_suffix}');
             let cssWidth = 0;
             let cssHeight = 0;
 
@@ -2911,8 +2848,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             }}
 
             function updateLabels() {{
-                const count = parseInt(countInput.value, 10);
-                countValue.textContent = 'Cortes 1 a ' + count;
+                countValue.textContent = countInput.value;
                 spacingValue.textContent = spacingInput.value + ' px';
                 angleValue.textContent = angleInput.value + '°';
             }}
@@ -2920,7 +2856,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             function drawParallelLines() {{
                 const count = parseInt(countInput.value, 10);
                 const spacing = parseFloat(spacingInput.value);
-                const angleDeg = parseFloat(angleInput.value) % 360;
+                const angleDeg = parseFloat(angleInput.value);
                 const angle = angleDeg * Math.PI / 180;
                 const dirX = Math.cos(angle);
                 const dirY = Math.sin(angle);
@@ -2932,9 +2868,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 const offsetCenter = (count - 1) / 2;
 
                 ctx.strokeStyle = 'rgba(255, 80, 80, 0.92)';
-                ctx.fillStyle = 'rgba(255, 80, 80, 0.98)';
                 ctx.lineWidth = 1.2;
-                ctx.font = '12px Arial';
 
                 for (let i = 0; i < count; i++) {{
                     const offset = (i - offsetCenter) * spacing;
@@ -2948,10 +2882,6 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                     ctx.moveTo(x1, y1);
                     ctx.lineTo(x2, y2);
                     ctx.stroke();
-
-                    const labelX = baseX - dirX * (halfSpan * 0.9);
-                    const labelY = baseY - dirY * (halfSpan * 0.9);
-                    ctx.fillText(String(i + 1), labelX + 6, labelY - 4);
                 }}
             }}
 
@@ -2962,9 +2892,19 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 drawParallelLines();
             }}
 
+            function setAngle(value) {{
+                angleInput.value = value;
+                updateLabels();
+                draw();
+            }}
+
             countInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
             spacingInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
             angleInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
+            presetAxial.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(0); }});
+            presetCoronal.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(90); }});
+            presetSagital.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(90); }});
+            presetOblicuo.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(45); }});
 
             img.onload = () => {{
                 updateLabels();
@@ -2980,265 +2920,6 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
     except Exception as e:
         st.warning(f"No fue posible cargar los rangos paralelos: {e}")
 
-
-def render_reformacion_obtenida_html(image_source, key_suffix="reform_obtenida"):
-    if image_source is None:
-        st.info("Sube una imagen para trabajar la reformación obtenida.")
-        return
-
-    try:
-        if isinstance(image_source, dict) and image_source.get("bytes"):
-            mime_type = image_source.get("mime", "image/png") or "image/png"
-            image_b64 = base64.b64encode(image_source["bytes"]).decode("utf-8")
-            data_uri = f"data:{mime_type};base64,{image_b64}"
-        else:
-            data_uri = imagen_a_data_uri(image_source)
-
-        if not data_uri:
-            st.warning("No fue posible cargar la imagen de reformación obtenida.")
-            return
-
-        html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-                <div style="color:white;font-weight:700;font-size:16px;">REFORMACIÓN OBTENIDA</div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                    <button id="add-arrow-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar flecha</button>
-                    <button id="remove-arrow-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar última flecha</button>
-                </div>
-            </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes agregar hasta 5 flechas movibles y escribir el nombre anatómico asociado a cada una.</div>
-            <div style="display:grid;grid-template-columns:minmax(320px, 2fr) minmax(220px, 1fr);gap:14px;align-items:start;">
-                <div>
-                    <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;cursor:default;touch-action:none;display:block;"></canvas>
-                </div>
-                <div id="labels-panel-{key_suffix}" style="display:flex;flex-direction:column;gap:10px;"></div>
-            </div>
-        </div>
-
-        <script>
-        (() => {{
-            const canvas = document.getElementById('canvas-{key_suffix}');
-            const ctx = canvas.getContext('2d');
-            const panel = document.getElementById('labels-panel-{key_suffix}');
-            const addBtn = document.getElementById('add-arrow-{key_suffix}');
-            const removeBtn = document.getElementById('remove-arrow-{key_suffix}');
-            const img = new Image();
-            let cssWidth = 0;
-            let cssHeight = 0;
-            let arrows = [];
-            let dragging = null;
-
-            function getCssSize() {{
-                const maxWidth = 760;
-                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
-                const height = width * (img.height / img.width);
-                return {{ width, height }};
-            }}
-
-            function resizeCanvas() {{
-                if (!img.width) return;
-                const dpr = window.devicePixelRatio || 1;
-                const size = getCssSize();
-                cssWidth = size.width;
-                cssHeight = size.height;
-                canvas.style.width = cssWidth + 'px';
-                canvas.style.height = cssHeight + 'px';
-                canvas.width = Math.round(cssWidth * dpr);
-                canvas.height = Math.round(cssHeight * dpr);
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                draw();
-            }}
-
-            function createArrow(index) {{
-                const offset = 36 * index;
-                return {{
-                    id: Date.now() + Math.random() + index,
-                    startX: Math.max(50, cssWidth * 0.18),
-                    startY: Math.max(50, cssHeight * 0.2 + offset),
-                    endX: Math.min(cssWidth - 60, cssWidth * 0.55),
-                    endY: Math.max(50, cssHeight * 0.2 + offset),
-                    label: ''
-                }};
-            }}
-
-            function renderLabelsPanel() {{
-                panel.innerHTML = '';
-                if (!arrows.length) {{
-                    const empty = document.createElement('div');
-                    empty.style.color = '#d8d8d8';
-                    empty.style.fontSize = '13px';
-                    empty.style.background = '#555';
-                    empty.style.borderRadius = '10px';
-                    empty.style.padding = '12px';
-                    empty.textContent = 'Aún no hay flechas. Usa Agregar flecha.';
-                    panel.appendChild(empty);
-                    return;
-                }}
-                arrows.forEach((arrow, index) => {{
-                    const row = document.createElement('div');
-                    row.style.background = '#555';
-                    row.style.border = '1px solid #777';
-                    row.style.borderRadius = '10px';
-                    row.style.padding = '10px';
-
-                    const title = document.createElement('div');
-                    title.style.color = 'white';
-                    title.style.fontWeight = '700';
-                    title.style.marginBottom = '6px';
-                    title.textContent = 'Flecha ' + (index + 1);
-
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.placeholder = 'Nombre anatómico';
-                    input.value = arrow.label || '';
-                    input.style.width = '100%';
-                    input.style.padding = '8px 10px';
-                    input.style.borderRadius = '8px';
-                    input.style.border = '1px solid #999';
-                    input.style.background = '#f4f4f4';
-                    input.style.color = '#222';
-                    input.style.boxSizing = 'border-box';
-                    input.addEventListener('input', (e) => {{
-                        arrow.label = e.target.value;
-                        draw();
-                    }});
-
-                    row.appendChild(title);
-                    row.appendChild(input);
-                    panel.appendChild(row);
-                }});
-            }}
-
-            function drawArrow(arrow, index) {{
-                const headLen = 12;
-                const dx = arrow.endX - arrow.startX;
-                const dy = arrow.endY - arrow.startY;
-                const angle = Math.atan2(dy, dx);
-
-                ctx.save();
-                ctx.strokeStyle = '#ff5252';
-                ctx.fillStyle = '#ff5252';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(arrow.startX, arrow.startY);
-                ctx.lineTo(arrow.endX, arrow.endY);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(arrow.endX, arrow.endY);
-                ctx.lineTo(arrow.endX - headLen * Math.cos(angle - Math.PI / 6), arrow.endY - headLen * Math.sin(angle - Math.PI / 6));
-                ctx.lineTo(arrow.endX - headLen * Math.cos(angle + Math.PI / 6), arrow.endY - headLen * Math.sin(angle + Math.PI / 6));
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.fillStyle = '#ff5252';
-                ctx.beginPath();
-                ctx.arc(arrow.startX, arrow.startY, 6, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(arrow.endX, arrow.endY, 6, 0, Math.PI * 2);
-                ctx.fill();
-
-                if (arrow.label) {{
-                    ctx.font = 'bold 15px Arial';
-                    ctx.fillStyle = '#ffe9a8';
-                    ctx.fillText(arrow.label, arrow.startX + 10, arrow.startY - 10);
-                }}
-                ctx.restore();
-            }}
-
-            function draw() {{
-                if (!img.width) return;
-                ctx.clearRect(0, 0, cssWidth, cssHeight);
-                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
-                arrows.forEach((arrow, index) => drawArrow(arrow, index));
-            }}
-
-            function getPointerPos(event) {{
-                const rect = canvas.getBoundingClientRect();
-                const touch = event.touches && event.touches[0]
-                    ? event.touches[0]
-                    : (event.changedTouches && event.changedTouches[0] ? event.changedTouches[0] : null);
-                const clientX = touch ? touch.clientX : (typeof event.clientX === 'number' ? event.clientX : rect.left);
-                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
-                return {{ x: clientX - rect.left, y: clientY - rect.top }};
-            }}
-
-            function hitHandle(pos, arrow) {{
-                const points = [
-                    {{ part: 'start', x: arrow.startX, y: arrow.startY }},
-                    {{ part: 'end', x: arrow.endX, y: arrow.endY }},
-                ];
-                for (const point of points) {{
-                    const dx = pos.x - point.x;
-                    const dy = pos.y - point.y;
-                    if (Math.sqrt(dx * dx + dy * dy) <= 12) return point.part;
-                }}
-                return null;
-            }}
-
-            function startDragging(event) {{
-                const pos = getPointerPos(event);
-                for (let i = arrows.length - 1; i >= 0; i--) {{
-                    const part = hitHandle(pos, arrows[i]);
-                    if (part) {{
-                        dragging = {{ arrow: arrows[i], part }};
-                        event.preventDefault();
-                        return;
-                    }}
-                }}
-            }}
-
-            function moveDragging(event) {{
-                if (!dragging) return;
-                const pos = getPointerPos(event);
-                dragging.arrow[dragging.part + 'X'] = Math.max(0, Math.min(cssWidth, pos.x));
-                dragging.arrow[dragging.part + 'Y'] = Math.max(0, Math.min(cssHeight, pos.y));
-                draw();
-                event.preventDefault();
-            }}
-
-            function stopDragging() {{
-                dragging = null;
-            }}
-
-            addBtn.addEventListener('click', (e) => {{
-                e.preventDefault();
-                if (arrows.length >= 5) return;
-                arrows.push(createArrow(arrows.length));
-                renderLabelsPanel();
-                draw();
-            }});
-
-            removeBtn.addEventListener('click', (e) => {{
-                e.preventDefault();
-                if (arrows.length) arrows.pop();
-                renderLabelsPanel();
-                draw();
-            }});
-
-            canvas.addEventListener('mousedown', startDragging);
-            window.addEventListener('mousemove', moveDragging);
-            window.addEventListener('mouseup', stopDragging);
-            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
-            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
-            window.addEventListener('touchend', stopDragging);
-            window.addEventListener('touchcancel', stopDragging);
-
-            img.onload = () => {{
-                resizeCanvas();
-                renderLabelsPanel();
-                window.addEventListener('resize', resizeCanvas);
-            }};
-
-            img.src = '{data_uri}';
-        }})();
-        </script>
-        """
-        components.html(html_code, height=760)
-    except Exception as e:
-        st.warning(f"No fue posible cargar la reformación obtenida: {e}")
 
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
@@ -4147,34 +3828,68 @@ elif seccion == "A Practicar":
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
-    col_img, col_menu = st.columns([1.15, 1], vertical_alignment="center")
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stRadio"] > label p {
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+        }
+        div[data-testid="stRadio"] [role="radiogroup"] label {
+            padding-top: 0.4rem !important;
+            padding-bottom: 0.4rem !important;
+            transform: scale(1.6);
+            transform-origin: left center;
+            margin-left: 1.2rem !important;
+            margin-bottom: 1rem !important;
+        }
+        div[data-testid="stRadio"] {
+            margin-bottom: 2rem !important;
+        }
+        div.stButton > button[kind="secondary"],
+        div.stButton > button[kind="primary"] {
+            font-size: 1.9rem !important;
+            font-weight: 700 !important;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            min-height: 5rem !important;
+            border-radius: 16px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col_img, col_menu = st.columns([1.15, 1], vertical_alignment="top")
 
     with col_img:
-        st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
-        if A_PRACTICAR_IMG.exists():
-            mostrar_imagen_actualizada(A_PRACTICAR_IMG, use_container_width=True)
-        else:
-            st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            if A_PRACTICAR_IMG.exists():
+                mostrar_imagen_actualizada(A_PRACTICAR_IMG, use_container_width=True)
+            else:
+                st.info("Guarda la imagen como 'a_practicar.png' en la misma carpeta del app.py.")
 
     with col_menu:
-        st.markdown('<div class="bloque-a-practicar">', unsafe_allow_html=True)
-        if st.button("Preparación del paciente", use_container_width=True):
-            ir_a("Preparación de paciente"); st.rerun()
-        if st.button("Topograma", use_container_width=True):
-            ir_a("Topograma"); st.rerun()
-        if st.button("Jeringa inyectora", use_container_width=True):
-            ir_a("Jeringa inyectora"); st.rerun()
-        if st.button("Adquisición", use_container_width=True):
-            ir_a("Adquisición"); st.rerun()
-        if st.button("Reconstrucción", use_container_width=True):
-            ir_a("Reconstrucción"); st.rerun()
-        if st.button("Reformación", use_container_width=True):
-            ir_a("Reformación"); st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            etapas_a_practicar = {
+                "Preparación del paciente": "Preparación de paciente",
+                "Topograma": "Topograma",
+                "Jeringa inyectora": "Jeringa inyectora",
+                "Adquisición": "Adquisición",
+                "Reconstrucción": "Reconstrucción",
+                "Reformación": "Reformación",
+            }
 
-    st.divider()
-    st.info("Haz clic en una etapa para continuar.")
+            opcion_etapa = st.radio(
+                "Etapas disponibles",
+                list(etapas_a_practicar.keys()),
+                key="menu_a_practicar_radio",
+                label_visibility="visible",
+            )
+
+            if st.button("Abrir etapa seleccionada", key="abrir_etapa_a_practicar", use_container_width=True):
+                ir_a(etapas_a_practicar[opcion_etapa])
+                st.rerun()
 
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
@@ -4605,25 +4320,6 @@ elif seccion == "Reformación":
         persistent_selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], "reform_orientacion")
         persistent_text_area("Observaciones de reformación", "reform_observaciones")
 
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Reformación obtenida</div>', unsafe_allow_html=True)
-    archivo_reform_obtenida = st.file_uploader(
-        "Subir imagen de reformación obtenida",
-        type=["png", "jpg", "jpeg", "webp"],
-        key="reform_obtenida_uploader",
-    )
-    if archivo_reform_obtenida is not None:
-        registrar_imagen_reformacion_obtenida_subida(archivo_reform_obtenida)
-    if st.session_state.get("reform_obtenida_img_nombre"):
-        st.caption(f"Imagen activa: {st.session_state['reform_obtenida_img_nombre']}")
-    if st.button("Quitar imagen de reformación obtenida", key="quitar_reform_obtenida", use_container_width=True, disabled=not bool(st.session_state.get("reform_obtenida_img_bytes"))):
-        limpiar_imagen_reformacion_obtenida_subida()
-        if "reform_obtenida_uploader" in st.session_state:
-            st.session_state["reform_obtenida_uploader"] = None
-        st.rerun()
-    render_reformacion_obtenida_html(obtener_fuente_imagen_reformacion_obtenida(), key_suffix="reform_obtenida")
-    st.markdown('</div>', unsafe_allow_html=True)
-
     reformacion_completa = all([
         lista_completa(st.session_state["reform_tipo"]),
         seleccion_completa(st.session_state["reform_orientacion"]),
@@ -4639,7 +4335,6 @@ elif seccion == "Reformación":
     st.write(f"**Observaciones:** {st.session_state['reform_observaciones']}")
     st.write(f"**Imagen de rangos 1:** {st.session_state.get('reform_rangos_img1_nombre') or 'No subida'}")
     st.write(f"**Imagen de rangos 2:** {st.session_state.get('reform_rangos_img2_nombre') or 'No subida'}")
-    st.write(f"**Imagen de reformación obtenida:** {st.session_state.get('reform_obtenida_img_nombre') or 'No subida'}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     if reformacion_completa:
