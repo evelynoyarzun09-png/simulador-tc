@@ -654,8 +654,8 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             let roi = {{ x: 0, y: 0, r: 20 }};
 
             function getCssSize() {{
-                const maxWidth = 507;
-                const width = Math.min(canvas.parentElement.clientWidth || 507, maxWidth);
+                const maxWidth = 1014;
+                const width = Math.min(canvas.parentElement.clientWidth || 1014, maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
             }}
@@ -2634,7 +2634,7 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         </script>
         """
 
-        components.html(html_code, height=520)
+        components.html(html_code, height=980)
     except Exception as e:
         st.warning(f"No fue posible cargar la matriz de reconstrucción interactiva: {e}")
 
