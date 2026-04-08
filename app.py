@@ -1204,8 +1204,6 @@ input[type="date"] {
 </style>
 """, unsafe_allow_html=True)
 
-inyectar_estilos_botones_navegacion()
-
 # -------------------------
 # NAVEGACIÓN
 # -------------------------
@@ -1299,6 +1297,8 @@ def inyectar_estilos_botones_navegacion():
         width=0,
     )
 
+
+inyectar_estilos_botones_navegacion()
 
 # -------------------------
 # VALIDACIONES
