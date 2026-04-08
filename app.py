@@ -3828,6 +3828,38 @@ elif seccion == "A Practicar":
     st.header("A Practicar")
     st.write("Selecciona una etapa del simulador:")
 
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stRadio"] > label p {
+            font-size: 2rem !important;
+            font-weight: 700 !important;
+        }
+        div[data-testid="stRadio"] [role="radiogroup"] label {
+            padding-top: 0.4rem !important;
+            padding-bottom: 0.4rem !important;
+            transform: scale(1.6);
+            transform-origin: left center;
+            margin-left: 1.2rem !important;
+            margin-bottom: 1rem !important;
+        }
+        div[data-testid="stRadio"] {
+            margin-bottom: 2rem !important;
+        }
+        div.stButton > button[kind="secondary"],
+        div.stButton > button[kind="primary"] {
+            font-size: 1.9rem !important;
+            font-weight: 700 !important;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            min-height: 5rem !important;
+            border-radius: 16px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     col_img, col_menu = st.columns([1.15, 1], vertical_alignment="top")
 
     with col_img:
