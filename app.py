@@ -14,7 +14,7 @@ st.set_page_config(page_title="Simulador TC", layout="wide")
  
 # -------------------------
 # RUTA DE IMÁGENES
-# -------------------------
+# -------------------------x
 BASE_DIR = Path(__file__).parent
 PORTADA_IMG = BASE_DIR / "tomografo_portada.png"
 A_PRACTICAR_IMG = BASE_DIR / "a_practicar.png"
@@ -1087,24 +1087,49 @@ div.stButton > button:disabled {
 </style>
 <script>
 (function() {
-    function pintarBotonesNavegacion() {
-        const botones = window.parent.document.querySelectorAll('button');
+    function aplicarEstiloBoton(btn, fondo, borde) {
+        if (!btn) return;
+        btn.style.setProperty('background', fondo, 'important');
+        btn.style.setProperty('background-color', fondo, 'important');
+        btn.style.setProperty('color', '#ffffff', 'important');
+        btn.style.setProperty('border', `1px solid ${borde}`, 'important');
+        btn.style.setProperty('box-shadow', 'none', 'important');
+    }
+
+    function textoNormalizado(btn) {
+        return (btn.innerText || btn.textContent || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+
+    function pintarBotonesNavegacion(doc) {
+        if (!doc) return;
+        const botones = doc.querySelectorAll('button');
         botones.forEach((btn) => {
-            const texto = (btn.innerText || '').trim().toLowerCase();
-            if (texto === 'volver al inicio') {
-                btn.style.backgroundColor = '#1f77ff';
-                btn.style.color = 'white';
-                btn.style.border = '1px solid #165dcc';
+            const texto = textoNormalizado(btn);
+            if (texto.includes('volver al inicio')) {
+                aplicarEstiloBoton(btn, '#1f77ff', '#165dcc');
             }
             if (texto === 'volver') {
-                btn.style.backgroundColor = '#19a857';
-                btn.style.color = 'white';
-                btn.style.border = '1px solid #0f7a3d';
+                aplicarEstiloBoton(btn, '#19a857', '#0f7a3d');
             }
         });
     }
-    pintarBotonesNavegacion();
-    setInterval(pintarBotonesNavegacion, 700);
+
+    function repintarTodo() {
+        pintarBotonesNavegacion(document);
+        try { pintarBotonesNavegacion(window.parent.document); } catch (e) {}
+    }
+
+    repintarTodo();
+    setInterval(repintarTodo, 400);
+
+    const observer = new MutationObserver(repintarTodo);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    try {
+        observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
+    } catch (e) {}
 })();
 </script>
 <style>
@@ -1256,7 +1281,7 @@ def render_botones_navegacion(seccion_actual):
     col1, col2, col3 = st.columns([1.2, 1, 4.8])
     with col1:
         st.markdown('<div class="nav-top-btn">', unsafe_allow_html=True)
-        if st.button("Volver al inicio", key=f"inicio_{seccion_actual}", use_container_width=True):
+        if st.button("🏠 Volver al inicio", key=f"inicio_{seccion_actual}", use_container_width=True):
             ir_a("A Practicar")
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
