@@ -1262,15 +1262,17 @@ def recon_prefijo(numero):
 
 
 def render_nav_links(prev_section):
-    col_inicio, col_volver, col_spacer = st.columns([1.3, 1.1, 5])
-    with col_inicio:
-        if st.button("🏠 Volver al inicio", key=f"volver_inicio_{st.session_state.seccion}", use_container_width=True):
-            st.session_state.seccion = "A Practicar"
-            st.rerun()
-    with col_volver:
-        if st.button("⬅ Volver", key=f"volver_anterior_{st.session_state.seccion}", use_container_width=True):
-            st.session_state.seccion = prev_section
-            st.rerun()
+    inicio_url = f"?go={quote('A Practicar')}"
+    volver_url = f"?go={quote(prev_section)}"
+    st.markdown(
+        f"""
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin:0.25rem 0 0.8rem 0;">
+            <a href="{inicio_url}" target="_self" style="display:inline-block; padding:0.55rem 0.95rem; border-radius:8px; background:#1e6bff; color:white; text-decoration:none; font-weight:700; border:1px solid #0d4fd1;">🏠 Volver al inicio</a>
+            <a href="{volver_url}" target="_self" style="display:inline-block; padding:0.55rem 0.95rem; border-radius:8px; background:#1f9d55; color:white; text-decoration:none; font-weight:700; border:1px solid #157347;">⬅ Volver</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # -------------------------
 # VALIDACIONES
