@@ -654,8 +654,8 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             let roi = {{ x: 0, y: 0, r: 20 }};
 
             function getCssSize() {{
-                const maxWidth = 760;
-                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
+                const maxWidth = 360;
+                const width = Math.min((canvas.parentElement?.clientWidth || maxWidth), maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
             }}
@@ -2799,9 +2799,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 </div>
             </div>
             <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los rangos en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de cortes entre 1 y 200. La primera línea corresponde al corte 1 y se muestra también el último corte según la cantidad seleccionada.</div>
-            <div style="width:100%;display:flex;justify-content:center;">
-                <canvas id="canvas-{key_suffix}" style="width:100%;max-width:960px;min-height:700px;border-radius:10px;background:#222;display:block;"></canvas>
-            </div>
+            <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;"></canvas>
         </div>
 
         <script>
@@ -2819,12 +2817,9 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             let cssHeight = 0;
 
             function getCssSize() {{
-                const maxWidth = 960;
-                const width = Math.min(canvas.parentElement.clientWidth || 960, maxWidth);
-                const proportionalHeight = width * (img.height / img.width);
-                const minHeight = 700;
-                const maxHeight = 900;
-                const height = Math.max(minHeight, Math.min(proportionalHeight, maxHeight));
+                const maxWidth = 760;
+                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
+                const height = width * (img.height / img.width);
                 return {{ width, height }};
             }}
 
@@ -2933,7 +2928,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
         }})();
         </script>
         """
-        components.html(html_code, height=980)
+        components.html(html_code, height=620)
     except Exception as e:
         st.warning(f"No fue posible cargar los rangos paralelos: {e}")
 
