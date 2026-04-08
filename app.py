@@ -9,10 +9,9 @@ import json
 from html import escape
 import streamlit.components.v1 as components
 from PIL import Image, ImageDraw
-from urllib.parse import quote
 
 st.set_page_config(page_title="Simulador TC", layout="wide")
-
+ 
 # -------------------------
 # RUTA DE IMÁGENES
 # -------------------------
@@ -46,14 +45,6 @@ if "autenticado" not in st.session_state:
 
 if "seccion" not in st.session_state:
     st.session_state.seccion = "Portada"
-
-query_go = st.query_params.get("go")
-if query_go in {"A Practicar", "Preparación de paciente", "Topograma", "Adquisición", "Reconstrucción", "Reformación", "Jeringa inyectora"}:
-    st.session_state.seccion = query_go
-    try:
-        del st.query_params["go"]
-    except Exception:
-        pass
 
 DEFAULTS = {
     # Preparación
@@ -125,11 +116,13 @@ DEFAULTS = {
     "recon_ancho_ventana": "Seleccionar",
     "recon_grosor": "Seleccionar",
     "recon_incremento": "Seleccionar",
+    "recon_imagen_subida_bytes": None,
+    "recon_imagen_subida_nombre": "",
+    "recon_imagen_subida_mime": "",
     "recon_topo1_limite_superior": 15,
     "recon_topo1_limite_inferior": 85,
     "recon_topo2_limite_superior": 15,
     "recon_topo2_limite_inferior": 85,
-    "recon_cantidad": 1,
 
     # Reformación
     "reform_tipo": [],
@@ -150,29 +143,6 @@ DEFAULTS = {
 for clave, valor in DEFAULTS.items():
     if clave not in st.session_state:
         st.session_state[clave] = valor
-
-for numero_recon in range(2, 9):
-    pref = f"recon{numero_recon}"
-    recon_defaults = {
-        f"{pref}_fase": "Seleccionar",
-        f"{pref}_tipo": "Seleccionar",
-        f"{pref}_intensidad": "Seleccionar",
-        f"{pref}_kernel": "Seleccionar",
-        f"{pref}_nivel_ventana": "Seleccionar",
-        f"{pref}_ancho_ventana": "Seleccionar",
-        f"{pref}_grosor": "Seleccionar",
-        f"{pref}_incremento": "Seleccionar",
-        f"{pref}_imagen_subida_bytes": None,
-        f"{pref}_imagen_subida_nombre": "",
-        f"{pref}_imagen_subida_mime": "",
-        f"{pref}_topo1_limite_superior": 15,
-        f"{pref}_topo1_limite_inferior": 85,
-        f"{pref}_topo2_limite_superior": 15,
-        f"{pref}_topo2_limite_inferior": 85,
-    }
-    for clave, valor in recon_defaults.items():
-        if clave not in st.session_state:
-            st.session_state[clave] = valor
 
 # -------------------------
 # FUNCIONES PERSISTENCIA
@@ -452,41 +422,38 @@ def render_panel_exportacion_pdf():
             if st.session_state.get("mostrar_topo2", False):
                 snapshot_blocks.append(bloque_imagen_exportacion(f"Adquisición {numero} - corte de bolus topograma 2", storage_key=f"sim_tc_snapshot_{pref}_topo2_bolus"))
 
-    for numero_recon in range(1, int(st.session_state.get("recon_cantidad", 1)) + 1):
-        pref_recon = recon_prefijo(numero_recon)
-        filas_recon = [
-            ("Fase a reconstruir", st.session_state.get(f"{pref_recon}_fase")),
-            ("Tipo de reconstrucción", st.session_state.get(f"{pref_recon}_tipo")),
-            ("Intensidad", st.session_state.get(f"{pref_recon}_intensidad")),
-            ("Filtro kernel", st.session_state.get(f"{pref_recon}_kernel")),
-            ("Nivel de ventana", st.session_state.get(f"{pref_recon}_nivel_ventana")),
-            ("Ancho de ventana", st.session_state.get(f"{pref_recon}_ancho_ventana")),
-            ("Grosor de corte", st.session_state.get(f"{pref_recon}_grosor")),
-            ("Incremento", st.session_state.get(f"{pref_recon}_incremento")),
-            ("Imagen subida manualmente", st.session_state.get(f"{pref_recon}_imagen_subida_nombre") or "No"),
-        ]
-        secciones_html.append(bloque_resumen_exportacion(f"Reconstrucción {numero_recon}", filas_recon))
-        secciones_html.append(bloque_imagen_exportacion(f"Reconstrucción {numero_recon} - matriz interactiva", storage_key=f"sim_tc_snapshot_{pref_recon}_preview"))
+    filas_recon = [
+        ("Fase a reconstruir", st.session_state.get("recon_fase")),
+        ("Tipo de reconstrucción", st.session_state.get("recon_tipo")),
+        ("Intensidad", st.session_state.get("recon_intensidad")),
+        ("Filtro kernel", st.session_state.get("recon_kernel")),
+        ("Nivel de ventana", st.session_state.get("recon_nivel_ventana")),
+        ("Ancho de ventana", st.session_state.get("recon_ancho_ventana")),
+        ("Grosor de corte", st.session_state.get("recon_grosor")),
+        ("Incremento", st.session_state.get("recon_incremento")),
+    ]
+    secciones_html.append(bloque_resumen_exportacion("Reconstrucción", filas_recon))
+    secciones_html.append(bloque_imagen_exportacion("Reconstrucción - matriz interactiva", storage_key="sim_tc_snapshot_recon_preview"))
 
-        recon_topo1 = crear_topograma_data_uri_para_exportacion(
-            obtener_imagen_rx_topograma("topo"),
-            int(st.session_state.get(f"{pref_recon}_topo1_limite_superior", 15)),
-            int(st.session_state.get(f"{pref_recon}_topo1_limite_inferior", 85)),
+    recon_topo1 = crear_topograma_data_uri_para_exportacion(
+        obtener_imagen_rx_topograma("topo"),
+        int(st.session_state.get("recon_topo1_limite_superior", 15)),
+        int(st.session_state.get("recon_topo1_limite_inferior", 85)),
+        color_inicio=(255, 0, 255),
+        color_fin=(0, 255, 0),
+    )
+    if recon_topo1:
+        secciones_html.append(bloque_imagen_exportacion("Reconstrucción - topograma 1", recon_topo1))
+    if st.session_state.get("mostrar_topo2", False):
+        recon_topo2 = crear_topograma_data_uri_para_exportacion(
+            obtener_imagen_rx_topograma("topo2"),
+            int(st.session_state.get("recon_topo2_limite_superior", 15)),
+            int(st.session_state.get("recon_topo2_limite_inferior", 85)),
             color_inicio=(255, 0, 255),
             color_fin=(0, 255, 0),
         )
-        if recon_topo1:
-            secciones_html.append(bloque_imagen_exportacion(f"Reconstrucción {numero_recon} - topograma 1", recon_topo1))
-        if st.session_state.get("mostrar_topo2", False):
-            recon_topo2 = crear_topograma_data_uri_para_exportacion(
-                obtener_imagen_rx_topograma("topo2"),
-                int(st.session_state.get(f"{pref_recon}_topo2_limite_superior", 15)),
-                int(st.session_state.get(f"{pref_recon}_topo2_limite_inferior", 85)),
-                color_inicio=(255, 0, 255),
-                color_fin=(0, 255, 0),
-            )
-            if recon_topo2:
-                secciones_html.append(bloque_imagen_exportacion(f"Reconstrucción {numero_recon} - topograma 2", recon_topo2))
+        if recon_topo2:
+            secciones_html.append(bloque_imagen_exportacion("Reconstrucción - topograma 2", recon_topo2))
 
     filas_reform = [
         ("Tipo de reformación", st.session_state.get("reform_tipo")),
@@ -1255,24 +1222,6 @@ def ir_a(seccion_destino):
 
 def volver_anterior():
     st.session_state.seccion = SECCION_ANTERIOR.get(st.session_state.seccion, "A Practicar")
-
-
-def recon_prefijo(numero):
-    return "recon" if numero == 1 else f"recon{numero}"
-
-
-def render_nav_links(prev_section):
-    inicio_url = f"?go={quote('A Practicar')}"
-    volver_url = f"?go={quote(prev_section)}"
-    st.markdown(
-        f"""
-        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin:0.25rem 0 0.8rem 0;">
-            <a href="{inicio_url}" target="_self" style="display:inline-block; padding:0.55rem 0.95rem; border-radius:8px; background:#1e6bff; color:white; text-decoration:none; font-weight:700; border:1px solid #0d4fd1;">🏠 Volver al inicio</a>
-            <a href="{volver_url}" target="_self" style="display:inline-block; padding:0.55rem 0.95rem; border-radius:8px; background:#1f9d55; color:white; text-decoration:none; font-weight:700; border:1px solid #157347;">⬅ Volver</a>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 # -------------------------
 # VALIDACIONES
@@ -2430,18 +2379,33 @@ def valor_numerico_desde_texto(valor):
 
 def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="recon_matrix"):
     try:
-        if isinstance(imagen_fuente, Path):
-            ruta = imagen_fuente
-        else:
-            ruta = Path(imagen_fuente)
+        image_bytes = None
+        mime = "image/png"
 
-        if not ruta.exists():
+        if isinstance(imagen_fuente, dict):
+            image_bytes = imagen_fuente.get("bytes")
+            mime = imagen_fuente.get("mime", "image/png") or "image/png"
+        elif isinstance(imagen_fuente, Image.Image):
+            buffer = BytesIO()
+            imagen_fuente.save(buffer, format="PNG")
+            image_bytes = buffer.getvalue()
+            mime = "image/png"
+        elif hasattr(imagen_fuente, "getvalue"):
+            image_bytes = imagen_fuente.getvalue()
+            mime = getattr(imagen_fuente, "type", "image/png") or "image/png"
+        else:
+            ruta = imagen_fuente if isinstance(imagen_fuente, Path) else Path(imagen_fuente)
+            if not ruta.exists():
+                st.info("No se encontró la imagen de reconstrucción.")
+                return
+            image_bytes = ruta.read_bytes()
+            sufijo = ruta.suffix.lower()
+            mime = "image/png" if sufijo == ".png" else "image/jpeg"
+
+        if not image_bytes:
             st.info("No se encontró la imagen de reconstrucción.")
             return
 
-        image_bytes = ruta.read_bytes()
-        sufijo = ruta.suffix.lower()
-        mime = "image/png" if sufijo == ".png" else "image/jpeg"
         encoded = base64.b64encode(image_bytes).decode("utf-8")
         data_uri = f"data:{mime};base64,{encoded}"
 
@@ -2635,12 +2599,12 @@ def render_matriz_reconstruccion_interactiva_html(imagen_fuente, key_suffix="rec
         st.warning(f"No fue posible cargar la matriz de reconstrucción interactiva: {e}")
 
 
-def obtener_nombre_imagen_reconstruccion(prefijo="recon"):
+def obtener_nombre_imagen_reconstruccion():
     protocolo = st.session_state.get("topo_region", "Seleccionar")
-    fase = st.session_state.get(f"{prefijo}_fase", "Seleccionar")
-    kernel = st.session_state.get(f"{prefijo}_kernel", "Seleccionar")
-    nivel = valor_numerico_desde_texto(st.session_state.get(f"{prefijo}_nivel_ventana", ""))
-    ancho = valor_numerico_desde_texto(st.session_state.get(f"{prefijo}_ancho_ventana", ""))
+    fase = st.session_state.get("recon_fase", "Seleccionar")
+    kernel = st.session_state.get("recon_kernel", "Seleccionar")
+    nivel = valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana", ""))
+    ancho = valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana", ""))
 
     if not all([
         seleccion_completa(protocolo),
@@ -2691,12 +2655,39 @@ def obtener_nombre_imagen_reconstruccion(prefijo="recon"):
     return None
 
 
-def obtener_archivo_imagen_reconstruccion(prefijo="recon"):
-    nombre = obtener_nombre_imagen_reconstruccion(prefijo)
+def obtener_archivo_imagen_reconstruccion():
+    nombre = obtener_nombre_imagen_reconstruccion()
     if not nombre:
         return None
     return buscar_archivo_imagen_por_nombre(nombre)
 
+
+def limpiar_imagen_reconstruccion_subida():
+    st.session_state["recon_imagen_subida_bytes"] = None
+    st.session_state["recon_imagen_subida_nombre"] = ""
+    st.session_state["recon_imagen_subida_mime"] = ""
+
+
+def registrar_imagen_reconstruccion_subida(archivo):
+    if archivo is None:
+        return
+    try:
+        st.session_state["recon_imagen_subida_bytes"] = archivo.getvalue()
+        st.session_state["recon_imagen_subida_nombre"] = getattr(archivo, "name", "imagen_reconstruccion")
+        st.session_state["recon_imagen_subida_mime"] = getattr(archivo, "type", "image/png") or "image/png"
+    except Exception:
+        pass
+
+
+def obtener_fuente_imagen_reconstruccion():
+    bytes_subidos = st.session_state.get("recon_imagen_subida_bytes")
+    if bytes_subidos:
+        return {
+            "bytes": bytes_subidos,
+            "mime": st.session_state.get("recon_imagen_subida_mime", "image/png") or "image/png",
+            "name": st.session_state.get("recon_imagen_subida_nombre", "imagen_reconstruccion"),
+        }
+    return obtener_archivo_imagen_reconstruccion()
 
 
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
@@ -3058,7 +3049,7 @@ def render_topogramas_adquisicion(numero=1):
             )
 
 
-def render_topogramas_reconstruccion(prefijo="recon"):
+def render_topogramas_reconstruccion():
     mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
     imagen_topo_1 = obtener_imagen_rx_topograma("topo")
     imagen_topo_2 = obtener_imagen_rx_topograma("topo2") if mostrar_topo2 else None
@@ -3069,13 +3060,13 @@ def render_topogramas_reconstruccion(prefijo="recon"):
     if mostrar_topo2:
         topo_col1, topo_col2 = st.columns(2)
         bloques_topo = [
-            (topo_col1, "topo", "Topograma 1", imagen_topo_1, f"{prefijo}_topo1_limite_superior", f"{prefijo}_topo1_limite_inferior"),
-            (topo_col2, "topo2", "Topograma 2", imagen_topo_2, f"{prefijo}_topo2_limite_superior", f"{prefijo}_topo2_limite_inferior"),
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "recon_topo1_limite_superior", "recon_topo1_limite_inferior"),
+            (topo_col2, "topo2", "Topograma 2", imagen_topo_2, "recon_topo2_limite_superior", "recon_topo2_limite_inferior"),
         ]
     else:
         margen1, topo_col1, margen2 = st.columns([1.2, 1.6, 1.2])
         bloques_topo = [
-            (topo_col1, "topo", "Topograma 1", imagen_topo_1, f"{prefijo}_topo1_limite_superior", f"{prefijo}_topo1_limite_inferior"),
+            (topo_col1, "topo", "Topograma 1", imagen_topo_1, "recon_topo1_limite_superior", "recon_topo1_limite_inferior"),
         ]
 
     for columna_topo, prefijo_topo, titulo_topo, imagen_topo, key_sup, key_inf in bloques_topo:
@@ -3638,7 +3629,10 @@ elif seccion == "A Practicar":
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
 
-    render_nav_links("A Practicar")
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.75])
 
@@ -3756,7 +3750,10 @@ elif seccion == "Preparación de paciente":
 elif seccion == "Topograma":
     st.header("Topograma")
 
-    render_nav_links("Preparación de paciente")
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     st.markdown('<div class="topo-compacto">', unsafe_allow_html=True)
 
@@ -3881,26 +3878,74 @@ elif seccion == "Adquisición":
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
     with c1:
-        render_nav_links("Topograma")
+        if st.button("⬅ Volver a Topograma", use_container_width=True):
+            ir_a("Topograma"); st.rerun()
     with c3:
         if st.button("Siguiente: Reconstrucción ➡", use_container_width=True, disabled=not adquisicion_completa):
             ir_a("Reconstrucción"); st.rerun()
 
 elif seccion == "Reconstrucción":
     st.header("Reconstrucción")
-    render_nav_links("Adquisición")
 
-    c_count1, c_count2, c_count3 = st.columns([1.2, 1.2, 3.6])
-    with c_count1:
-        if st.button("➕ Agregar reconstrucción", use_container_width=True, disabled=int(st.session_state.get("recon_cantidad", 1)) >= 8):
-            st.session_state["recon_cantidad"] = min(8, int(st.session_state.get("recon_cantidad", 1)) + 1)
+    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+    st.markdown('<div class="titulo-bloque">Imagen para matriz de reconstrucción</div>', unsafe_allow_html=True)
+    archivo_recon_subido = st.file_uploader(
+        "Subir imagen para aplicar la matriz de reconstrucción",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="recon_imagen_uploader",
+        help="Si subes una imagen aquí, la matriz de reconstrucción se aplicará sobre esa imagen en vez de usar la imagen automática de la app.",
+    )
+    if archivo_recon_subido is not None:
+        registrar_imagen_reconstruccion_subida(archivo_recon_subido)
+
+    col_img_recon_1, col_img_recon_2 = st.columns([3, 1])
+    with col_img_recon_1:
+        if st.session_state.get("recon_imagen_subida_nombre"):
+            st.caption(f"Imagen subida activa: {st.session_state['recon_imagen_subida_nombre']}")
+        else:
+            st.caption("No hay una imagen subida manualmente. Se usará la imagen automática de reconstrucción si existe.")
+    with col_img_recon_2:
+        if st.button("Quitar imagen subida", use_container_width=True, disabled=not bool(st.session_state.get("recon_imagen_subida_bytes"))):
+            limpiar_imagen_reconstruccion_subida()
+            if "recon_imagen_uploader" in st.session_state:
+                st.session_state["recon_imagen_uploader"] = None
             st.rerun()
-    with c_count2:
-        if st.button("➖ Quitar reconstrucción", use_container_width=True, disabled=int(st.session_state.get("recon_cantidad", 1)) <= 1):
-            st.session_state["recon_cantidad"] = max(1, int(st.session_state.get("recon_cantidad", 1)) - 1)
-            st.rerun()
-    with c_count3:
-        st.info(f"Reconstrucciones activas: {int(st.session_state.get('recon_cantidad', 1))} de 8")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    imagen_recon = obtener_fuente_imagen_reconstruccion()
+    topograma_recon_disponible = obtener_imagen_rx_topograma("topo") is not None or (
+        st.session_state.get("mostrar_topo2", False) and obtener_imagen_rx_topograma("topo2") is not None
+    )
+    if imagen_recon is not None or topograma_recon_disponible:
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        col_recon, col_topo = st.columns([1.2, 1], vertical_alignment="top")
+        with col_recon:
+            st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
+            if imagen_recon is not None:
+                render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix="recon_preview")
+            else:
+                st.info("No se encontró la imagen de reconstrucción, pero sí el topograma seleccionado para delimitar el rango de reconstrucción.")
+        with col_topo:
+            render_topogramas_reconstruccion()
+        st.markdown('</div>', unsafe_allow_html=True)
+    elif (
+        st.session_state.get("topo_region") == "cerebro"
+        and st.session_state.get("recon_fase") == "Sin contraste"
+        and st.session_state.get("recon_kernel") in ["Standar 30f", "Suave 20f"]
+        and valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana")) is not None
+        and valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana")) is not None
+        and 40 <= valor_numerico_desde_texto(st.session_state.get("recon_nivel_ventana")) <= 60
+        and 100 <= valor_numerico_desde_texto(st.session_state.get("recon_ancho_ventana")) <= 140
+    ):
+        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
+        st.info("Se activó una regla de imagen, pero no se encontró el archivo correspondiente en la carpeta de la app.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     fases_recon = ["Seleccionar", "Sin contraste", "Angiográfica", "Venosa o portal", "Tardía"]
     tipos_recon = ["Seleccionar", "Retroproyección filtrada", "Safire", "Asir"]
@@ -3922,100 +3967,51 @@ elif seccion == "Reconstrucción":
         return valores
 
     opciones_mm = lista_mm_hasta_6()
-    reconstrucciones_completas = []
 
-    for numero_recon in range(1, int(st.session_state.get("recon_cantidad", 1)) + 1):
-        pref = recon_prefijo(numero_recon)
-        st.divider()
-        st.subheader(f"Reconstrucción {numero_recon}")
+    col1, col2 = st.columns(2)
+    with col1:
+        persistent_selectbox("Fase a reconstruir", fases_recon, "recon_fase")
+        persistent_selectbox("Tipo de reconstrucción", tipos_recon, "recon_tipo")
+        if st.session_state["recon_tipo"] == "Safire":
+            persistent_selectbox("Intensidad Safire", intensidades_safire, "recon_intensidad")
+        elif st.session_state["recon_tipo"] == "Asir":
+            persistent_selectbox("Intensidad Asir", intensidades_asir, "recon_intensidad")
+        else:
+            st.session_state["recon_intensidad"] = "Seleccionar"
+        persistent_selectbox("Filtro kernel", kernels_recon, "recon_kernel")
 
-        st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-        st.markdown('<div class="titulo-bloque">Imagen para matriz de reconstrucción</div>', unsafe_allow_html=True)
-        archivo_recon_subido = st.file_uploader(
-            f"Subir imagen para aplicar la matriz de reconstrucción {numero_recon}",
-            type=["png", "jpg", "jpeg", "webp"],
-            key=f"{pref}_imagen_uploader",
-            help="Si subes una imagen aquí, la matriz de reconstrucción se aplicará sobre esa imagen en vez de usar la imagen automática de la app.",
-        )
-        if archivo_recon_subido is not None:
-            registrar_imagen_reconstruccion_subida(archivo_recon_subido, pref)
+    with col2:
+        persistent_selectbox("Nivel de ventana", niveles_ventana, "recon_nivel_ventana")
+        persistent_selectbox("Ancho de ventana", anchos_ventana, "recon_ancho_ventana")
+        persistent_selectbox("Grosor de corte", opciones_mm, "recon_grosor")
+        persistent_selectbox("Incremento", opciones_mm, "recon_incremento")
 
-        col_img_recon_1, col_img_recon_2 = st.columns([3, 1])
-        with col_img_recon_1:
-            if st.session_state.get(f"{pref}_imagen_subida_nombre"):
-                st.caption(f"Imagen subida activa: {st.session_state[f'{pref}_imagen_subida_nombre']}")
-            else:
-                st.caption("No hay una imagen subida manualmente. Se usará la imagen automática de reconstrucción si existe.")
-        with col_img_recon_2:
-            if st.button("Quitar imagen subida", key=f"btn_quitar_{pref}", use_container_width=True, disabled=not bool(st.session_state.get(f"{pref}_imagen_subida_bytes"))):
-                limpiar_imagen_reconstruccion_subida(pref)
-                if f"{pref}_imagen_uploader" in st.session_state:
-                    st.session_state[f"{pref}_imagen_uploader"] = None
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+    intensidad_requerida = st.session_state["recon_tipo"] in ["Safire", "Asir"]
+    reconstruccion_completa = all([
+        seleccion_completa(st.session_state["recon_fase"]),
+        seleccion_completa(st.session_state["recon_tipo"]),
+        (seleccion_completa(st.session_state["recon_intensidad"]) if intensidad_requerida else True),
+        seleccion_completa(st.session_state["recon_kernel"]),
+        seleccion_completa(st.session_state["recon_nivel_ventana"]),
+        seleccion_completa(st.session_state["recon_ancho_ventana"]),
+        seleccion_completa(st.session_state["recon_grosor"]),
+        seleccion_completa(st.session_state["recon_incremento"]),
+    ])
 
-        imagen_recon = obtener_fuente_imagen_reconstruccion(pref)
-        topograma_recon_disponible = obtener_imagen_rx_topograma("topo") is not None or (
-            st.session_state.get("mostrar_topo2", False) and obtener_imagen_rx_topograma("topo2") is not None
-        )
-        if imagen_recon is not None or topograma_recon_disponible:
-            st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-            col_recon, col_topo = st.columns([1.2, 1], vertical_alignment="top")
-            with col_recon:
-                st.markdown('<div class="titulo-bloque">Vista previa de reconstrucción</div>', unsafe_allow_html=True)
-                if imagen_recon is not None:
-                    render_matriz_reconstruccion_interactiva_html(imagen_recon, key_suffix=f"{pref}_preview")
-                else:
-                    st.info("No se encontró la imagen de reconstrucción, pero sí el topograma seleccionado para delimitar el rango de reconstrucción.")
-            with col_topo:
-                render_topogramas_reconstruccion(pref)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        col1, col2 = st.columns(2)
-        with col1:
-            persistent_selectbox("Fase a reconstruir", fases_recon, f"{pref}_fase")
-            persistent_selectbox("Tipo de reconstrucción", tipos_recon, f"{pref}_tipo")
-            if st.session_state[f"{pref}_tipo"] == "Safire":
-                persistent_selectbox("Intensidad Safire", intensidades_safire, f"{pref}_intensidad")
-            elif st.session_state[f"{pref}_tipo"] == "Asir":
-                persistent_selectbox("Intensidad Asir", intensidades_asir, f"{pref}_intensidad")
-            else:
-                st.session_state[f"{pref}_intensidad"] = "Seleccionar"
-            persistent_selectbox("Filtro kernel", kernels_recon, f"{pref}_kernel")
-
-        with col2:
-            persistent_selectbox("Nivel de ventana", niveles_ventana, f"{pref}_nivel_ventana")
-            persistent_selectbox("Ancho de ventana", anchos_ventana, f"{pref}_ancho_ventana")
-            persistent_selectbox("Grosor de corte", opciones_mm, f"{pref}_grosor")
-            persistent_selectbox("Incremento", opciones_mm, f"{pref}_incremento")
-
-        intensidad_requerida = st.session_state[f"{pref}_tipo"] in ["Safire", "Asir"]
-        reconstruccion_completa_actual = all([
-            seleccion_completa(st.session_state[f"{pref}_fase"]),
-            seleccion_completa(st.session_state[f"{pref}_tipo"]),
-            (seleccion_completa(st.session_state[f"{pref}_intensidad"]) if intensidad_requerida else True),
-            seleccion_completa(st.session_state[f"{pref}_kernel"]),
-            seleccion_completa(st.session_state[f"{pref}_nivel_ventana"]),
-            seleccion_completa(st.session_state[f"{pref}_ancho_ventana"]),
-            seleccion_completa(st.session_state[f"{pref}_grosor"]),
-            seleccion_completa(st.session_state[f"{pref}_incremento"]),
-        ])
-        reconstrucciones_completas.append(reconstruccion_completa_actual)
-
-        st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-        st.write(f"**Fase a reconstruir:** {st.session_state[f'{pref}_fase']}")
-        st.write(f"**Tipo de reconstrucción:** {st.session_state[f'{pref}_tipo']}")
-        if intensidad_requerida:
-            st.write(f"**Intensidad:** {st.session_state[f'{pref}_intensidad']}")
-        st.write(f"**Filtro kernel:** {st.session_state[f'{pref}_kernel']}")
-        st.write(f"**Nivel de ventana:** {st.session_state[f'{pref}_nivel_ventana']}")
-        st.write(f"**Ancho de ventana:** {st.session_state[f'{pref}_ancho_ventana']}")
-        st.write(f"**Grosor de corte:** {st.session_state[f'{pref}_grosor']} mm")
-        st.write(f"**Incremento:** {st.session_state[f'{pref}_incremento']} mm")
-        st.write(f"**Imagen subida manualmente:** {st.session_state.get(f'{pref}_imagen_subida_nombre') or 'No'}")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    reconstruccion_completa = all(reconstrucciones_completas) if reconstrucciones_completas else False
+    st.divider()
+    st.subheader("Resumen")
+    st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
+    st.write(f"**Fase a reconstruir:** {st.session_state['recon_fase']}")
+    st.write(f"**Tipo de reconstrucción:** {st.session_state['recon_tipo']}")
+    if intensidad_requerida:
+        st.write(f"**Intensidad:** {st.session_state['recon_intensidad']}")
+    st.write(f"**Filtro kernel:** {st.session_state['recon_kernel']}")
+    st.write(f"**Nivel de ventana:** {st.session_state['recon_nivel_ventana']}")
+    st.write(f"**Ancho de ventana:** {st.session_state['recon_ancho_ventana']}")
+    st.write(f"**Grosor de corte:** {st.session_state['recon_grosor']} mm")
+    st.write(f"**Incremento:** {st.session_state['recon_incremento']} mm")
+    st.write(f"**Imagen subida manualmente:** {st.session_state.get('recon_imagen_subida_nombre') or 'No'}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
     with c2:
@@ -4025,7 +4021,10 @@ elif seccion == "Reconstrucción":
 elif seccion == "Reformación":
     st.header("Reformación")
 
-    render_nav_links("Reconstrucción")
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     col1, col2 = st.columns(2)
     with col1:
@@ -4058,7 +4057,10 @@ elif seccion == "Reformación":
 elif seccion == "Jeringa inyectora":
     st.header("Jeringa inyectora")
 
-    render_nav_links("Reformación")
+    colv1, colv2, colv3 = st.columns([1, 6, 1])
+    with colv1:
+        if st.button("⬅ Volver", use_container_width=True):
+            volver_anterior(); st.rerun()
 
     st.toggle("No la usaré", key="jer_no_usare")
 
