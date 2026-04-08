@@ -2817,8 +2817,8 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             let cssHeight = 0;
 
             function getCssSize() {{
-                const maxWidth = 760;
-                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
+                const maxWidth = 1013;
+                const width = Math.min(canvas.parentElement.clientWidth || 1013, maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
             }}
@@ -2928,7 +2928,7 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
         }})();
         </script>
         """
-        components.html(html_code, height=620)
+        components.html(html_code, height=820)
     except Exception as e:
         st.warning(f"No fue posible cargar los rangos paralelos: {e}")
 
