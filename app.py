@@ -125,21 +125,16 @@ DEFAULTS = {
     "recon_topo2_limite_inferior": 85,
 
     # Reformación
-    "reform_reconstruccion": "Seleccionar",
-    "reform_fase": "Seleccionar",
-    "reform_tipo": "Seleccionar",
-    "reform_plano": "Seleccionar",
-    "reform_grosor": "",
-    "reform_distancia": "",
+    "reform_tipo": [],
+    "reform_grosor": 10.0,
+    "reform_orientacion": "Seleccionar",
+    "reform_observaciones": "",
     "reform_rangos_img1_bytes": None,
     "reform_rangos_img1_nombre": "",
     "reform_rangos_img1_mime": "",
     "reform_rangos_img2_bytes": None,
     "reform_rangos_img2_nombre": "",
     "reform_rangos_img2_mime": "",
-    "reform_rangos_img3_bytes": None,
-    "reform_rangos_img3_nombre": "",
-    "reform_rangos_img3_mime": "",
 
     # Jeringa
     "jer_tipo_contraste": "Yodado",
@@ -226,30 +221,6 @@ def persistent_multiselect(label, options, key):
 def persistent_number_input(label, key, **kwargs):
     load_widget(key)
     st.number_input(label, key=f"_{key}", on_change=store_widget, args=(key,), **kwargs)
-
-
-def sanitizar_decimal(valor):
-    valor = "" if valor is None else str(valor)
-    valor_limpio = re.sub(r"[^0-9.,]", "", valor).replace(",", ".")
-    partes = valor_limpio.split(".")
-    if len(partes) > 2:
-        valor_limpio = partes[0] + "." + "".join(partes[1:])
-    return valor_limpio
-
-
-def store_decimal_widget(key):
-    st.session_state[key] = sanitizar_decimal(st.session_state.get(f"_{key}", ""))
-    st.session_state[f"_{key}"] = st.session_state[key]
-
-
-def persistent_decimal_text_input(label, key, placeholder=""):
-    widget_key = f"_{key}"
-    if widget_key not in st.session_state:
-        st.session_state[widget_key] = sanitizar_decimal(st.session_state.get(key, ""))
-
-    st.text_input(label, key=widget_key, placeholder=placeholder, on_change=store_decimal_widget, args=(key,))
-
-    st.session_state[key] = sanitizar_decimal(st.session_state.get(widget_key, ""))
 
 def calcular_cobertura_desde_matriz(matriz_texto):
     matriz = str(matriz_texto).strip()
@@ -491,12 +462,10 @@ def render_panel_exportacion_pdf():
             secciones_html.append(bloque_imagen_exportacion("Reconstrucción - topograma 2", recon_topo2))
 
     filas_reform = [
-        ("Reconstrucción a reformar", st.session_state.get("reform_reconstruccion")),
-        ("Fase", st.session_state.get("reform_fase")),
         ("Tipo de reformación", st.session_state.get("reform_tipo")),
-        ("Plano de reformación", st.session_state.get("reform_plano")),
-        ("Grosor de corte", st.session_state.get("reform_grosor")),
-        ("Distancia de corte", st.session_state.get("reform_distancia")),
+        ("Grosor slab", f"{st.session_state.get('reform_grosor')} mm"),
+        ("Orientación", st.session_state.get("reform_orientacion")),
+        ("Observaciones", st.session_state.get("reform_observaciones")),
     ]
     if st.session_state.get("jer_no_usare", False):
         filas_jeringa = [
@@ -685,8 +654,8 @@ def render_roi_interactiva_html(uploaded_file, key_suffix="roi"):
             let roi = {{ x: 0, y: 0, r: 20 }};
 
             function getCssSize() {{
-                const maxWidth = 360;
-                const width = Math.min((canvas.parentElement?.clientWidth || maxWidth), maxWidth);
+                const maxWidth = 760;
+                const width = Math.min(canvas.parentElement.clientWidth || 760, maxWidth);
                 const height = width * (img.height / img.width);
                 return {{ width, height }};
             }}
@@ -989,78 +958,8 @@ def render_linea_corte_bolus_interactiva_html(imagen_fuente, key_suffix="bolus_l
 # -------------------------
 # CONTROL DE ACCESO
 # -------------------------
-def verificar_clave():
-    clave_ingresada = st.session_state.get("clave_ingresada", "")
-    clave_correcta = st.secrets.get("app_password", "")
-
-    if hmac.compare_digest(clave_ingresada, clave_correcta):
-        st.session_state.autenticado = True
-        st.session_state.error_clave = False
-    else:
-        st.session_state.autenticado = False
-        st.session_state.error_clave = True
-
-
-if not st.session_state.autenticado:
-    st.markdown("""
-    <style>
-    .stApp { background-color: #111111; }
-    .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 820px; }
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText { color: white !important; text-transform: uppercase !important; }
-    .login-box {
-        background-color: #000000;
-        padding: 2rem;
-        border-radius: 18px;
-        border: 1px solid #2d2d2d;
-    }
-    .login-titulo {
-        text-align: center;
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #20cfcf;
-        margin-bottom: 0.35rem;
-    }
-    .login-subtitulo {
-        text-align: center;
-        color: white;
-        font-size: 0.62rem;
-        margin-bottom: 1.2rem;
-    }
-    div[data-baseweb="input"] > div {
-        background-color: #d0d5dd !important;
-        color: #111111 !important;
-        border-radius: 8px !important;
-    }
-    input {
-        color: #111111 !important;
-        -webkit-text-fill-color: #111111 !important;
-    }
-    div.stButton > button {
-        background-color: #b8bec7 !important;
-        color: #1f1f1f !important;
-        border-radius: 8px !important;
-        border: 1px solid #9ca3ad !important;
-        font-weight: 600 !important;
-    font-size: 0.7rem !important;
-        min-height: 30px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="login-box">', unsafe_allow_html=True)
-    st.markdown('<div class="login-titulo">Tomografía Computada Aplicada</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-subtitulo">Ingrese la clave para acceder al simulador.</div>', unsafe_allow_html=True)
-
-    if PORTADA_IMG.exists():
-        mostrar_imagen_actualizada(PORTADA_IMG, use_container_width=True)
-
-    st.text_input("Clave de acceso", type="password", key="clave_ingresada", on_change=verificar_clave)
-
-    if st.session_state.get("error_clave", False):
-        st.error("Clave incorrecta. Inténtalo nuevamente.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.stop()
+# Acceso directo sin clave
+st.session_state.autenticado = True
 
 # -------------------------
 # ESTILOS
@@ -2964,280 +2863,6 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
         st.warning(f"No fue posible cargar los rangos paralelos: {e}")
 
 
-def render_reformacion_obtenida_interactiva_html(image_source, key_suffix="reform_obtenida"):
-    if image_source is None:
-        st.info("Sube una imagen en Reformación obtenida para agregar flechas y escribir la anatomía.")
-        return
-
-    try:
-        if isinstance(image_source, dict) and image_source.get("bytes"):
-            mime_type = image_source.get("mime", "image/png") or "image/png"
-            image_b64 = base64.b64encode(image_source["bytes"]).decode("utf-8")
-            data_uri = f"data:{mime_type};base64,{image_b64}"
-        else:
-            data_uri = imagen_a_data_uri(image_source)
-
-        if not data_uri:
-            st.warning("No fue posible cargar la imagen de reformación obtenida.")
-            return
-
-        html_code = f"""
-        <div style="background:#4a4a4a;border:1px solid #7a7a7a;border-radius:12px;padding:14px;">
-            <div style="color:white;font-weight:700;font-size:16px;margin-bottom:10px;">REFORMACIÓN OBTENIDA</div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:12px;">Activa hasta 5 flechas, mueve cada punta sobre la anatomía y escribe el nombre en su espacio correspondiente.</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-                <button id="add-arrow-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Agregar flecha</button>
-                <button id="remove-arrow-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;">Quitar última flecha</button>
-            </div>
-            <div style="display:grid;grid-template-columns:minmax(0, 2.2fr) minmax(220px, 0.55fr);gap:16px;align-items:start;">
-                <div>
-                    <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;cursor:default;"></canvas>
-                </div>
-                <div id="labels-panel-{key_suffix}" style="display:flex;flex-direction:column;gap:10px;"></div>
-            </div>
-        </div>
-
-        <script>
-        (() => {{
-            const MAX_ARROWS = 5;
-            const canvas = document.getElementById('canvas-{key_suffix}');
-            const ctx = canvas.getContext('2d');
-            const addBtn = document.getElementById('add-arrow-{key_suffix}');
-            const removeBtn = document.getElementById('remove-arrow-{key_suffix}');
-            const labelsPanel = document.getElementById('labels-panel-{key_suffix}');
-            const img = new Image();
-            let cssWidth = 0;
-            let cssHeight = 0;
-            let dragging = null;
-            let arrows = [];
-
-            function createArrow(index) {{
-                const startX = cssWidth * 0.78;
-                const startY = cssHeight * (0.18 + index * 0.14);
-                const tipX = cssWidth * 0.45;
-                const tipY = cssHeight * (0.22 + index * 0.12);
-                return {{
-                    id: index + 1,
-                    startX,
-                    startY,
-                    tipX,
-                    tipY,
-                    text: ''
-                }};
-            }}
-
-            function getCssSize() {{
-                const maxWidth = 1280;
-                const width = Math.min(canvas.parentElement.clientWidth || maxWidth, maxWidth);
-                const height = width * (img.height / img.width);
-                return {{ width, height }};
-            }}
-
-            function resizeCanvas() {{
-                if (!img.width) return;
-                const oldWidth = cssWidth || 1;
-                const oldHeight = cssHeight || 1;
-                const dpr = window.devicePixelRatio || 1;
-                const size = getCssSize();
-                cssWidth = size.width;
-                cssHeight = size.height;
-                canvas.style.width = cssWidth + 'px';
-                canvas.style.height = cssHeight + 'px';
-                canvas.width = Math.round(cssWidth * dpr);
-                canvas.height = Math.round(cssHeight * dpr);
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-                arrows = arrows.map((arrow, idx) => {{
-                    if (!oldWidth || !oldHeight) return createArrow(idx);
-                    return {{
-                        ...arrow,
-                        startX: arrow.startX * cssWidth / oldWidth,
-                        startY: arrow.startY * cssHeight / oldHeight,
-                        tipX: arrow.tipX * cssWidth / oldWidth,
-                        tipY: arrow.tipY * cssHeight / oldHeight,
-                    }};
-                }});
-
-                draw();
-                renderInputs();
-            }}
-
-            function clampPoint(x, y) {{
-                return {{
-                    x: Math.max(0, Math.min(cssWidth, x)),
-                    y: Math.max(0, Math.min(cssHeight, y)),
-                }};
-            }}
-
-            function getPointerPos(event) {{
-                const rect = canvas.getBoundingClientRect();
-                const touch = event.touches && event.touches[0]
-                    ? event.touches[0]
-                    : (event.changedTouches && event.changedTouches[0] ? event.changedTouches[0] : null);
-                const clientX = touch ? touch.clientX : (typeof event.clientX === 'number' ? event.clientX : rect.left);
-                const clientY = touch ? touch.clientY : (typeof event.clientY === 'number' ? event.clientY : rect.top);
-                return {{ x: clientX - rect.left, y: clientY - rect.top }};
-            }}
-
-            function distance(aX, aY, bX, bY) {{
-                const dx = aX - bX;
-                const dy = aY - bY;
-                return Math.sqrt(dx * dx + dy * dy);
-            }}
-
-            function hitTest(pos) {{
-                for (let i = arrows.length - 1; i >= 0; i--) {{
-                    const arrow = arrows[i];
-                    if (distance(pos.x, pos.y, arrow.tipX, arrow.tipY) <= 14) return {{ index: i, point: 'tip' }};
-                    if (distance(pos.x, pos.y, arrow.startX, arrow.startY) <= 14) return {{ index: i, point: 'start' }};
-                }}
-                return null;
-            }}
-
-            function drawArrowHead(fromX, fromY, toX, toY) {{
-                const angle = Math.atan2(toY - fromY, toX - fromX);
-                const headLength = 12;
-                ctx.beginPath();
-                ctx.moveTo(toX, toY);
-                ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
-                ctx.moveTo(toX, toY);
-                ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
-                ctx.stroke();
-            }}
-
-            function drawHandle(x, y, fill) {{
-                ctx.beginPath();
-                ctx.arc(x, y, 5, 0, Math.PI * 2);
-                ctx.fillStyle = fill;
-                ctx.fill();
-                ctx.strokeStyle = '#111';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }}
-
-            function draw() {{
-                if (!img.width) return;
-                ctx.clearRect(0, 0, cssWidth, cssHeight);
-                ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
-                ctx.lineWidth = 2.2;
-                ctx.strokeStyle = '#ffd54a';
-                ctx.fillStyle = '#ffd54a';
-                ctx.font = 'bold 13px Arial';
-
-                arrows.forEach((arrow) => {{
-                    ctx.beginPath();
-                    ctx.moveTo(arrow.startX, arrow.startY);
-                    ctx.lineTo(arrow.tipX, arrow.tipY);
-                    ctx.stroke();
-                    drawArrowHead(arrow.startX, arrow.startY, arrow.tipX, arrow.tipY);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-                    ctx.lineWidth = 3;
-                    ctx.strokeText(String(arrow.id), arrow.startX + 14, arrow.startY - 10);
-                    ctx.fillText(String(arrow.id), arrow.startX + 14, arrow.startY - 10);
-                    ctx.strokeStyle = '#ffd54a';
-                    ctx.fillStyle = '#ffd54a';
-                    ctx.lineWidth = 2.2;
-                }});
-            }}
-
-            function renderInputs() {{
-                labelsPanel.innerHTML = '';
-                if (!arrows.length) {{
-                    labelsPanel.innerHTML = '<div style="color:#d8d8d8;font-size:13px;background:#3f3f3f;border:1px dashed #7a7a7a;border-radius:10px;padding:14px;">Agrega una flecha para escribir la anatomía correspondiente.</div>';
-                    return;
-                }}
-                arrows.forEach((arrow, index) => {{
-                    const wrap = document.createElement('div');
-                    wrap.style.background = '#3f3f3f';
-                    wrap.style.border = '1px solid #676767';
-                    wrap.style.borderRadius = '10px';
-                    wrap.style.padding = '10px';
-                    wrap.innerHTML = `
-                        <div style="color:white;font-weight:700;font-size:13px;margin-bottom:6px;">Flecha ${{arrow.id}}</div>
-                        <input type="text" value="${{(arrow.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}}" placeholder="Escribe aquí la anatomía" style="width:100%;background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:10px 12px;font-size:14px;box-sizing:border-box;" />
-                    `;
-                    const input = wrap.querySelector('input');
-                    input.addEventListener('input', (e) => {{
-                        arrows[index].text = e.target.value;
-                    }});
-                    labelsPanel.appendChild(wrap);
-                }});
-            }}
-
-            function addArrow() {{
-                if (arrows.length >= MAX_ARROWS) return;
-                arrows.push(createArrow(arrows.length));
-                renderInputs();
-                draw();
-            }}
-
-            function removeArrow() {{
-                if (!arrows.length) return;
-                arrows.pop();
-                renderInputs();
-                draw();
-            }}
-
-            function startDragging(event) {{
-                const pos = getPointerPos(event);
-                const hit = hitTest(pos);
-                if (!hit) return;
-                dragging = hit;
-                event.preventDefault();
-            }}
-
-            function moveDragging(event) {{
-                if (!dragging) return;
-                const pos = getPointerPos(event);
-                const point = clampPoint(pos.x, pos.y);
-                if (dragging.point === 'start') {{
-                    arrows[dragging.index].startX = point.x;
-                    arrows[dragging.index].startY = point.y;
-                }} else {{
-                    arrows[dragging.index].tipX = point.x;
-                    arrows[dragging.index].tipY = point.y;
-                }}
-                draw();
-                event.preventDefault();
-            }}
-
-            function stopDragging() {{
-                dragging = null;
-            }}
-
-            addBtn.addEventListener('click', (event) => {{
-                event.preventDefault();
-                addArrow();
-            }});
-            removeBtn.addEventListener('click', (event) => {{
-                event.preventDefault();
-                removeArrow();
-            }});
-
-            canvas.addEventListener('mousedown', startDragging);
-            window.addEventListener('mousemove', moveDragging);
-            window.addEventListener('mouseup', stopDragging);
-            canvas.addEventListener('touchstart', startDragging, {{ passive: false }});
-            window.addEventListener('touchmove', moveDragging, {{ passive: false }});
-            window.addEventListener('touchend', stopDragging);
-
-            img.onload = () => {{
-                resizeCanvas();
-                renderInputs();
-                draw();
-                window.addEventListener('resize', resizeCanvas);
-            }};
-
-            img.src = '{data_uri}';
-        }})();
-        </script>
-        """
-        components.html(html_code, height=820)
-    except Exception as e:
-        st.warning(f"No fue posible cargar la reformación obtenida: {e}")
-
-
 def obtener_imagen_topograma_generico(prefijo_estado="topo", sufijo_imagen=""):
     entrada = st.session_state.get(f"{prefijo_estado}_entrada_paciente", "Seleccionar")
     posicionamiento = st.session_state.get(f"{prefijo_estado}_posicionamiento", "Seleccionar")
@@ -4629,67 +4254,29 @@ elif seccion == "Reformación":
         render_rangos_paralelos_interactivos_html(obtener_fuente_imagen_rangos(2), key_suffix="reform_rangos_2")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="bloque-seccion">', unsafe_allow_html=True)
-    st.markdown('<div class="titulo-bloque">Reformación obtenida</div>', unsafe_allow_html=True)
-
-    col_reform_img, col_reform_param = st.columns([2.6, 0.5])
-
-    with col_reform_img:
-        archivo_rangos_3 = st.file_uploader(
-            "Subir imagen de reformación obtenida",
-            type=["png", "jpg", "jpeg", "webp"],
-            key="reform_rangos_uploader_3",
-        )
-        if archivo_rangos_3 is not None:
-            registrar_imagen_rangos_subida(archivo_rangos_3, numero=3)
-
-        col_reform_obt_1, col_reform_obt_2 = st.columns([3, 1])
-        with col_reform_obt_1:
-            if st.session_state.get("reform_rangos_img3_nombre"):
-                st.caption(f"Imagen activa: {st.session_state['reform_rangos_img3_nombre']}")
-            else:
-                st.caption("No hay imagen subida aún para reformación obtenida.")
-        with col_reform_obt_2:
-            if st.button("Quitar reformación obtenida", key="quitar_rangos_3", use_container_width=True, disabled=not bool(st.session_state.get("reform_rangos_img3_bytes"))):
-                limpiar_imagen_rangos_subida(numero=3)
-                if "reform_rangos_uploader_3" in st.session_state:
-                    st.session_state["reform_rangos_uploader_3"] = None
-                st.rerun()
-
-        render_reformacion_obtenida_interactiva_html(obtener_fuente_imagen_rangos(3), key_suffix="reform_obtenida")
-
-    with col_reform_param:
-        st.markdown('<div class="titulo-bloque" style="margin-top:0;">Parámetros de reformación obtenida</div>', unsafe_allow_html=True)
-        persistent_selectbox("Reconstrucción a reformar", ["Seleccionar", "Partes blandas", "Ósea", "Pulmonar", "Angiografía", "De cerebro"], "reform_reconstruccion")
-        persistent_selectbox("Tipo de fase", ["Seleccionar", "Sin contraste", "Angiografía", "Arterial", "Venosa o portal", "Tardía"], "reform_fase")
-        persistent_selectbox("Tipo de reformación", ["Seleccionar", "MPR", "VR", "MIP", "miniMIP"], "reform_tipo")
-        persistent_selectbox("Plano de reformación", ["Seleccionar", "Axial", "Coronal", "Sagital", "Oblicuo", "Parasagital derecho", "Parasagital izquierdo", "Radial", "Coronal oblicuo derecho", "Coronal oblicuo izquierdo"], "reform_plano")
-        persistent_decimal_text_input("Grosor de corte (mm)", "reform_grosor", placeholder="Ej: 1.25")
-        persistent_decimal_text_input("Distancia de corte (mm)", "reform_distancia", placeholder="Ej: 0.75")
-
-    st.markdown('</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        persistent_multiselect("Tipo de reformación", ["MPR coronal", "MPR sagital", "MIP", "MinIP", "VR", "Curva"], "reform_tipo")
+        persistent_number_input("Grosor MIP / slab (mm)", "reform_grosor", min_value=0.1, step=0.1)
+    with col2:
+        persistent_selectbox("Orientación principal", ["Seleccionar", "Coronal", "Sagital", "Oblicua"], "reform_orientacion")
+        persistent_text_area("Observaciones de reformación", "reform_observaciones")
 
     reformacion_completa = all([
-        seleccion_completa(st.session_state["reform_reconstruccion"]),
-        seleccion_completa(st.session_state["reform_fase"]),
-        seleccion_completa(st.session_state["reform_tipo"]),
-        seleccion_completa(st.session_state["reform_plano"]),
-        str(st.session_state["reform_grosor"]).strip() != "",
-        str(st.session_state["reform_distancia"]).strip() != "",
+        lista_completa(st.session_state["reform_tipo"]),
+        seleccion_completa(st.session_state["reform_orientacion"]),
+        texto_completo(st.session_state["reform_observaciones"]),
     ])
 
     st.divider()
     st.subheader("Resumen")
     st.markdown('<div class="bloque-resumen">', unsafe_allow_html=True)
-    st.write(f"**Reconstrucción a reformar:** {st.session_state['reform_reconstruccion']}")
-    st.write(f"**Fase:** {st.session_state['reform_fase']}")
-    st.write(f"**Tipo de reformación:** {st.session_state['reform_tipo']}")
-    st.write(f"**Plano de reformación:** {st.session_state['reform_plano']}")
-    st.write(f"**Grosor de corte:** {st.session_state['reform_grosor']} mm")
-    st.write(f"**Distancia de corte:** {st.session_state['reform_distancia']} mm")
+    st.write(f"**Tipo:** {', '.join(st.session_state['reform_tipo']) if st.session_state['reform_tipo'] else 'Ninguno'}")
+    st.write(f"**Grosor slab:** {st.session_state['reform_grosor']} mm")
+    st.write(f"**Orientación:** {st.session_state['reform_orientacion']}")
+    st.write(f"**Observaciones:** {st.session_state['reform_observaciones']}")
     st.write(f"**Imagen de rangos 1:** {st.session_state.get('reform_rangos_img1_nombre') or 'No subida'}")
     st.write(f"**Imagen de rangos 2:** {st.session_state.get('reform_rangos_img2_nombre') or 'No subida'}")
-    st.write(f"**Reformación obtenida:** {st.session_state.get('reform_rangos_img3_nombre') or 'No subida'}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     if reformacion_completa:
