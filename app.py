@@ -1079,6 +1079,35 @@ div.stButton > button:disabled {
     border: 1px solid #7a7a7a !important;
     opacity: 0.75 !important;
 }
+
+.nav-top-btn button {
+    min-height: 38px !important;
+    font-size: 0.78rem !important;
+}
+</style>
+<script>
+(function() {
+    function pintarBotonesNavegacion() {
+        const botones = window.parent.document.querySelectorAll('button');
+        botones.forEach((btn) => {
+            const texto = (btn.innerText || '').trim().toLowerCase();
+            if (texto === 'volver al inicio') {
+                btn.style.backgroundColor = '#1f77ff';
+                btn.style.color = 'white';
+                btn.style.border = '1px solid #165dcc';
+            }
+            if (texto === 'volver') {
+                btn.style.backgroundColor = '#19a857';
+                btn.style.color = 'white';
+                btn.style.border = '1px solid #0f7a3d';
+            }
+        });
+    }
+    pintarBotonesNavegacion();
+    setInterval(pintarBotonesNavegacion, 700);
+})();
+</script>
+<style>
 .bloque-resumen {
     background-color: #616161;
     padding: 0.45rem 0.6rem;
@@ -1222,6 +1251,21 @@ def ir_a(seccion_destino):
 
 def volver_anterior():
     st.session_state.seccion = SECCION_ANTERIOR.get(st.session_state.seccion, "A Practicar")
+
+def render_botones_navegacion(seccion_actual):
+    col1, col2, col3 = st.columns([1.2, 1, 4.8])
+    with col1:
+        st.markdown('<div class="nav-top-btn">', unsafe_allow_html=True)
+        if st.button("Volver al inicio", key=f"inicio_{seccion_actual}", use_container_width=True):
+            ir_a("A Practicar")
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<div class="nav-top-btn">', unsafe_allow_html=True)
+        if st.button("Volver", key=f"volver_{seccion_actual}", use_container_width=True):
+            ir_a(SECCION_ANTERIOR.get(seccion_actual, "A Practicar"))
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # VALIDACIONES
@@ -3629,10 +3673,7 @@ elif seccion == "A Practicar":
 elif seccion == "Preparación de paciente":
     st.header("Preparación de paciente")
 
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+    render_botones_navegacion("Preparación de paciente")
 
     col_izq, col_centro, col_img = st.columns([1.15, 1.15, 0.75])
 
@@ -3750,10 +3791,7 @@ elif seccion == "Preparación de paciente":
 elif seccion == "Topograma":
     st.header("Topograma")
 
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+    render_botones_navegacion("Topograma")
 
     st.markdown('<div class="topo-compacto">', unsafe_allow_html=True)
 
@@ -3835,10 +3873,7 @@ elif seccion == "Topograma":
 elif seccion == "Adquisición":
     st.header("Adquisición")
 
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+    render_botones_navegacion("Adquisición")
 
     mostrar_topo2 = st.session_state.get("mostrar_topo2", False)
 
@@ -3877,11 +3912,8 @@ elif seccion == "Adquisición":
     adquisicion_completa = all(adquisiciones_completas)
 
     c1, c2, c3 = st.columns([1.5, 2, 1.5])
-    with c1:
-        if st.button("⬅ Volver a Topograma", use_container_width=True):
-            ir_a("Topograma"); st.rerun()
-    with c3:
-        if st.button("Siguiente: Reconstrucción ➡", use_container_width=True, disabled=not adquisicion_completa):
+    with c2:
+        if st.button("Siguiente", key="siguiente_adquisicion", use_container_width=True, disabled=not adquisicion_completa):
             ir_a("Reconstrucción"); st.rerun()
 
 elif seccion == "Reconstrucción":
@@ -3942,10 +3974,7 @@ elif seccion == "Reconstrucción":
         st.info("Se activó una regla de imagen, pero no se encontró el archivo correspondiente en la carpeta de la app.")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+    render_botones_navegacion("Reconstrucción")
 
     fases_recon = ["Seleccionar", "Sin contraste", "Angiográfica", "Venosa o portal", "Tardía"]
     tipos_recon = ["Seleccionar", "Retroproyección filtrada", "Safire", "Asir"]
@@ -4021,10 +4050,7 @@ elif seccion == "Reconstrucción":
 elif seccion == "Reformación":
     st.header("Reformación")
 
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+    render_botones_navegacion("Reformación")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -4057,10 +4083,7 @@ elif seccion == "Reformación":
 elif seccion == "Jeringa inyectora":
     st.header("Jeringa inyectora")
 
-    colv1, colv2, colv3 = st.columns([1, 6, 1])
-    with colv1:
-        if st.button("⬅ Volver", use_container_width=True):
-            volver_anterior(); st.rerun()
+    render_botones_navegacion("Jeringa inyectora")
 
     st.toggle("No la usaré", key="jer_no_usare")
 
