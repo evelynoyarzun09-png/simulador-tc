@@ -243,11 +243,13 @@ def store_decimal_widget(key):
 
 
 def persistent_decimal_text_input(label, key, placeholder=""):
-    if f"_{key}" not in st.session_state:
-        st.session_state[f"_{key}"] = sanitizar_decimal(st.session_state.get(key, ""))
-    st.text_input(label, key=f"_{key}", placeholder=placeholder, on_change=store_decimal_widget, args=(key,))
-    st.session_state[key] = sanitizar_decimal(st.session_state.get(f"_{key}", ""))
-    st.session_state[f"_{key}"] = st.session_state[key]
+    widget_key = f"_{key}"
+    if widget_key not in st.session_state:
+        st.session_state[widget_key] = sanitizar_decimal(st.session_state.get(key, ""))
+
+    st.text_input(label, key=widget_key, placeholder=placeholder, on_change=store_decimal_widget, args=(key,))
+
+    st.session_state[key] = sanitizar_decimal(st.session_state.get(widget_key, ""))
 
 def calcular_cobertura_desde_matriz(matriz_texto):
     matriz = str(matriz_texto).strip()
@@ -4682,8 +4684,8 @@ elif seccion == "Reformación":
     st.write(f"**Fase:** {st.session_state['reform_fase']}")
     st.write(f"**Tipo de reformación:** {st.session_state['reform_tipo']}")
     st.write(f"**Plano de reformación:** {st.session_state['reform_plano']}")
-    st.write(f"**Grosor de corte:** {st.session_state['reform_grosor']}")
-    st.write(f"**Distancia de corte:** {st.session_state['reform_distancia']}")
+    st.write(f"**Grosor de corte:** {st.session_state['reform_grosor']} mm")
+    st.write(f"**Distancia de corte:** {st.session_state['reform_distancia']} mm")
     st.write(f"**Imagen de rangos 1:** {st.session_state.get('reform_rangos_img1_nombre') or 'No subida'}")
     st.write(f"**Imagen de rangos 2:** {st.session_state.get('reform_rangos_img2_nombre') or 'No subida'}")
     st.write(f"**Reformación obtenida:** {st.session_state.get('reform_rangos_img3_nombre') or 'No subida'}")
