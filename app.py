@@ -1085,53 +1085,6 @@ div.stButton > button:disabled {
     font-size: 0.78rem !important;
 }
 </style>
-<script>
-(function() {
-    function aplicarEstiloBoton(btn, fondo, borde) {
-        if (!btn) return;
-        btn.style.setProperty('background', fondo, 'important');
-        btn.style.setProperty('background-color', fondo, 'important');
-        btn.style.setProperty('color', '#ffffff', 'important');
-        btn.style.setProperty('border', `1px solid ${borde}`, 'important');
-        btn.style.setProperty('box-shadow', 'none', 'important');
-    }
-
-    function textoNormalizado(btn) {
-        return (btn.innerText || btn.textContent || '')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .toLowerCase();
-    }
-
-    function pintarBotonesNavegacion(doc) {
-        if (!doc) return;
-        const botones = doc.querySelectorAll('button');
-        botones.forEach((btn) => {
-            const texto = textoNormalizado(btn);
-            if (texto.includes('volver al inicio')) {
-                aplicarEstiloBoton(btn, '#1f77ff', '#165dcc');
-            }
-            if (texto === 'volver') {
-                aplicarEstiloBoton(btn, '#19a857', '#0f7a3d');
-            }
-        });
-    }
-
-    function repintarTodo() {
-        pintarBotonesNavegacion(document);
-        try { pintarBotonesNavegacion(window.parent.document); } catch (e) {}
-    }
-
-    repintarTodo();
-    setInterval(repintarTodo, 400);
-
-    const observer = new MutationObserver(repintarTodo);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-    try {
-        observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
-    } catch (e) {}
-})();
-</script>
 <style>
 .bloque-resumen {
     background-color: #616161;
@@ -1251,6 +1204,8 @@ input[type="date"] {
 </style>
 """, unsafe_allow_html=True)
 
+inyectar_estilos_botones_navegacion()
+
 # -------------------------
 # NAVEGACIÓN
 # -------------------------
@@ -1291,6 +1246,59 @@ def render_botones_navegacion(seccion_actual):
             ir_a(SECCION_ANTERIOR.get(seccion_actual, "A Practicar"))
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
+
+def inyectar_estilos_botones_navegacion():
+    components.html(
+        """
+        <script>
+        (function() {
+            function aplicarEstiloBoton(btn, fondo, borde) {
+                if (!btn) return;
+                btn.style.setProperty('background', fondo, 'important');
+                btn.style.setProperty('background-color', fondo, 'important');
+                btn.style.setProperty('color', '#ffffff', 'important');
+                btn.style.setProperty('-webkit-text-fill-color', '#ffffff', 'important');
+                btn.style.setProperty('border', '1px solid ' + borde, 'important');
+                btn.style.setProperty('box-shadow', 'none', 'important');
+            }
+
+            function textoNormalizado(btn) {
+                return (btn.innerText || btn.textContent || '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
+            }
+
+            function pintarBotonesNavegacion(doc) {
+                if (!doc) return;
+                const botones = doc.querySelectorAll('button');
+                botones.forEach((btn) => {
+                    const texto = textoNormalizado(btn);
+                    if (texto.includes('volver al inicio')) {
+                        aplicarEstiloBoton(btn, '#1f77ff', '#165dcc');
+                    }
+                    if (texto === 'volver') {
+                        aplicarEstiloBoton(btn, '#19a857', '#0f7a3d');
+                    }
+                });
+            }
+
+            function repintarTodo() {
+                pintarBotonesNavegacion(window.parent.document);
+            }
+
+            repintarTodo();
+            const observer = new MutationObserver(repintarTodo);
+            observer.observe(window.parent.document.body, { childList: true, subtree: true, attributes: true });
+            setInterval(repintarTodo, 300);
+        })();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
+
 
 # -------------------------
 # VALIDACIONES
@@ -4100,10 +4108,11 @@ elif seccion == "Reformación":
     st.write(f"**Observaciones:** {st.session_state['reform_observaciones']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns([1.5, 2, 1.5])
-    with c2:
-        if st.button("Siguiente", use_container_width=True, disabled=not reformacion_completa):
-            ir_a("Jeringa inyectora"); st.rerun()
+    if reformacion_completa:
+        st.success("Simulación completada.")
+        st.divider()
+        st.subheader("Descarga del PDF")
+        render_panel_exportacion_pdf()
 
 elif seccion == "Jeringa inyectora":
     st.header("Jeringa inyectora")
@@ -4145,8 +4154,3 @@ elif seccion == "Jeringa inyectora":
         st.write(f"**Tiempo delay:** {st.session_state['jer_tiempo_delay']} s")
         st.write(f"**Sitio de punción:** {st.session_state['jer_sitio_puncion']}")
     st.markdown('</div>', unsafe_allow_html=True)
-
-    if jeringa_completa:
-        st.success("Simulación completada.")
-        st.divider()
-        render_panel_exportacion_pdf()
