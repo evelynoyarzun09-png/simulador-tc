@@ -2783,9 +2783,9 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             <div style="color:white;font-weight:700;font-size:16px;margin-bottom:10px;">RANGOS</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:10px;">
                 <div>
-                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Cantidad de líneas</label>
+                    <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Cantidad de cortes</label>
                     <input id="count-{key_suffix}" type="range" min="1" max="200" value="20" step="1" style="width:180px;" />
-                    <div id="count-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">20</div>
+                    <div id="count-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">1 a 20</div>
                 </div>
                 <div>
                     <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Separación</label>
@@ -2794,17 +2794,11 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 </div>
                 <div>
                     <label style="color:white;font-size:13px;display:block;margin-bottom:4px;">Ángulo</label>
-                    <input id="angle-{key_suffix}" type="range" min="0" max="180" value="0" step="1" style="width:160px;" />
+                    <input id="angle-{key_suffix}" type="range" min="0" max="360" value="0" step="1" style="width:160px;" />
                     <div id="angle-value-{key_suffix}" style="color:#d8d8d8;font-size:12px;">0°</div>
                 </div>
-                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button id="preset-axial-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Axial</button>
-                    <button id="preset-coronal-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Coronal</button>
-                    <button id="preset-sagital-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Sagital</button>
-                    <button id="preset-oblicuo-{key_suffix}" style="background:#b8bec7;color:#1f1f1f;border:none;border-radius:8px;padding:8px 10px;font-weight:600;cursor:pointer;">Oblicuo</button>
-                </div>
             </div>
-            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los rangos en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de líneas entre 1 y 200.</div>
+            <div style="color:#d8d8d8;font-size:13px;margin-bottom:10px;">Puedes orientar los rangos en cualquier plano usando el ángulo y aumentar o disminuir la cantidad de cortes entre 1 y 200. La primera línea corresponde al corte 1 y se muestra también el último corte según la cantidad seleccionada.</div>
             <canvas id="canvas-{key_suffix}" style="max-width:100%;width:100%;border-radius:10px;background:#222;display:block;"></canvas>
         </div>
 
@@ -2819,10 +2813,6 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             const countValue = document.getElementById('count-value-{key_suffix}');
             const spacingValue = document.getElementById('spacing-value-{key_suffix}');
             const angleValue = document.getElementById('angle-value-{key_suffix}');
-            const presetAxial = document.getElementById('preset-axial-{key_suffix}');
-            const presetCoronal = document.getElementById('preset-coronal-{key_suffix}');
-            const presetSagital = document.getElementById('preset-sagital-{key_suffix}');
-            const presetOblicuo = document.getElementById('preset-oblicuo-{key_suffix}');
             let cssWidth = 0;
             let cssHeight = 0;
 
@@ -2848,15 +2838,44 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
             }}
 
             function updateLabels() {{
-                countValue.textContent = countInput.value;
+                const count = parseInt(countInput.value, 10);
+                countValue.textContent = '1 a ' + count;
                 spacingValue.textContent = spacingInput.value + ' px';
                 angleValue.textContent = angleInput.value + '°';
+            }}
+
+            function drawCutLabels(startX, startY, endX, endY, label, isFirst, isLast) {{
+                const text = String(label);
+                ctx.save();
+                ctx.font = 'bold 12px Arial';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+                ctx.lineWidth = 3;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const len = Math.sqrt(dx * dx + dy * dy) || 1;
+                const ux = dx / len;
+                const uy = dy / len;
+                const margin = 18;
+
+                const points = [];
+                if (isFirst) points.push({{ x: startX + ux * margin, y: startY + uy * margin }});
+                if (isLast) points.push({{ x: endX - ux * margin, y: endY - uy * margin }});
+
+                points.forEach((p) => {{
+                    ctx.strokeText(text, p.x, p.y);
+                    ctx.fillText(text, p.x, p.y);
+                }});
+                ctx.restore();
             }}
 
             function drawParallelLines() {{
                 const count = parseInt(countInput.value, 10);
                 const spacing = parseFloat(spacingInput.value);
-                const angleDeg = parseFloat(angleInput.value);
+                const angleDeg = parseFloat(angleInput.value) % 360;
                 const angle = angleDeg * Math.PI / 180;
                 const dirX = Math.cos(angle);
                 const dirY = Math.sin(angle);
@@ -2882,6 +2901,9 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                     ctx.moveTo(x1, y1);
                     ctx.lineTo(x2, y2);
                     ctx.stroke();
+
+                    const label = i + 1;
+                    drawCutLabels(x1, y1, x2, y2, label, i === 0, i === count - 1);
                 }}
             }}
 
@@ -2892,19 +2914,9 @@ def render_rangos_paralelos_interactivos_html(image_source, key_suffix="rangos")
                 drawParallelLines();
             }}
 
-            function setAngle(value) {{
-                angleInput.value = value;
-                updateLabels();
-                draw();
-            }}
-
             countInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
             spacingInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
             angleInput.addEventListener('input', () => {{ updateLabels(); draw(); }});
-            presetAxial.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(0); }});
-            presetCoronal.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(90); }});
-            presetSagital.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(90); }});
-            presetOblicuo.addEventListener('click', (e) => {{ e.preventDefault(); setAngle(45); }});
 
             img.onload = () => {{
                 updateLabels();
